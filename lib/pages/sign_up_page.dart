@@ -6,7 +6,7 @@ import 'package:hisab_kitab/services/User_authentication/firebase_authentication
 import 'package:hisab_kitab/utils/gradiants.dart';
 
 class SignUpPage extends StatefulWidget {
-  const SignUpPage({Key? key}) : super(key: key);
+  const SignUpPage({super.key});
 
   @override
   State<SignUpPage> createState() => _SignUpPageState();
