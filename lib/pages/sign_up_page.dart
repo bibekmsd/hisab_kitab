@@ -1,12 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:hisab_kitab/User_authentication/firebase_implementation.dart';
 import 'package:hisab_kitab/reuseable_widgets/textField.dart';
 import 'package:hisab_kitab/reuseable_widgets/text_button.dart';
+import 'package:hisab_kitab/services/User_authentication/firebase_authentication.dart';
 import 'package:hisab_kitab/utils/gradiants.dart';
 
 class SignUpPage extends StatefulWidget {
-  const SignUpPage({super.key});
+  const SignUpPage({Key? key}) : super(key: key);
 
   @override
   State<SignUpPage> createState() => _SignUpPageState();
@@ -29,6 +29,9 @@ class _SignUpPageState extends State<SignUpPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        leading: const BackButton(),
+      ),
       body: Stack(
         children: [
           // Gradient background
@@ -39,7 +42,6 @@ class _SignUpPageState extends State<SignUpPage> {
               mainAxisSize: MainAxisSize.min, // Center the column itself
               children: [
                 BanakoTextField(
-                  // hintText: "Username",
                   labelText: "Username",
                   controller: _usernameController,
                 ),
@@ -58,19 +60,18 @@ class _SignUpPageState extends State<SignUpPage> {
                   controller: _passwordController,
                 ),
                 const SizedBox(height: 16),
-                const SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     BanakoTextButton(
                       text: "Master Sign-up",
-                      onPressed: () {},
+                      onPressed: () => _signUp(role: "admin"),
                       fontSize: 20,
                       textColor: Colors.deepPurpleAccent,
                     ),
                     BanakoTextButton(
                       text: "Sign Up",
-                      onPressed: _signUp,
+                      onPressed: () => _signUp(role: "staff"),
                       fontSize: 20,
                       textColor: const Color.fromARGB(255, 144, 113, 229),
                     ),
@@ -84,25 +85,26 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 
-  void _signUp() async {
+  void _signUp({required String role}) async {
     String username = _usernameController.text;
     String email = _emailController.text;
     String password = _passwordController.text;
 
-    User? user = await _auth.signUpWithEmailAndPassword(email, password);
+
+    User? user = await _auth.signUpWithEmailAndPassword(email, password, role,username);
 
     if (user != null) {
-      print("User created successfully");
+      debugPrint("User created successfully");
 
       showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('Success'),
-            content: Text('User Created Successfully'),
+            title: const Text('Success'),
+            content: const Text('User Created Successfully'),
             actions: <Widget>[
               TextButton(
-                child: Text('OK'),
+                child: const Text('OK'),
                 onPressed: () {
                   Navigator.of(context).pop(); // Close the dialog
                   Navigator.pop(context); // Navigate back to the sign-in page
@@ -113,7 +115,7 @@ class _SignUpPageState extends State<SignUpPage> {
         },
       );
     } else {
-      print("User creation error");
+      debugPrint("User creation error");
     }
   }
 }

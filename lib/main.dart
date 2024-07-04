@@ -1,6 +1,9 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:hisab_kitab/pages/sign_in_page.dart';
+import 'package:hisab_kitab/admin/admin_page.dart';
+import 'package:hisab_kitab/pages/log_in_page.dart';
+import 'package:hisab_kitab/reuseable_widgets/getItemsFromDatabase.dart';
+import 'package:hisab_kitab/user/staff_user_page.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,21 +22,24 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: "HisabKitab",
-        theme: ThemeData(
-            useMaterial3: true,
-            appBarTheme: const AppBarTheme(
-              color: Color.fromRGBO(81, 152, 255, 1),
-              titleTextStyle: TextStyle(
-                fontSize: 28,
-                color: Colors.white,
-              ),
+      debugShowCheckedModeBanner: false,
+      title: "HisabKitab",
+      theme: ThemeData(
+          useMaterial3: true,
+          appBarTheme: const AppBarTheme(
+            color: Color.fromRGBO(81, 152, 255, 1),
+            titleTextStyle: TextStyle(
+              fontSize: 28,
+              color: Colors.white,
             ),
-            textTheme: const TextTheme(
-                titleSmall: TextStyle(fontSize: 16),
-                titleLarge: TextStyle(fontSize: 32),
-                titleMedium: TextStyle(fontSize: 20))),
-        home: const SignInPage());
+          ),
+          textTheme: const TextTheme(
+              titleSmall: TextStyle(fontSize: 16),
+              titleLarge: TextStyle(fontSize: 32),
+              titleMedium: TextStyle(fontSize: 20))),
+      home: const SignInPage(),
+      // home: const AdminUserScreen(),
+      // home: const StaffUserScreen(),
+    );
   }
 }

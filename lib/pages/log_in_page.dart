@@ -1,15 +1,18 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:hisab_kitab/User_authentication/firebase_implementation.dart';
+import 'package:hisab_kitab/admin/admin_page.dart';
 import 'package:hisab_kitab/pages/home_page.dart';
 import 'package:hisab_kitab/pages/sign_up_page.dart';
 import 'package:hisab_kitab/reuseable_widgets/buttons.dart';
 import 'package:hisab_kitab/reuseable_widgets/textField.dart';
 import 'package:hisab_kitab/reuseable_widgets/text_button.dart';
+import 'package:hisab_kitab/services/User_authentication/firebase_authentication.dart';
+import 'package:hisab_kitab/user/staff_user_page.dart';
 import 'package:hisab_kitab/utils/gradiants.dart';
 
 class SignInPage extends StatefulWidget {
-  const SignInPage({super.key});
+  const SignInPage({Key? key}) : super(key: key);
 
   @override
   State<SignInPage> createState() => _SignInPageState();
@@ -91,20 +94,49 @@ class _SignInPageState extends State<SignInPage> {
     );
   }
 
-  void _signIn() async {
+  _signIn() async {
     String email = _emailController.text;
     String password = _passwordController.text;
 
     User? user = await _auth.signInWithEmailAndPassword(email, password);
 
     if (user != null) {
-      print("LogIn Succesfull");
-      Navigator.of(context)
-          .pushReplacement(MaterialPageRoute(builder: (context) {
-        return const HomePage();
-      }));
+      // Retrieve user role from Firestore
+      String role = await _getUserRole(user.uid);
+
+      // Navigate based on role
+      if (role == 'admin') {
+        Navigator.of(context)
+            .pushReplacement(MaterialPageRoute(builder: (context) {
+          return const AdminUserScreen();
+        }));
+      } else if (role == 'staff') {
+        Navigator.of(context)
+            .pushReplacement(MaterialPageRoute(builder: (context) {
+          return const StaffUserScreen();
+        }));
+      }
     } else {
-      print("Error in login");
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Enter Valid Credentials")));
+      debugPrint("Error in login");
     }
+  }
+
+  Future<String> _getUserRole(String uid) async {
+    String role = 'user'; // Default role
+
+    try {
+      DocumentSnapshot docSnapshot =
+          await FirebaseFirestore.instance.collection('users').doc(uid).get();
+
+      if (docSnapshot.exists) {
+        role = docSnapshot.get('role');
+      }
+    } catch (e) {
+      debugPrint('Error fetching user role: $e');
+    }
+
+    return role;
   }
 }
