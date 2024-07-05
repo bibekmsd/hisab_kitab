@@ -40,7 +40,6 @@ dependencies:
   qr_flutter: ^4.1.0
   sqlite3: ^2.4.3
   provider: ^6.1.2
-  flutter_native_splash: ^2.4.0
   firebase_core: ^3.1.0
   firebase_auth: ^5.1.0
   cloud_firestore: ^5.0.2
