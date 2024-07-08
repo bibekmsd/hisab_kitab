@@ -26,6 +26,10 @@ class _SignInPageState extends State<SignInPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text("Sign-In"),
+        leading: const BackButton(),
+      ),
       body: Stack(
         children: [
           // Gradient background

@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:hisab_kitab/admin/admin_page.dart';
+import 'package:hisab_kitab/newUI/Navigation_bar.dart';
 import 'package:hisab_kitab/pages/log_in_page.dart';
 import 'package:hisab_kitab/reuseable_widgets/getItemsFromDatabase.dart';
 import 'package:hisab_kitab/user/staff_user_page.dart';
@@ -27,19 +28,22 @@ class _MyAppState extends State<MyApp> {
       theme: ThemeData(
           useMaterial3: true,
           appBarTheme: const AppBarTheme(
-            color: Color.fromRGBO(81, 152, 255, 1),
+            centerTitle: true,
+            iconTheme: IconThemeData(color: Colors.white),
+            color: Color.fromRGBO(18, 29, 45, 1),
             titleTextStyle: TextStyle(
-              fontSize: 28,
-              color: Colors.white,
+              fontSize: 24,
+              color: Color.fromARGB(255, 155, 204, 50),
             ),
           ),
           textTheme: const TextTheme(
               titleSmall: TextStyle(fontSize: 16),
               titleLarge: TextStyle(fontSize: 32),
               titleMedium: TextStyle(fontSize: 20))),
-      home: const SignInPage(),
+      // home: const SignInPage(),
       // home: const AdminUserScreen(),
       // home: const StaffUserScreen(),
+      home: const NavigationBarBanako(),
     );
   }
 }

@@ -31,6 +31,7 @@ class _SignUpPageState extends State<SignUpPage> {
     return Scaffold(
       appBar: AppBar(
         leading: const BackButton(),
+        title: Text("Sign-Up"),
       ),
       body: Stack(
         children: [
@@ -90,8 +91,8 @@ class _SignUpPageState extends State<SignUpPage> {
     String email = _emailController.text;
     String password = _passwordController.text;
 
-
-    User? user = await _auth.signUpWithEmailAndPassword(email, password, role,username);
+    User? user =
+        await _auth.signUpWithEmailAndPassword(email, password, role, username);
 
     if (user != null) {
       debugPrint("User created successfully");
