@@ -58,7 +58,6 @@ class _AdminUserScreenState extends State<AdminUserScreen> {
       ),
       body: Stack(
         children: [
-          const MeroGradiant(),
           SingleChildScrollView(
             scrollDirection: Axis.vertical,
             child: Center(

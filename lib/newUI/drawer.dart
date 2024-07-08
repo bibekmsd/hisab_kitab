@@ -17,7 +17,6 @@ class _BanakoDrawerState extends State<BanakoDrawer> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Top section with header and list items
           Column(
             children: [
               SizedBox(
@@ -37,22 +36,14 @@ class _BanakoDrawerState extends State<BanakoDrawer> {
               ),
               ListTile(
                 title: const Text('Item 1'),
-                onTap: () {
-                  // Update the state of the app.
-                  // ...
-                },
+                onTap: () {},
               ),
               ListTile(
                 title: const Text('Item 2'),
-                onTap: () {
-                  // Update the state of the app.
-                  // ...
-                },
+                onTap: () {},
               ),
             ],
           ),
-          // Footer section with login and signup options
-
           Column(
             children: [
               Divider(

@@ -1,6 +1,8 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
+import 'package:hisab_kitab/reuseable_widgets/getItemsFromDatabase.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 
 class Newbill extends StatefulWidget {
   const Newbill({super.key});
@@ -25,7 +27,11 @@ class _NewbillState extends State<Newbill> {
             child: Row(
               children: [
                 IconButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    //   GetItemsFromDatabaseTable(
+                    //       scannedValues: scannedValues, onDelete: handleDelete);
+                    // },
+                  },
                   icon: Icon(Icons.barcode_reader),
                   iconSize: 42,
                 ),

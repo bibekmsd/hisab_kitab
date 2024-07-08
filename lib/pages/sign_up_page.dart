@@ -36,7 +36,7 @@ class _SignUpPageState extends State<SignUpPage> {
       body: Stack(
         children: [
           // Gradient background
-          const MeroGradiant(),
+          // const MeroGradiant(),
           // Centered content
           Center(
             child: Column(

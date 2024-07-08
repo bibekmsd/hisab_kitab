@@ -56,7 +56,7 @@ class _StaffUserScreenState extends State<StaffUserScreen> {
       ),
       body: Stack(
         children: [
-          const MeroGradiant(),
+          // const MeroGradiant(),
           SingleChildScrollView(
             scrollDirection: Axis.vertical,
             child: Center(

@@ -33,7 +33,7 @@ class _SignInPageState extends State<SignInPage> {
       body: Stack(
         children: [
           // Gradient background
-          const MeroGradiant(),
+          // const MeroGradiant(),
           // Centered content
           Center(
             child: Column(

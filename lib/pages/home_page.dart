@@ -76,7 +76,7 @@ class _HomePageState extends State<HomePage> {
       ),
       body: Stack(
         children: [
-          const MeroGradiant(),
+          // const MeroGradiant(),
           SingleChildScrollView(
             scrollDirection: Axis.vertical,
             child: Center(
