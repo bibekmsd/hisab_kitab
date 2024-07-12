@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class MyStock extends StatefulWidget {
-  final TextEditingController _name = new TextEditingController();
+  final TextEditingController _name = TextEditingController();
   MyStock({super.key});
 
   @override
@@ -10,6 +10,25 @@ class MyStock extends StatefulWidget {
 }
 
 class _MyStockState extends State<MyStock> {
+  String searchQuery = '';
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    widget._name.dispose();
+    super.dispose();
+  }
+
+  void _onSearchSubmitted(String value) {
+    setState(() {
+      searchQuery = value.trim();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,12 +45,19 @@ class _MyStockState extends State<MyStock> {
                 border: OutlineInputBorder(),
                 labelText: 'Enter product name',
               ),
+              onSubmitted: _onSearchSubmitted,
             ),
           ),
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-              stream:
-                  FirebaseFirestore.instance.collection("Products").snapshots(),
+              stream: (searchQuery.isNotEmpty)
+                  ? FirebaseFirestore.instance
+                      .collection("Products")
+                      .where('Name', isEqualTo: searchQuery)
+                      .snapshots()
+                  : FirebaseFirestore.instance
+                      .collection("Products")
+                      .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));

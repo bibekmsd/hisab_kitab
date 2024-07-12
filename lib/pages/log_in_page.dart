@@ -117,7 +117,12 @@ class _SignInPageState extends State<SignInPage> {
       } else if (role == 'staff') {
         Navigator.of(context)
             .pushReplacement(MaterialPageRoute(builder: (context) {
-          return const StaffUserScreen();
+          // return const StaffUserScreen();
+          return Scaffold(
+            appBar: AppBar(
+              title: Text("Admin page"),
+            ),
+          );
         }));
       }
     } else {

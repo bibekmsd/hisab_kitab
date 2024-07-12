@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hisab_kitab/newUI/barcode_new.dart';
 import 'package:hisab_kitab/reuseable_widgets/Table.dart';
 import 'package:hisab_kitab/utils/scannerr.dart';
 import 'package:hisab_kitab/reuseable_widgets/buttons.dart';

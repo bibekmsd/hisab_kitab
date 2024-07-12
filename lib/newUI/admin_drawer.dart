@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:hisab_kitab/pages/log_in_page.dart';
 import 'package:hisab_kitab/pages/sign_up_page.dart';
 
-class BanakoDrawer extends StatefulWidget {
-  const BanakoDrawer({super.key});
+class AdminDrawer extends StatefulWidget {
+  const AdminDrawer({super.key});
 
   @override
-  State<BanakoDrawer> createState() => _BanakoDrawerState();
+  State<AdminDrawer> createState() => _AdminDrawerState();
 }
 
-class _BanakoDrawerState extends State<BanakoDrawer> {
+class _AdminDrawerState extends State<AdminDrawer> {
   @override
   Widget build(BuildContext context) {
     return Drawer(

@@ -1,8 +1,7 @@
-// ignore_for_file: prefer_const_constructors
-
 import 'package:flutter/material.dart';
-import 'package:hisab_kitab/reuseable_widgets/getItemsFromDatabase.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'grossary_list_staff.dart';
 
 class Newbill extends StatefulWidget {
   const Newbill({super.key});
@@ -12,48 +11,134 @@ class Newbill extends StatefulWidget {
 }
 
 class _NewbillState extends State<Newbill> {
-  TextEditingController barcodeController = TextEditingController();
+  final List<String> _scannedValues = [];
+  final TextEditingController barcodeController = TextEditingController();
+  bool isScanning = false;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    barcodeController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _searchBarcode(String barcode) async {
+    try {
+      final querySnapshot = await _firestore
+          .collection('Products')
+          .where('Barcode', isEqualTo: barcode)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        final productData = querySnapshot.docs.first.data();
+        setState(() {
+          if (!_scannedValues.contains(productData['Barcode'])) {
+            _scannedValues.add(productData['Barcode']);
+          }
+        });
+      } else {
+        // Handle case where no product is found
+        print('Product not found');
+      }
+    } catch (e) {
+      print('Error searching barcode: $e');
+    }
+  }
+
+  void _handleDelete(int index) {
+    setState(() {
+      _scannedValues.removeAt(index);
+    });
+  }
+
+  void handleScanResult(BarcodeCapture capture) {
+    setState(() {
+      for (final barcode in capture.barcodes) {
+        final String? code = barcode.rawValue;
+        if (code != null && !_scannedValues.contains(code)) {
+          _scannedValues.add(code);
+        }
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Naya Bill"),
       ),
-      body: Column(
+      body: Stack(
         children: [
-          Container(
-            decoration: const BoxDecoration(color: Colors.grey),
-            height: 100,
-            child: Row(
-              children: [
-                IconButton(
-                  onPressed: () {
-                    //   GetItemsFromDatabaseTable(
-                    //       scannedValues: scannedValues, onDelete: handleDelete);
-                    // },
-                  },
-                  icon: Icon(Icons.barcode_reader),
-                  iconSize: 42,
+          Column(
+            children: [
+              Container(
+                height: 100,
+                decoration: const BoxDecoration(color: Colors.grey),
+                child: Row(
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        setState(() {
+                          isScanning = !isScanning;
+                        });
+                      },
+                      icon: const Icon(Icons.barcode_reader),
+                      iconSize: 42,
+                    ),
+                    const Text(
+                      "Scan Barcode",
+                      style:
+                          TextStyle(fontSize: 26, fontWeight: FontWeight.w600),
+                    )
+                  ],
                 ),
-                Text(
-                  "Scan Barcode",
-                  style: TextStyle(fontSize: 26, fontWeight: FontWeight.w600),
-                )
-              ],
-            ),
+              ),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                child: TextField(
+                  controller: barcodeController,
+                  keyboardType: const TextInputType.numberWithOptions(),
+                  decoration: const InputDecoration(
+                    hintText: "Search Barcode",
+                    prefixIcon: Icon(Icons.qr_code_scanner),
+                  ),
+                  onSubmitted: (value) {
+                    _searchBarcode(value);
+                    barcodeController
+                        .clear(); // Clear the text field after submission
+                  },
+                ),
+              ),
+              Expanded(
+                child: GrossaryListStaff(
+                  onDelete: _handleDelete,
+                  scannedValues: _scannedValues,
+                ),
+              ),
+            ],
           ),
-          Container(
-            height: 30,
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 1),
-            constraints: const BoxConstraints(minHeight: 50, minWidth: 1200),
-            child: TextField(
-              controller: barcodeController,
-              keyboardType: TextInputType.numberWithOptions(),
-              decoration: InputDecoration(
-                  hintText: ("Search Barcode"),
-                  prefixIcon: const Icon(Icons.qr_code_scanner)),
+          if (isScanning)
+            Positioned.fill(
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: SizedBox(
+                  width: 300,
+                  height: 100,
+                  child: MobileScanner(
+                    fit: BoxFit.cover,
+                    controller: MobileScannerController(),
+                    onDetect: handleScanResult,
+                  ),
+                ),
+              ),
             ),
-          ),
         ],
       ),
     );
