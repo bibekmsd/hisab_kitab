@@ -13,13 +13,12 @@ class MyCustomers extends StatefulWidget {
 class _MyCustomersState extends State<MyCustomers> {
   @override
   Widget build(BuildContext context) {
-    
     return Scaffold(
       appBar: AppBar(
         title: const Text("My Customers"),
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection("Customers").snapshots(),
+        stream: FirebaseFirestore.instance.collection("customers").snapshots(),
         builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));

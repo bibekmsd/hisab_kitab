@@ -73,11 +73,12 @@ class _MyStockState extends State<MyStock> {
                     var products = snapshot.data!.docs.map((doc) {
                       Map<String, dynamic> data =
                           doc.data() as Map<String, dynamic>;
+
                       return Product(
                         barcode: doc.id,
                         name: data['Name'] ?? '',
-                        quantity: data['quantity'] ?? 0,
-                        price: data['Price'] ?? 0.0,
+                        quantity: data['Quantity'] ?? 0,
+                        price: data['Price'] ?? '0.0',
                       );
                     }).toList();
 
@@ -96,7 +97,7 @@ class _MyStockState extends State<MyStock> {
                             leading: Text((index + 1).toString()),
                             title: Text(product.name),
                             subtitle: Text(
-                                'Price: ${product.price}, Quantity: ${product.quantity}'),
+                                'Price: ${product.price}, Quantity: ${(product.quantity)}'),
                             trailing: Text('Barcode: ${product.barcode}'),
                           ),
                         );

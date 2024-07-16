@@ -2,9 +2,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:hisab_kitab/admin/admin_page.dart';
+import 'package:hisab_kitab/newUI/admin_drawer.dart';
+import 'package:hisab_kitab/newUI/analytics_page.dart';
 import 'package:hisab_kitab/newUI/drawer.dart';
 import 'package:hisab_kitab/newUI/row_card_widget.dart';
 import 'package:hisab_kitab/newUI/Homepage.dart';
+import 'package:hisab_kitab/newUI/settings_page.dart';
 import 'package:hisab_kitab/user/staff_user_page.dart';
 
 class NavigationBarBanako extends StatefulWidget {
@@ -19,7 +22,7 @@ class _NavigationBarBanakoState extends State<NavigationBarBanako> {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> pages = [HomePage(), AdminUserScreen(), StaffUserScreen()];
+    List<Widget> pages = [HomePage(), AnalyticsPage(), SettingsPage()];
 
     return Scaffold(
       body: pages[currentPage],
@@ -46,7 +49,7 @@ class _NavigationBarBanakoState extends State<NavigationBarBanako> {
           ),
         ],
       ),
-      drawer: BanakoDrawer(),
+      // drawer: AdminDrawer(),
     );
   }
 }

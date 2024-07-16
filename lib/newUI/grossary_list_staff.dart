@@ -1,5 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:hisab_kitab/newUI/add_customer.dart';
 import 'package:hisab_kitab/newUI/check_out_page.dart';
 
 class GrossaryListStaff extends StatefulWidget {
@@ -17,35 +18,52 @@ class GrossaryListStaff extends StatefulWidget {
 }
 
 class _GrossaryListStaffState extends State<GrossaryListStaff> {
-  final Map<int, TextEditingController> _productQuantityControllers = {};
+  final Map<int, int> _productQuantities = {};
   final Map<int, double> _productTotalPrices = {};
+  final Map<int, Map<String, dynamic>> _productDetails = {};
   int _totalQuantity = 0;
   double _totalPrice = 0.0;
-
-  @override
-  void dispose() {
-    for (var controller in _productQuantityControllers.values) {
-      controller.dispose();
-    }
-    super.dispose();
-  }
-
-  TextEditingController _getProductQuantityController(int index) {
-    if (!_productQuantityControllers.containsKey(index)) {
-      _productQuantityControllers[index] = TextEditingController();
-    }
-    return _productQuantityControllers[index]!;
-  }
+  final TextEditingController _phoneController = TextEditingController();
 
   void _updateTotals() {
     setState(() {
-      _totalQuantity = _productQuantityControllers.values
-          .map((controller) => int.tryParse(controller.text) ?? 0)
+      _totalQuantity = _productQuantities.values
           .fold(0, (prev, quantity) => prev + quantity);
-
       _totalPrice =
           _productTotalPrices.values.fold(0.0, (prev, total) => prev + total);
     });
+  }
+
+  void _incrementQuantity(int index, double itemPrice) {
+    setState(() {
+      _productQuantities[index] = (_productQuantities[index] ?? 0) + 1;
+      _productTotalPrices[index] = itemPrice * _productQuantities[index]!;
+      _updateTotals();
+    });
+  }
+
+  void _decrementQuantity(int index, double itemPrice) {
+    setState(() {
+      if ((_productQuantities[index] ?? 0) > 0) {
+        _productQuantities[index] = (_productQuantities[index] ?? 0) - 1;
+        _productTotalPrices[index] = itemPrice * _productQuantities[index]!;
+        _updateTotals();
+      }
+    });
+  }
+
+  void _handleCheckOut() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CheckOutPage(
+          customerPhone: _phoneController.text.trim(),
+          productDetails: _productDetails.values.toList(),
+          totalQuantity: _totalQuantity,
+          totalPrice: _totalPrice,
+        ),
+      ),
+    );
   }
 
   @override
@@ -59,195 +77,155 @@ class _GrossaryListStaffState extends State<GrossaryListStaff> {
 
         final documents = snapshot.data?.docs ?? [];
 
-        return SingleChildScrollView(
-          scrollDirection: Axis.vertical,
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Column(
-              children: [
-                DataTable(
-                  columns: const [
-                    DataColumn(label: Text('SN')),
-                    DataColumn(label: Text('Barcode')),
-                    DataColumn(label: Text('Item Name')),
-                    DataColumn(label: Text('Price')),
-                    DataColumn(label: Text('Quantity')),
-                    DataColumn(label: Text('Total')),
-                    DataColumn(label: Text('Remove')),
-                  ],
-                  rows: [
-                    ...widget.scannedValues.asMap().entries.map(
-                      (entry) {
-                        final matchedDocs = documents
-                            .where((doc) => doc['Barcode'] == entry.value)
-                            .toList();
+        return Column(
+          children: [
+            // Padding(
+            //   padding: const EdgeInsets.all(16.0),
+            //   child: TextField(
+            //     controller: _phoneController,
+            //     decoration: InputDecoration(labelText: 'Customer Phone Number'),
+            //     keyboardType: TextInputType.phone,
+            //   ),
+            // ),
+            Expanded(
+              child: ListView.builder(
+                itemCount: widget.scannedValues.length,
+                itemBuilder: (context, index) {
+                  final matchedDocs = documents
+                      .where((doc) =>
+                          doc['Barcode'] == widget.scannedValues[index])
+                      .toList();
 
-                        if (matchedDocs.isEmpty) {
-                          debugPrint(
-                              "No document found for barcode: ${entry.value}");
-                          return DataRow(
-                            cells: [
-                              DataCell(Text((entry.key + 1).toString())),
-                              DataCell(Text(entry.value)),
-                              const DataCell(Text('Unknown')),
-                              const DataCell(Text('0.0')),
-                              DataCell(
-                                TextField(
-                                  controller:
-                                      _getProductQuantityController(entry.key),
-                                  onChanged: (value) {
-                                    setState(() {
-                                      final quantity = int.tryParse(value) ?? 0;
-                                      final totalPrice = 0.0 * quantity;
-                                      _productTotalPrices[entry.key] =
-                                          totalPrice;
-                                      _updateTotals();
-                                    });
-                                  },
-                                  keyboardType: TextInputType.number,
-                                  decoration: const InputDecoration(
-                                    hintText: 'Quantity',
-                                  ),
-                                ),
-                              ),
-                              DataCell(
-                                Text(
-                                  _productTotalPrices[entry.key]?.toString() ??
-                                      '0.0',
-                                ),
-                              ),
-                              DataCell(
-                                IconButton(
-                                  onPressed: () {
-                                    showDialog(
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return AlertDialog(
-                                          title:
-                                              const Text("Remove from Cart?"),
-                                          actions: [
-                                            TextButton(
-                                              onPressed: () {
-                                                widget.onDelete(entry.key);
-                                                Navigator.of(context).pop();
-                                              },
-                                              child: const Text("Yes"),
-                                            ),
-                                            TextButton(
-                                              onPressed: () {
-                                                Navigator.of(context).pop();
-                                              },
-                                              child: const Text("No"),
-                                            ),
-                                          ],
-                                        );
-                                      },
-                                    );
-                                  },
-                                  icon: const Icon(Icons.delete),
-                                ),
-                              ),
-                            ],
-                          );
-                        }
-
-                        final doc = matchedDocs.first;
-                        final itemName = doc['Name'] ?? 'Unknown';
-                        final itemPriceString = doc['Price'].toString();
-                        final itemPrice =
-                            double.tryParse(itemPriceString) ?? 0.0;
-
-                        return DataRow(
-                          cells: [
-                            DataCell(Text((entry.key + 1).toString())),
-                            DataCell(Text(entry.value)),
-                            DataCell(Text(itemName)),
-                            DataCell(Text(itemPrice.toString())),
-                            DataCell(
-                              TextField(
-                                controller:
-                                    _getProductQuantityController(entry.key),
-                                onChanged: (value) {
-                                  setState(() {
-                                    final quantity = int.tryParse(value) ?? 0;
-                                    final totalPrice = itemPrice * quantity;
-                                    _productTotalPrices[entry.key] = totalPrice;
-                                    _updateTotals();
-                                  });
-                                },
-                                keyboardType: TextInputType.number,
-                                decoration: const InputDecoration(
-                                  hintText: 'Quantity',
-                                ),
-                              ),
-                            ),
-                            DataCell(
-                              Text(
-                                _productTotalPrices[entry.key]?.toString() ??
-                                    '0.0',
-                              ),
-                            ),
-                            DataCell(
-                              IconButton(
-                                onPressed: () {
-                                  showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return AlertDialog(
-                                        title: const Text("Remove from Cart?"),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () {
-                                              widget.onDelete(entry.key);
-                                              Navigator.of(context).pop();
-                                            },
-                                            child: const Text("Yes"),
-                                          ),
-                                          TextButton(
-                                            onPressed: () {
-                                              Navigator.of(context).pop();
-                                            },
-                                            child: const Text("No"),
-                                          ),
-                                        ],
-                                      );
+                  if (matchedDocs.isEmpty) {
+                    return ListTile(
+                      leading: Icon(Icons.shopping_bag),
+                      title: Text("Item ${index + 1}"),
+                      subtitle: Text("Unknown"),
+                      trailing: IconButton(
+                        icon: Icon(Icons.delete),
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: const Text("Remove from Cart?"),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      widget.onDelete(index);
+                                      Navigator.of(context).pop();
                                     },
-                                  );
-                                },
-                                icon: const Icon(Icons.delete),
-                              ),
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                    // Total row
-                    DataRow(cells: [
-                      const DataCell(Text('')),
-                      const DataCell(Text('Total')),
-                      const DataCell(Text('')),
+                                    child: const Text("Yes"),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: const Text("No"),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    );
+                  }
 
-                      const DataCell(Text('')),
-                      DataCell(Text(_totalQuantity.toString())),
-                      DataCell(Text(_totalPrice.toString())),
-                      DataCell(Container()), // Placeholder for the remove cell
-                    ]),
-                  ],
-                ),
-                // Checkout button
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(
-                      builder: (context) {
-                        return const CheckOutPage();
-                      },
-                    ));
-                  },
-                  child: const Text('Checkout'),
-                ),
-              ],
+                  final doc = matchedDocs.first;
+                  final itemName = doc['Name'] ?? 'Unknown';
+                  final itemPriceString = doc['Price'].toString();
+                  final itemPrice = double.tryParse(itemPriceString) ?? 0.0;
+
+                  _productDetails[index] = {
+                    'name': itemName,
+                    'price': itemPrice,
+                    'barcode': widget.scannedValues[index],
+                    'quantity': _productQuantities[index] ?? 0,
+                    'totalPrice': _productTotalPrices[index] ?? 0.0,
+                  };
+
+                  return Card(
+                    margin: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+                    child: ListTile(
+                      leading: Icon(Icons.shopping_bag),
+                      title: Text(itemName),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Barcode: ${widget.scannedValues[index]}"),
+                          Text("Price: \$${itemPrice.toStringAsFixed(2)}"),
+                          Row(
+                            children: [
+                              IconButton(
+                                icon: Icon(Icons.remove),
+                                onPressed: () =>
+                                    _decrementQuantity(index, itemPrice),
+                              ),
+                              Text((_productQuantities[index] ?? 0).toString()),
+                              IconButton(
+                                icon: Icon(Icons.add),
+                                onPressed: () =>
+                                    _incrementQuantity(index, itemPrice),
+                              ),
+                              Text(
+                                  "Total: \$${_productTotalPrices[index]?.toStringAsFixed(2) ?? '0.00'}"),
+                            ],
+                          ),
+                        ],
+                      ),
+                      trailing: IconButton(
+                        icon: Icon(Icons.delete),
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: const Text("Remove from Cart?"),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      widget.onDelete(index);
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: const Text("Yes"),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: const Text("No"),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  );
+                },
+              ),
             ),
-          ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text("Total Quantity: $_totalQuantity"),
+                  Text("Total Price: \$${_totalPrice.toStringAsFixed(2)}"),
+                  Row(
+                    children: [
+                      ElevatedButton(
+                        onPressed: _handleCheckOut,
+                        child: Text('Check Out'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
         );
       },
     );

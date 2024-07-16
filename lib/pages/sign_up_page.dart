@@ -31,7 +31,7 @@ class _SignUpPageState extends State<SignUpPage> {
     return Scaffold(
       appBar: AppBar(
         leading: const BackButton(),
-        title: Text("Sign-Up"),
+        title: const Text("Staff Sign-Up"),
       ),
       body: Stack(
         children: [
@@ -64,12 +64,12 @@ class _SignUpPageState extends State<SignUpPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    BanakoTextButton(
-                      text: "Master Sign-up",
-                      onPressed: () => _signUp(role: "admin"),
-                      fontSize: 20,
-                      textColor: Colors.deepPurpleAccent,
-                    ),
+                    // BanakoTextButton(
+                    //   text: "Master Sign-up",
+                    //   onPressed: () => _signUp(role: "admin"),
+                    //   fontSize: 20,
+                    //   textColor: Colors.deepPurpleAccent,
+                    // ),
                     BanakoTextButton(
                       text: "Sign Up",
                       onPressed: () => _signUp(role: "staff"),

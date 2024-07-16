@@ -6,17 +6,18 @@ import 'package:hisab_kitab/newUI/card_wigdet.dart';
 import 'package:hisab_kitab/newUI/drawer.dart';
 import 'package:hisab_kitab/newUI/homepage_body.dart';
 import 'package:hisab_kitab/newUI/row_card_widget.dart';
+import 'package:hisab_kitab/newUI/staff_drawer.dart';
 import 'package:hisab_kitab/pages/log_in_page.dart';
 import 'package:hisab_kitab/pages/sign_up_page.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class StaffHomePage extends StatefulWidget {
+  const StaffHomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<StaffHomePage> createState() => _StaffHomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _StaffHomePageState extends State<StaffHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,7 +31,7 @@ class _HomePageState extends State<HomePage> {
         title: const Text("Hamro Baazar"),
       ),
       body: HomepageBody(),
-      drawer: AdminDrawer(),
+      drawer: StaffDrawer(),
     );
   }
 }

@@ -5,8 +5,8 @@ import 'package:hisab_kitab/newUI/drawer.dart';
 import 'package:hisab_kitab/pages/log_in_page.dart';
 import 'package:hisab_kitab/pages/sign_up_page.dart';
 
-class AdminDrawer extends StatelessWidget {
-  const AdminDrawer({Key? key}) : super(key: key);
+class StaffDrawer extends StatelessWidget {
+  const StaffDrawer({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -23,10 +23,6 @@ class AdminDrawer extends StatelessWidget {
         ),
         ListTile(
           title: const Text('My Customers'),
-          onTap: () {},
-        ),
-        ListTile(
-          title: const Text('Add Staffs'),
           onTap: () {},
         ),
       ],
@@ -49,32 +45,15 @@ class AdminDrawer extends StatelessWidget {
           },
         ),
         Divider(
-          height: 0,     
-        ),
-        ListTile(
-          leading: Icon(Icons.login),
-          title: Text('Login'),
-          onTap: () {
-            Navigator.push(context, MaterialPageRoute(
-              builder: (context) {
-                return SignInPage();
-              },
-            ));
-          },
+          height: 0,
         ),
         Divider(
           height: 0,
         ),
         ListTile(
-          leading: Icon(Icons.app_registration),
-          title: Text('Signup'),
-          onTap: () {
-            Navigator.push(context, MaterialPageRoute(
-              builder: (context) {
-                return SignUpPage();
-              },
-            ));
-          },
+          leading: Icon(Icons.delete_forever_outlined),
+          title: Text('Delete Staff'),
+          onTap: () {},
         ),
       ],
     );

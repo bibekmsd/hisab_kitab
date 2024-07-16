@@ -3,14 +3,28 @@ import 'package:flutter/material.dart';
 import 'package:hisab_kitab/pages/log_in_page.dart';
 import 'package:hisab_kitab/pages/sign_up_page.dart';
 
-class BanakoDrawer extends StatefulWidget {
-  const BanakoDrawer({super.key});
+class ReusableDrawer extends StatelessWidget {
+  final String shopName;
+  final String userName;
+  final String loginTime;
+  final String phoneNumber;
+  final Color headerColor;
+  final List<Widget> drawerItems;
+  final List<Widget> footerItems;
+  final double height;
 
-  @override
-  State<BanakoDrawer> createState() => _BanakoDrawerState();
-}
+  const ReusableDrawer({
+    super.key,
+    required this.shopName,
+    required this.userName,
+    required this.loginTime,
+    required this.phoneNumber,
+    this.headerColor = const Color.fromARGB(255, 49, 55, 61),
+    required this.drawerItems,
+    required this.footerItems,
+    required this.height,
+  });
 
-class _BanakoDrawerState extends State<BanakoDrawer> {
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -20,61 +34,54 @@ class _BanakoDrawerState extends State<BanakoDrawer> {
           Column(
             children: [
               SizedBox(
-                height: 80,
+                height: height,
                 width: double.infinity,
-                child: const DrawerHeader(
+                child: DrawerHeader(
                   decoration: BoxDecoration(
-                    color: Color.fromARGB(255, 49, 55, 61),
+                    color: headerColor,
                   ),
-                  child: Text(
-                    'Shop-Details',
-                    style: TextStyle(color: Color.fromARGB(255, 230, 220, 220)),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        shopName,
+                        style: TextStyle(
+                          color: Color.fromARGB(255, 230, 220, 220),
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 5),
+                      Text(
+                        'User: $userName',
+                        style: TextStyle(
+                          color: Color.fromARGB(255, 230, 220, 220),
+                          fontSize: 14,
+                        ),
+                      ),
+                      Text(
+                        'Login Time: $loginTime',
+                        style: TextStyle(
+                          color: Color.fromARGB(255, 230, 220, 220),
+                          fontSize: 14,
+                        ),
+                      ),
+                      Text(
+                        'Phone: $phoneNumber',
+                        style: TextStyle(
+                          color: Color.fromARGB(255, 230, 220, 220),
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
                   ),
-                  curve: Curves.bounceIn,
-                  duration: Durations.medium2,
                 ),
               ),
-              ListTile(
-                title: const Text('Item 1'),
-                onTap: () {},
-              ),
-              ListTile(
-                title: const Text('Item 2'),
-                onTap: () {},
-              ),
+              ...drawerItems,
             ],
           ),
           Column(
-            children: [
-              Divider(
-                height: 0,
-              ),
-              ListTile(
-                leading: Icon(Icons.login),
-                title: Text('Login'),
-                onTap: () {
-                  Navigator.push(context, MaterialPageRoute(
-                    builder: (context) {
-                      return SignInPage();
-                    },
-                  ));
-                },
-              ),
-              Divider(
-                height: 0,
-              ),
-              ListTile(
-                leading: Icon(Icons.app_registration),
-                title: Text('Signup'),
-                onTap: () {
-                  Navigator.push(context, MaterialPageRoute(
-                    builder: (context) {
-                      return SignUpPage();
-                    },
-                  ));
-                },
-              ),
-            ],
+            children: footerItems,
           ),
         ],
       ),
