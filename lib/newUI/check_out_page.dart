@@ -1,8 +1,9 @@
 // ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously, prefer_const_constructors, sort_child_properties_last
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hisab_kitab/newUI/add_customer.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 
 class CheckOutPage extends StatelessWidget {
   final List<Map<String, dynamic>> productDetails;
@@ -20,6 +21,52 @@ class CheckOutPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Future<void> generatePDF() async {
+      final pdf = pw.Document();
+
+      pdf.addPage(
+        pw.Page(
+          build: (context) => pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Text('Receipt', style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
+              pw.SizedBox(height: 10),
+              pw.ListView.builder(
+                itemCount: productDetails.length,
+                itemBuilder: (context, index) {
+                  final product = productDetails[index];
+                  return pw.Container(
+                    padding: const pw.EdgeInsets.all(8),
+                    margin: const pw.EdgeInsets.only(bottom: 8),
+                    decoration: pw.BoxDecoration(
+                      border: pw.Border.all(),
+                      borderRadius: pw.BorderRadius.circular(4),
+                    ),
+                    child: pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.start,
+                      children: [
+                        pw.Text('Name: ${product['name']}'),
+                        pw.Text('Barcode: ${product['barcode']}'),
+                        pw.Text('Price: \$${product['price'].toStringAsFixed(2)}'),
+                        pw.Text('Quantity: ${product['quantity']}'),
+                        pw.Text('Total: \$${product['totalPrice'].toStringAsFixed(2)}'),
+                      ],
+                    ),
+                  );
+                },
+              ),
+              pw.SizedBox(height: 10),
+              pw.Text('Total Quantity: $totalQuantity'),
+              pw.Text('Total Price: \$${totalPrice.toStringAsFixed(2)}'),
+            ],
+          ),
+        ),
+      );
+
+      // Display the PDF using the `printing` package
+      await Printing.layoutPdf(onLayout: (PdfPageFormat format) async => pdf.save());
+    }
+
     void showCheckOutForm() {
       showModalBottomSheet(
         context: context,
@@ -78,10 +125,10 @@ class CheckOutPage extends StatelessWidget {
                         onPressed: showCheckOutForm,
                         child: Text('Add Customers'),
                       ),
-                      // ElevatedButton(
-                      //   onPressed: addDataToDatabase,
-                      //   child: Text('Add Data'),
-                      // ),
+                      ElevatedButton(
+                        onPressed: generatePDF,
+                        child: Text('Generate PDF'),
+                      ),
                     ],
                   ),
                 ],

@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hisab_kitab/admin/admin_page.dart';
+import 'package:hisab_kitab/newUI/admin_page.dart';
+import 'package:hisab_kitab/newUI/staff_page.dart';
 import 'package:hisab_kitab/pages/home_page.dart';
 import 'package:hisab_kitab/pages/sign_up_page.dart';
 import 'package:hisab_kitab/reuseable_widgets/buttons.dart';
@@ -105,47 +107,47 @@ class _SignInPageState extends State<SignInPage> {
     User? user = await _auth.signInWithEmailAndPassword(email, password);
 
     if (user != null) {
-      // Retrieve user role from Firestore
-      String role = await _getUserRole(user.uid);
+      // Retrieve user role and other details from Firestore
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
 
-      // Navigate based on role
-      if (role == 'admin') {
-        Navigator.of(context)
-            .pushReplacement(MaterialPageRoute(builder: (context) {
-          return const AdminUserScreen();
-        }));
-      } else if (role == 'staff') {
-        Navigator.of(context)
-            .pushReplacement(MaterialPageRoute(builder: (context) {
-          // return const StaffUserScreen();
-          return Scaffold(
-            appBar: AppBar(
-              title: Text("Admin page"),
-            ),
+      if (userDoc.exists) {
+        String role = userDoc.get('role');
+        String userName = userDoc.get('username');
+        String shopName = userDoc.get('shopName');
+        String phoneNumber = userDoc.get('phoneNumber');
+        String loginTime = DateTime.now().toString(); // Current login time
+
+        // Navigate based on role and pass user details
+        if (role == 'admin') {
+          Navigator.of(context)
+              .pushReplacement(MaterialPageRoute(builder: (context) {
+            return AdminUserScreen(
+              userName: userName,
+              shopName: shopName,
+              phoneNumber: phoneNumber,
+              loginTime: loginTime,
+            );
+          }));
+        } else if (role == 'staff') {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) {
+              return StaffUserScreen(
+                userName: userName,
+                shopName: shopName,
+                phoneNumber: phoneNumber,
+                loginTime: loginTime,
+              );
+            }),
           );
-        }));
+        }
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Enter Valid Credentials")));
       debugPrint("Error in login");
     }
-  }
-
-  Future<String> _getUserRole(String uid) async {
-    String role = 'user'; // Default role
-
-    try {
-      DocumentSnapshot docSnapshot =
-          await FirebaseFirestore.instance.collection('users').doc(uid).get();
-
-      if (docSnapshot.exists) {
-        role = docSnapshot.get('role');
-      }
-    } catch (e) {
-      debugPrint('Error fetching user role: $e');
-    }
-
-    return role;
   }
 }

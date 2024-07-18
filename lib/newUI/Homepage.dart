@@ -5,6 +5,7 @@ import 'package:hisab_kitab/newUI/admin_drawer.dart';
 import 'package:hisab_kitab/newUI/card_wigdet.dart';
 import 'package:hisab_kitab/newUI/drawer.dart';
 import 'package:hisab_kitab/newUI/homepage_body.dart';
+import 'package:hisab_kitab/newUI/notification.dart';
 import 'package:hisab_kitab/newUI/row_card_widget.dart';
 import 'package:hisab_kitab/pages/log_in_page.dart';
 import 'package:hisab_kitab/pages/sign_up_page.dart';
@@ -23,14 +24,20 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         actions: [
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(
+                builder: (context) {
+                  return NotificationPage();
+                },
+              ));
+            },
             icon: const Icon(Icons.notifications_active_outlined),
           ),
         ],
         title: const Text("Hamro Baazar"),
       ),
       body: HomepageBody(),
-      drawer: AdminDrawer(),
+      // drawer: AdminDrawer(),
     );
   }
 }

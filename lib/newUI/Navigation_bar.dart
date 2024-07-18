@@ -8,6 +8,7 @@ import 'package:hisab_kitab/newUI/drawer.dart';
 import 'package:hisab_kitab/newUI/row_card_widget.dart';
 import 'package:hisab_kitab/newUI/Homepage.dart';
 import 'package:hisab_kitab/newUI/settings_page.dart';
+import 'package:hisab_kitab/newUI/staff_homepage.dart';
 import 'package:hisab_kitab/user/staff_user_page.dart';
 
 class NavigationBarBanako extends StatefulWidget {
@@ -49,7 +50,9 @@ class _NavigationBarBanakoState extends State<NavigationBarBanako> {
           ),
         ],
       ),
-      // drawer: AdminDrawer(),
+      // drawer: Column(
+      //   children: [StaffHomePage()],
+      // ),
     );
   }
 }

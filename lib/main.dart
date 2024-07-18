@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:hisab_kitab/admin/admin_page.dart';
 import 'package:hisab_kitab/newUI/Navigation_bar.dart';
+import 'package:hisab_kitab/newUI/nabhetekoProductAdd.dart';
 import 'package:hisab_kitab/pages/log_in_page.dart';
 import 'package:hisab_kitab/reuseable_widgets/getItemsFromDatabase.dart';
 import 'package:hisab_kitab/user/staff_user_page.dart';
@@ -14,7 +15,7 @@ Future main() async {
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
-  
+
   @override
   State<MyApp> createState() => _MyAppState();
 }
@@ -43,7 +44,8 @@ class _MyAppState extends State<MyApp> {
       // home: const SignInPage(),
       // home: const AdminUserScreen(),
       // home: const StaffUserScreen(),
-      home: const NavigationBarBanako(),
+      // home: const NavigationBarBanako(),
+      home: NabhetekoProductPage(),
     );
   }
 }

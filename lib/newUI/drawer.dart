@@ -11,7 +11,6 @@ class ReusableDrawer extends StatelessWidget {
   final Color headerColor;
   final List<Widget> drawerItems;
   final List<Widget> footerItems;
-  final double height;
 
   const ReusableDrawer({
     super.key,
@@ -22,7 +21,6 @@ class ReusableDrawer extends StatelessWidget {
     this.headerColor = const Color.fromARGB(255, 49, 55, 61),
     required this.drawerItems,
     required this.footerItems,
-    required this.height,
   });
 
   @override
@@ -34,7 +32,7 @@ class ReusableDrawer extends StatelessWidget {
           Column(
             children: [
               SizedBox(
-                height: height,
+                height: 200,
                 width: double.infinity,
                 child: DrawerHeader(
                   decoration: BoxDecoration(
@@ -60,7 +58,7 @@ class ReusableDrawer extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        'Login Time: $loginTime',
+                        'Login Time: \n$loginTime',
                         style: TextStyle(
                           color: Color.fromARGB(255, 230, 220, 220),
                           fontSize: 14,

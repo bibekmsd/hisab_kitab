@@ -79,14 +79,6 @@ class _GrossaryListStaffState extends State<GrossaryListStaff> {
 
         return Column(
           children: [
-            // Padding(
-            //   padding: const EdgeInsets.all(16.0),
-            //   child: TextField(
-            //     controller: _phoneController,
-            //     decoration: InputDecoration(labelText: 'Customer Phone Number'),
-            //     keyboardType: TextInputType.phone,
-            //   ),
-            // ),
             Expanded(
               child: ListView.builder(
                 itemCount: widget.scannedValues.length,

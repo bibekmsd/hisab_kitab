@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hisab_kitab/newUI/add_products.dart';
 import 'package:hisab_kitab/newUI/card_wigdet.dart';
 import 'package:hisab_kitab/newUI/my_customers.dart';
 import 'package:hisab_kitab/newUI/my_stock.dart';
@@ -120,11 +121,11 @@ class _HomepageBodyState extends State<HomepageBody> {
                       radius: 16,
                       rakhneIcon: Icons.store_mall_directory_outlined,
                       onTap: () {
-                        // Navigator.push(context, MaterialPageRoute(
-                        //   builder: (context) {
-                        //     return MyStock();
-                        //   },
-                        // ));
+                        Navigator.push(context, MaterialPageRoute(
+                          builder: (context) {
+                            return AddProducts();
+                          },
+                        ));
                       },
                     );
                   case 5:

@@ -7,6 +7,7 @@ import 'package:hisab_kitab/newUI/drawer.dart';
 import 'package:hisab_kitab/newUI/homepage_body.dart';
 import 'package:hisab_kitab/newUI/row_card_widget.dart';
 import 'package:hisab_kitab/newUI/staff_drawer.dart';
+import 'package:hisab_kitab/newUI/staff_page.dart';
 import 'package:hisab_kitab/pages/log_in_page.dart';
 import 'package:hisab_kitab/pages/sign_up_page.dart';
 
@@ -31,7 +32,11 @@ class _StaffHomePageState extends State<StaffHomePage> {
         title: const Text("Hamro Baazar"),
       ),
       body: HomepageBody(),
-      drawer: StaffDrawer(),
+      // drawer: StaffUserScreen(
+      //     userName: userName,
+      //     shopName: shopName,
+      //     phoneNumber: phoneNumber,
+      //     loginTime: loginTime),
     );
   }
 }
