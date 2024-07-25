@@ -8,7 +8,7 @@ class AddCustomers extends StatefulWidget {
 
   const AddCustomers({
     super.key,
-    required this.productDetails, // Add required parameter
+    required this.productDetails,
   });
 
   @override
@@ -37,8 +37,18 @@ class _AddCustomersState extends State<AddCustomers> {
     super.dispose();
   }
 
-  Future<void> _saveCustomer() async {
-    if (_formKey.currentState?.validate() ?? false) {
+  Future<String> _getNextBillNumber() async {
+    final billNumberDoc = _firestore.collection('counters').doc('billNumber');
+    return await _firestore.runTransaction((transaction) async {
+      final snapshot = await transaction.get(billNumberDoc);
+      int newBillNumber = (snapshot.data()?['current'] ?? 0) + 1;
+      transaction.update(billNumberDoc, {'current': newBillNumber});
+      return newBillNumber.toString();
+    });
+  }
+
+  Future<void> _saveCustomer({bool addUsingBillNo = false}) async {
+    if (_formKey.currentState?.validate() ?? false || addUsingBillNo) {
       final phoneNo = _phoneController.text.trim();
       final name = _nameController.text.trim();
       final address = _addressController.text.trim();
@@ -48,25 +58,35 @@ class _AddCustomersState extends State<AddCustomers> {
       // Get the current date as a string
       final purchaseDate = DateTime.now().toLocal().toString().split(' ')[0];
 
-      // Prepare the history entry with product details
-      Map<String, dynamic> historyEntry = {
-        'Products': widget.productDetails,
-        'PurchaseDate': DateTime.now(),
-      };
-
-      final customerData = {
-        'PhoneNo': phoneNo,
-        'Name': name,
-        'Address': address,
-        'Notes': notes,
-        'BirthDate': birthDate,
-        'createdAt': FieldValue.serverTimestamp(),
-        'History': {
-          purchaseDate: [historyEntry]
-        },
-      };
-
       try {
+        // Generate the next bill number if adding using Bill no
+        String? billNumber;
+        if (addUsingBillNo) {
+          billNumber = await _getNextBillNumber();
+        }
+
+        // Prepare the history entry with product details
+        Map<String, dynamic> historyEntry = {
+          'Products': widget.productDetails,
+          'PurchaseDate': Timestamp.fromDate(DateTime.now()),
+        };
+
+        if (billNumber != null) {
+          historyEntry['BillNumber'] = billNumber;
+        }
+
+        final customerData = {
+          'PhoneNo': phoneNo,
+          'Name': name,
+          'Address': address,
+          'Notes': notes,
+          'BirthDate': birthDate,
+          'createdAt': FieldValue.serverTimestamp(),
+          'History': {
+            purchaseDate: [historyEntry]
+          },
+        };
+
         final docRef = _firestore.collection('customers').doc(phoneNo);
 
         // Check if the customer already exists
@@ -83,8 +103,7 @@ class _AddCustomersState extends State<AddCustomers> {
             'Address': address,
             'Notes': notes,
             'BirthDate': birthDate,
-            'History.$purchaseDate': FieldValue.arrayUnion(
-                [historyEntry]), // Append history under date key
+            'History.$purchaseDate': FieldValue.arrayUnion([historyEntry]),
           });
 
           // Set the preserved createdAt value back if it exists
@@ -135,6 +154,46 @@ class _AddCustomersState extends State<AddCustomers> {
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error fetching customer: $e')),
+      );
+    }
+  }
+
+  Future<void> _addUsingBillNo() async {
+    final billNumber = await _getNextBillNumber();
+    final purchaseDate = DateTime.now().toLocal().toString().split(' ')[0];
+
+    // Prepare the history entry with product details
+    Map<String, dynamic> historyEntry = {
+      'Products': widget.productDetails,
+      'PurchaseDate': Timestamp.fromDate(DateTime.now()),
+      'BillNumber': billNumber,
+    };
+
+    final customerData = {
+      'PhoneNo': '',
+      'Name': '',
+      'Address': '',
+      'Notes': '',
+      'BirthDate': '',
+      'createdAt': FieldValue.serverTimestamp(),
+      'History': {
+        purchaseDate: [historyEntry]
+      },
+    };
+
+    try {
+      final docRef = _firestore.collection('customers').doc(billNumber);
+
+      // Create new customer document with bill number as ID
+      await docRef.set(customerData);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Customer added with Bill Number: $billNumber')),
+      );
+      Navigator.of(context).pop();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error adding customer: $e')),
       );
     }
   }
@@ -225,6 +284,12 @@ class _AddCustomersState extends State<AddCustomers> {
                     child: Text('Save'),
                     style:
                         ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                  ),
+                  ElevatedButton(
+                    onPressed: _addUsingBillNo,
+                    child: Text('Add using Bill No'),
+                    style:
+                        ElevatedButton.styleFrom(backgroundColor: Colors.blue),
                   ),
                 ],
               ),

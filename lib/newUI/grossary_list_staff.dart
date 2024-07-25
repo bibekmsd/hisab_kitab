@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:hisab_kitab/newUI/add_customer.dart';
 import 'package:hisab_kitab/newUI/check_out_page.dart';
+import 'package:hisab_kitab/newUI/nabhetekoProductAdd.dart';
+// Make sure to import NabhetekoProductPage
 
 class GrossaryListStaff extends StatefulWidget {
   final List<String> scannedValues;
@@ -21,16 +22,18 @@ class _GrossaryListStaffState extends State<GrossaryListStaff> {
   final Map<int, int> _productQuantities = {};
   final Map<int, double> _productTotalPrices = {};
   final Map<int, Map<String, dynamic>> _productDetails = {};
-  int _totalQuantity = 0;
-  double _totalPrice = 0.0;
+  String _totalQuantity = "0";
+  String _totalPrice = "0.00";
   final TextEditingController _phoneController = TextEditingController();
 
   void _updateTotals() {
     setState(() {
-      _totalQuantity = _productQuantities.values
+      int totalQuantity = _productQuantities.values
           .fold(0, (prev, quantity) => prev + quantity);
-      _totalPrice =
+      double totalPrice =
           _productTotalPrices.values.fold(0.0, (prev, total) => prev + total);
+      _totalQuantity = totalQuantity.toString();
+      _totalPrice = totalPrice.toStringAsFixed(2);
     });
   }
 
@@ -75,7 +78,16 @@ class _GrossaryListStaffState extends State<GrossaryListStaff> {
           return Center(child: Text('Error: ${snapshot.error}'));
         }
 
-        final documents = snapshot.data?.docs ?? [];
+        if (!snapshot.hasData) {
+          return Center(child: CircularProgressIndicator());
+        }
+
+        final documents = snapshot.data!.docs;
+        print('Total documents fetched: ${documents.length}');
+
+        documents.forEach((doc) {
+          print('Document fetched with barcode: ${doc['Barcode']}');
+        });
 
         return Column(
           children: [
@@ -83,12 +95,17 @@ class _GrossaryListStaffState extends State<GrossaryListStaff> {
               child: ListView.builder(
                 itemCount: widget.scannedValues.length,
                 itemBuilder: (context, index) {
+                  final barcode = widget.scannedValues[index];
                   final matchedDocs = documents
-                      .where((doc) =>
-                          doc['Barcode'] == widget.scannedValues[index])
+                      .where((doc) => doc['Barcode'] == barcode)
                       .toList();
+                  print(
+                      'Scanned value: $barcode, Matched documents: ${matchedDocs.length}');
 
                   if (matchedDocs.isEmpty) {
+                    print('No matched document found for barcode: $barcode');
+                    // Navigate to NabhetekoProductPage if product is not found
+
                     return ListTile(
                       leading: Icon(Icons.shopping_bag),
                       title: Text("Item ${index + 1}"),
@@ -131,10 +148,11 @@ class _GrossaryListStaffState extends State<GrossaryListStaff> {
 
                   _productDetails[index] = {
                     'name': itemName,
-                    'price': itemPrice,
+                    'price': itemPriceString,
                     'barcode': widget.scannedValues[index],
-                    'quantity': _productQuantities[index] ?? 0,
-                    'totalPrice': _productTotalPrices[index] ?? 0.0,
+                    'quantity': (_productQuantities[index] ?? 0).toString(),
+                    'totalPrice':
+                        (_productTotalPrices[index] ?? 0.0).toStringAsFixed(2),
                   };
 
                   return Card(
@@ -161,7 +179,7 @@ class _GrossaryListStaffState extends State<GrossaryListStaff> {
                                     _incrementQuantity(index, itemPrice),
                               ),
                               Text(
-                                  "Total: \$${_productTotalPrices[index]?.toStringAsFixed(2) ?? '0.00'}"),
+                                  "Total: \$${(_productTotalPrices[index] ?? 0.0).toStringAsFixed(2)}"),
                             ],
                           ),
                         ],
@@ -205,7 +223,7 @@ class _GrossaryListStaffState extends State<GrossaryListStaff> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text("Total Quantity: $_totalQuantity"),
-                  Text("Total Price: \$${_totalPrice.toStringAsFixed(2)}"),
+                  Text("Total Price: \$$_totalPrice"),
                   Row(
                     children: [
                       ElevatedButton(

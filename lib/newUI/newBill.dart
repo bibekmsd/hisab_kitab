@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
 
 import 'package:flutter/material.dart';
+import 'package:hisab_kitab/newUI/nabhetekoProductAdd.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'grossary_list_staff.dart';
@@ -32,7 +33,7 @@ class _NewbillState extends State<Newbill> {
   Future<void> _searchBarcode(String barcode) async {
     try {
       final querySnapshot = await _firestore
-          .collection('Products')
+          .collection('ProductsNew')
           .where('Barcode', isEqualTo: barcode)
           .get();
 
@@ -46,6 +47,9 @@ class _NewbillState extends State<Newbill> {
       } else {
         // Handle case where no product is found
         print('Product not found');
+        Navigator.push(context, MaterialPageRoute(builder: (context) {
+          return NabhetekoProductPage();
+        }));
       }
     } catch (e) {
       print('Error searching barcode: $e');

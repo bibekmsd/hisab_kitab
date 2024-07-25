@@ -44,12 +44,12 @@ class _MyAppState extends State<MyApp> {
       // home: const SignInPage(),
       // home: const AdminUserScreen(),
       // home: const StaffUserScreen(),
-      // home: const NavigationBarBanako(),
-      home: NabhetekoProductPage(),
+      home: const NavigationBarBanako(),
+      // home: NabhetekoProductPage(),
     );
   }
 }
 //^ 4987176014955
 //^ 6928001826358
 //^ 8904106854005
-//^ 8901247574328
+//* 8901247574328

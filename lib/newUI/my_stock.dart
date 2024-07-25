@@ -11,6 +11,18 @@ class MyStock extends StatefulWidget {
 
 class _MyStockState extends State<MyStock> {
   String searchQuery = '';
+  String selectedProductType = 'All'; // Default to 'All'
+  final List<String> productTypes = [
+    'All',
+    'Beauty care and Hygiene',
+    'Cleaning and household',
+    'Eggs, meat and fish',
+    'Food grains, oil and masala',
+    'Fruits and vegetables',
+    'Health and wellness',
+    'Snacks'
+    // Add other product types here
+  ];
 
   @override
   void initState() {
@@ -26,6 +38,12 @@ class _MyStockState extends State<MyStock> {
   void _onSearchSubmitted(String value) {
     setState(() {
       searchQuery = value.trim();
+    });
+  }
+
+  void _onProductTypeChanged(String? newValue) {
+    setState(() {
+      selectedProductType = newValue ?? 'All';
     });
   }
 
@@ -48,16 +66,44 @@ class _MyStockState extends State<MyStock> {
               onSubmitted: _onSearchSubmitted,
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: DropdownButton<String>(
+              value: selectedProductType,
+              onChanged: _onProductTypeChanged,
+              items: productTypes.map((String type) {
+                return DropdownMenuItem<String>(
+                  value: type,
+                  child: Text(type),
+                );
+              }).toList(),
+              isExpanded: true,
+              hint: Text('Select Product Type'),
+            ),
+          ),
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-              stream: (searchQuery.isNotEmpty)
+              stream: (selectedProductType == 'All' && searchQuery.isEmpty)
                   ? FirebaseFirestore.instance
-                      .collection("Products")
-                      .where('Name', isEqualTo: searchQuery)
+                      .collection("ProductsNew")
                       .snapshots()
-                  : FirebaseFirestore.instance
-                      .collection("Products")
-                      .snapshots(),
+                  : selectedProductType == 'All'
+                      ? FirebaseFirestore.instance
+                          .collection("ProductsNew")
+                          .where('Name', isEqualTo: searchQuery)
+                          .snapshots()
+                      : searchQuery.isEmpty
+                          ? FirebaseFirestore.instance
+                              .collection("ProductsNew")
+                              .where('ProductType',
+                                  isEqualTo: selectedProductType)
+                              .snapshots()
+                          : FirebaseFirestore.instance
+                              .collection("ProductsNew")
+                              .where('Name', isEqualTo: searchQuery)
+                              .where('ProductType',
+                                  isEqualTo: selectedProductType)
+                              .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
@@ -69,20 +115,18 @@ class _MyStockState extends State<MyStock> {
                   if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                     return const Center(child: Text("No Data in database"));
                   } else {
-                    // Map the documents to Product objects
                     var products = snapshot.data!.docs.map((doc) {
                       Map<String, dynamic> data =
                           doc.data() as Map<String, dynamic>;
 
                       return Product(
                         barcode: doc.id,
-                        name: data['Name'] ?? '',
-                        quantity: data['Quantity'] ?? 0,
-                        price: data['Price'] ?? '0.0',
+                        name: data['Name']?.toString() ?? '',
+                        quantity: data['Quantity']?.toString() ?? '0',
+                        price: data['Price']?.toString() ?? '0.0',
                       );
                     }).toList();
 
-                    // Return the ListView.builder to display the products
                     return ListView.builder(
                       itemCount: products.length,
                       itemBuilder: (context, index) {
@@ -97,7 +141,7 @@ class _MyStockState extends State<MyStock> {
                             leading: Text((index + 1).toString()),
                             title: Text(product.name),
                             subtitle: Text(
-                                'Price: ${product.price}, Quantity: ${(product.quantity)}'),
+                                'Price: ${(product.price)}, Quantity: ${(product.quantity)}'),
                             trailing: Text('Barcode: ${product.barcode}'),
                           ),
                         );
@@ -105,7 +149,6 @@ class _MyStockState extends State<MyStock> {
                     );
                   }
                 }
-                // Return a placeholder or fallback widget in case the connection state is not handled above
                 return const Center(child: Text("Loading..."));
               },
             ),
@@ -116,11 +159,10 @@ class _MyStockState extends State<MyStock> {
   }
 }
 
-// Define the Product model
 class Product {
   final String barcode;
   final String name;
-  final int quantity;
+  final String quantity;
   final String price;
 
   Product({

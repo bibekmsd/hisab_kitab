@@ -7,8 +7,8 @@ import 'package:printing/printing.dart';
 
 class CheckOutPage extends StatelessWidget {
   final List<Map<String, dynamic>> productDetails;
-  final int totalQuantity;
-  final double totalPrice;
+  final String totalQuantity;
+  final String totalPrice;
   final String customerPhone;
 
   const CheckOutPage({
@@ -29,7 +29,9 @@ class CheckOutPage extends StatelessWidget {
           build: (context) => pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
-              pw.Text('Receipt', style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
+              pw.Text('Receipt',
+                  style: pw.TextStyle(
+                      fontSize: 24, fontWeight: pw.FontWeight.bold)),
               pw.SizedBox(height: 10),
               pw.ListView.builder(
                 itemCount: productDetails.length,
@@ -47,9 +49,9 @@ class CheckOutPage extends StatelessWidget {
                       children: [
                         pw.Text('Name: ${product['name']}'),
                         pw.Text('Barcode: ${product['barcode']}'),
-                        pw.Text('Price: \$${product['price'].toStringAsFixed(2)}'),
+                        pw.Text('Price: \$${product['price']}'),
                         pw.Text('Quantity: ${product['quantity']}'),
-                        pw.Text('Total: \$${product['totalPrice'].toStringAsFixed(2)}'),
+                        pw.Text('Total: \$${product['totalPrice']}'),
                       ],
                     ),
                   );
@@ -57,14 +59,15 @@ class CheckOutPage extends StatelessWidget {
               ),
               pw.SizedBox(height: 10),
               pw.Text('Total Quantity: $totalQuantity'),
-              pw.Text('Total Price: \$${totalPrice.toStringAsFixed(2)}'),
+              pw.Text('Total Price: \$${totalPrice}'),
             ],
           ),
         ),
       );
 
       // Display the PDF using the `printing` package
-      await Printing.layoutPdf(onLayout: (PdfPageFormat format) async => pdf.save());
+      await Printing.layoutPdf(
+          onLayout: (PdfPageFormat format) async => pdf.save());
     }
 
     void showCheckOutForm() {
@@ -100,11 +103,9 @@ class CheckOutPage extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text('Barcode: ${product['barcode']}'),
-                          Text(
-                              'Price: \$${product['price'].toStringAsFixed(2)}'),
+                          Text('Price: \$${product['price']}'),
                           Text('Quantity: ${product['quantity']}'),
-                          Text(
-                              'Total: \$${product['totalPrice'].toStringAsFixed(2)}'),
+                          Text('Total: \$${product['totalPrice']}'),
                         ],
                       ),
                     ),
@@ -113,7 +114,7 @@ class CheckOutPage extends StatelessWidget {
               ),
             ),
             Text('Total Quantity: $totalQuantity'),
-            Text('Total Price: \$${totalPrice.toStringAsFixed(2)}'),
+            Text('Total Price: \$${totalPrice}'),
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(

@@ -3,6 +3,7 @@ import 'package:hisab_kitab/newUI/add_products.dart';
 import 'package:hisab_kitab/newUI/card_wigdet.dart';
 import 'package:hisab_kitab/newUI/my_customers.dart';
 import 'package:hisab_kitab/newUI/my_stock.dart';
+import 'package:hisab_kitab/newUI/nabhetekoProductAdd.dart';
 import 'package:hisab_kitab/newUI/newBill.dart';
 import 'package:hisab_kitab/newUI/row_card_widget.dart';
 import 'package:hisab_kitab/newUI/staff_homepage.dart';
@@ -106,12 +107,21 @@ class _HomepageBodyState extends State<HomepageBody> {
                         });
                   case 3:
                     return BanakoCardColumn(
-                      text: "PostOrders",
+                      text: "Post\nOrders",
                       textColor: Colors.white,
                       backgroundGradient: MeroGradiant(),
                       radius: 16,
                       rakhneIcon: Icons.pages,
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) {
+                              return NabhetekoProductPage();
+                            },
+                          ),
+                        );
+                      },
                     );
                   case 4:
                     return BanakoCardColumn(
@@ -121,11 +131,14 @@ class _HomepageBodyState extends State<HomepageBody> {
                       radius: 16,
                       rakhneIcon: Icons.store_mall_directory_outlined,
                       onTap: () {
-                        Navigator.push(context, MaterialPageRoute(
-                          builder: (context) {
-                            return AddProducts();
-                          },
-                        ));
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) {
+                              return AddProducts();
+                            },
+                          ),
+                        );
                       },
                     );
                   case 5:
