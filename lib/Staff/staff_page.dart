@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:hisab_kitab/newUI/drawer.dart';
+import 'package:hisab_kitab/newUI/Navigation%20and%20Notification/Navigation_bar.dart';
+import 'package:hisab_kitab/newUI/Drawers/drawer.dart';
 
-class AdminUserScreen extends StatelessWidget {
+class StaffUserScreen extends StatelessWidget {
   final String userName;
   final String shopName;
   final String phoneNumber;
   final String loginTime;
 
-  const AdminUserScreen({
+  const StaffUserScreen({
     Key? key,
     required this.userName,
     required this.shopName,
@@ -22,7 +23,6 @@ class AdminUserScreen extends StatelessWidget {
         title: const Text("Admin Page"),
       ),
       drawer: ReusableDrawer(
-        // height: 300,
         shopName: shopName,
         userName: userName,
         loginTime: loginTime,
@@ -50,9 +50,7 @@ class AdminUserScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: const Center(
-        child: Text("Welcome Admin"),
-      ),
+      bottomNavigationBar: NavigationBarBanako(),
     );
   }
 }

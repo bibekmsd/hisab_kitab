@@ -2,15 +2,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hisab_kitab/admin/admin_page.dart';
-import 'package:hisab_kitab/newUI/admin_page.dart';
-import 'package:hisab_kitab/newUI/staff_page.dart';
-import 'package:hisab_kitab/pages/home_page.dart';
+import 'package:hisab_kitab/Staff/staff_page.dart';
+
 import 'package:hisab_kitab/pages/sign_up_page.dart';
 import 'package:hisab_kitab/reuseable_widgets/buttons.dart';
 import 'package:hisab_kitab/reuseable_widgets/textField.dart';
 import 'package:hisab_kitab/reuseable_widgets/text_button.dart';
 import 'package:hisab_kitab/services/User_authentication/firebase_authentication.dart';
-import 'package:hisab_kitab/user/staff_user_page.dart';
+
 import 'package:hisab_kitab/utils/gradiants.dart';
 
 class SignInPage extends StatefulWidget {

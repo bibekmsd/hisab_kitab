@@ -1,6 +1,6 @@
 // ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously, prefer_const_constructors, sort_child_properties_last
 import 'package:flutter/material.dart';
-import 'package:hisab_kitab/newUI/add_customer.dart';
+import 'package:hisab_kitab/newUI/Home%20page%20icons/My%20customers/add_customer.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';

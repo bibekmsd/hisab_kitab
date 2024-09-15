@@ -1,11 +1,11 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:hisab_kitab/admin/admin_page.dart';
-import 'package:hisab_kitab/newUI/Navigation_bar.dart';
-import 'package:hisab_kitab/newUI/nabhetekoProductAdd.dart';
+
+import 'package:hisab_kitab/newUI/Navigation%20and%20Notification/Navigation_bar.dart';
+import 'package:hisab_kitab/newUI/Home%20page%20icons/Add%20Products/nabhetekoProductAdd.dart';
 import 'package:hisab_kitab/pages/log_in_page.dart';
-import 'package:hisab_kitab/reuseable_widgets/getItemsFromDatabase.dart';
-import 'package:hisab_kitab/user/staff_user_page.dart';
+
+
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -52,4 +52,4 @@ class _MyAppState extends State<MyApp> {
 //^ 4987176014955
 //^ 6928001826358
 //^ 8904106854005
-//* 8901247574328
+//* 8901247574328 //florozone

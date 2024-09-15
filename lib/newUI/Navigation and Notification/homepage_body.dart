@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:hisab_kitab/newUI/add_products.dart';
-import 'package:hisab_kitab/newUI/card_wigdet.dart';
-import 'package:hisab_kitab/newUI/my_customers.dart';
-import 'package:hisab_kitab/newUI/my_stock.dart';
-import 'package:hisab_kitab/newUI/nabhetekoProductAdd.dart';
-import 'package:hisab_kitab/newUI/newBill.dart';
-import 'package:hisab_kitab/newUI/row_card_widget.dart';
-import 'package:hisab_kitab/newUI/staff_homepage.dart';
+import 'package:hisab_kitab/reuseable_widgets/card_wigdet.dart';
+import 'package:hisab_kitab/newUI/Home%20page%20icons/My%20customers/my_customers.dart';
+import 'package:hisab_kitab/newUI/Home%20page%20icons/My%20Stock/my_stock.dart';
+import 'package:hisab_kitab/newUI/Home%20page%20icons/Add%20Products/nabhetekoProductAdd.dart';
+import 'package:hisab_kitab/newUI/Home%20page%20icons/New%20Bill/newBill.dart';
+import 'package:hisab_kitab/reuseable_widgets/row_card_widget.dart';
+import 'package:hisab_kitab/newUI/Navigation%20and%20Notification/staff_homepage.dart';
 import 'package:hisab_kitab/pages/sign_up_page.dart';
 import 'package:hisab_kitab/utils/gradiants.dart';
 
@@ -102,7 +101,7 @@ class _HomepageBodyState extends State<HomepageBody> {
                         onTap: () {
                           Navigator.push(context,
                               MaterialPageRoute(builder: (context) {
-                            return const MyCustomers();
+                            return MyCustomers();
                           }));
                         });
                   case 3:
@@ -135,7 +134,7 @@ class _HomepageBodyState extends State<HomepageBody> {
                           context,
                           MaterialPageRoute(
                             builder: (context) {
-                              return AddProducts();
+                              return NabhetekoProductPage();
                             },
                           ),
                         );

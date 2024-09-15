@@ -1,15 +1,15 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors, sort_child_properties_last
 
 import 'package:flutter/material.dart';
-import 'package:hisab_kitab/admin/admin_page.dart';
-import 'package:hisab_kitab/newUI/admin_drawer.dart';
-import 'package:hisab_kitab/newUI/analytics_page.dart';
-import 'package:hisab_kitab/newUI/drawer.dart';
-import 'package:hisab_kitab/newUI/row_card_widget.dart';
-import 'package:hisab_kitab/newUI/Homepage.dart';
-import 'package:hisab_kitab/newUI/settings_page.dart';
-import 'package:hisab_kitab/newUI/staff_homepage.dart';
-import 'package:hisab_kitab/user/staff_user_page.dart';
+
+import 'package:hisab_kitab/newUI/Drawers/admin_drawer.dart';
+import 'package:hisab_kitab/newUI/Home%20page%20icons/analytics_page.dart';
+import 'package:hisab_kitab/newUI/Drawers/drawer.dart';
+import 'package:hisab_kitab/reuseable_widgets/row_card_widget.dart';
+import 'package:hisab_kitab/newUI/Navigation%20and%20Notification/Homepage.dart';
+import 'package:hisab_kitab/newUI/Navigation%20and%20Notification/settings_page.dart';
+import 'package:hisab_kitab/newUI/Navigation%20and%20Notification/staff_homepage.dart';
+
 
 class NavigationBarBanako extends StatefulWidget {
   const NavigationBarBanako({super.key});

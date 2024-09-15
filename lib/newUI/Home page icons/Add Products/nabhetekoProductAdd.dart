@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 
 class NabhetekoProductPage extends StatefulWidget {
   @override
@@ -8,6 +8,7 @@ class NabhetekoProductPage extends StatefulWidget {
 }
 
 class _NabhetekoProductPageState extends State<NabhetekoProductPage> {
+  final List<String> _scannedValues = [];
   final TextEditingController _barcodeController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
@@ -17,6 +18,7 @@ class _NabhetekoProductPageState extends State<NabhetekoProductPage> {
 
   bool _productExists = true;
   String _selectedProductType = 'Beauty care and Hygiene';
+  bool isScanning = false;
 
   final List<String> _productTypes = [
     'Beauty care and Hygiene',
@@ -31,7 +33,6 @@ class _NabhetekoProductPageState extends State<NabhetekoProductPage> {
   @override
   void initState() {
     super.initState();
-    // Add listener to barcode controller to fetch product details on change
     _barcodeController.addListener(() {
       _fetchProductDetails(_barcodeController.text);
     });
@@ -39,7 +40,6 @@ class _NabhetekoProductPageState extends State<NabhetekoProductPage> {
 
   @override
   void dispose() {
-    // Dispose controllers to avoid memory leaks
     _barcodeController.dispose();
     _nameController.dispose();
     _priceController.dispose();
@@ -48,32 +48,39 @@ class _NabhetekoProductPageState extends State<NabhetekoProductPage> {
     super.dispose();
   }
 
-  // Function to fetch product details based on barcode
+  void handleScanResult(BarcodeCapture capture) {
+    setState(() {
+      for (final barcode in capture.barcodes) {
+        final String? code = barcode.rawValue;
+        if (code != null && !_scannedValues.contains(code)) {
+          _scannedValues.add(code);
+        }
+      }
+    });
+  }
+
   void _fetchProductDetails(String barcode) async {
     if (barcode.isEmpty) {
       return;
     }
 
     try {
-      // Fetch product from Firestore
       final doc = await FirebaseFirestore.instance
           .collection('ProductsNew')
           .doc(barcode)
           .get();
 
       if (doc.exists) {
-        // If product exists, update the state with product details
         final data = doc.data()!;
         setState(() {
           _productExists = true;
           _nameController.text = data['Name'];
-          _priceController.text = data['Price'].toString();
-          _quantityController.text = data['Quantity'].toString();
-          _wholesalePriceController.text = data['WholesalePrice'].toString();
+          _priceController.text = data['Price'];
+          _quantityController.text = data['Quantity'];
+          _wholesalePriceController.text = data['WholesalePrice'];
           _selectedProductType = data['ProductType'];
         });
       } else {
-        // If product doesn't exist, clear the input fields
         setState(() {
           _productExists = false;
           _nameController.clear();
@@ -84,24 +91,29 @@ class _NabhetekoProductPageState extends State<NabhetekoProductPage> {
       }
     } catch (e) {
       debugPrint('Error fetching product details: $e');
-      // Handle error here (e.g., show error message to user)
     }
   }
 
-  // Function to save product to Firestore
   void _saveProduct() {
     try {
       final barcode = _barcodeController.text;
+
+      // Parsing fields as numbers
+      final double price = double.tryParse(_priceController.text) ?? 0.0;
+      final int quantity = int.tryParse(_quantityController.text) ?? 0;
+      final double wholesalePrice =
+          double.tryParse(_wholesalePriceController.text) ?? 0.0;
+
       final data = {
         'Barcode': barcode,
         'Name': _nameController.text,
-        'Price': int.parse(_priceController.text),
-        'Quantity': int.parse(_quantityController.text),
-        'WholesalePrice': int.parse(_wholesalePriceController.text),
+        'Price': price, // Saving as a double
+        'Quantity': quantity, // Saving as an int
+        'WholesalePrice': wholesalePrice, // Saving as a double
         'ProductType': _selectedProductType,
       };
 
-      // Save product to Firestore
+      // Saving to Firestore
       FirebaseFirestore.instance
           .collection('ProductsNew')
           .doc(barcode)
@@ -121,9 +133,9 @@ class _NabhetekoProductPageState extends State<NabhetekoProductPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   title: Text('Quick Add'),
-      // ),
+      appBar: AppBar(
+        title: Text("Add Product"),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
@@ -143,11 +155,28 @@ class _NabhetekoProductPageState extends State<NabhetekoProductPage> {
                   ),
                   onSubmitted: (value) {
                     _fetchProductDetails(value);
-                    // Clear the barcode field after submission
                     _barcodeController.clear();
                   },
                 ),
               ),
+              // Toggle scanning button
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    isScanning = !isScanning;
+                  });
+                },
+                child: Text(isScanning ? 'Stop Scanning' : 'Start Scanning'),
+              ),
+              if (isScanning)
+                SizedBox(
+                  width: 300,
+                  height: 100,
+                  child: MobileScanner(
+                      fit: BoxFit.cover,
+                      controller: MobileScannerController(),
+                      onDetect: handleScanResult),
+                ),
               // Display message if product is not found
               if (!_productExists)
                 Text(

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:hisab_kitab/newUI/Home%20page%20icons/My%20customers/customer_details.dart';
 import 'package:intl/intl.dart';
 import 'package:mobile_scanner/mobile_scanner.dart'; // Import intl package for date formatting
 
@@ -51,25 +52,34 @@ class _MyCustomersState extends State<MyCustomers> {
             itemBuilder: (context, index) {
               String formattedDate = DateFormat('yyyy-MM-dd HH:mm')
                   .format(customers[index].memberSince);
-              return ListTile(
-                title: Text(customers[index].name),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('PhoneNo: ${customers[index].number}'),
-                  ],
+              return Card(
+                child: ListTile(
+                  title: Text(customers[index].name),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('PhoneNo: ${customers[index].number}'),
+                    ],
+                  ),
+                  leading: const Icon(
+                    Icons.person,
+                    size: 40,
+                  ),
+                  trailing: Column(
+                    children: [
+                      Text('Address: ${customers[index].address}'),
+                      Text('Member Since: $formattedDate'),
+                    ],
+                  ),
+                  onTap: () {
+                    Navigator.push(context, MaterialPageRoute(
+                      builder: (context) {
+                        return CustomerDetails(
+                            customerId: snapshot.data!.docs[index].id);
+                      },
+                    ));
+                  },
                 ),
-                leading: const Icon(
-                  Icons.person,
-                  size: 40,
-                ),
-                trailing: Column(
-                  children: [
-                    Text('Address: ${customers[index].address}'),
-                    Text('Member Since: $formattedDate'),
-                  ],
-                ),
-                onTap: () {},
               );
             },
           );

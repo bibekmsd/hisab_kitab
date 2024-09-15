@@ -1,13 +1,13 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, sort_child_properties_last
 
 import 'package:flutter/material.dart';
-import 'package:hisab_kitab/newUI/admin_drawer.dart';
-import 'package:hisab_kitab/newUI/card_wigdet.dart';
-import 'package:hisab_kitab/newUI/drawer.dart';
-import 'package:hisab_kitab/newUI/homepage_body.dart';
-import 'package:hisab_kitab/newUI/row_card_widget.dart';
-import 'package:hisab_kitab/newUI/staff_drawer.dart';
-import 'package:hisab_kitab/newUI/staff_page.dart';
+import 'package:hisab_kitab/newUI/Drawers/admin_drawer.dart';
+import 'package:hisab_kitab/reuseable_widgets/card_wigdet.dart';
+import 'package:hisab_kitab/newUI/Drawers/drawer.dart';
+import 'package:hisab_kitab/newUI/Navigation%20and%20Notification/homepage_body.dart';
+import 'package:hisab_kitab/reuseable_widgets/row_card_widget.dart';
+import 'package:hisab_kitab/Staff/staff_drawer.dart';
+import 'package:hisab_kitab/Staff/staff_page.dart';
 import 'package:hisab_kitab/pages/log_in_page.dart';
 import 'package:hisab_kitab/pages/sign_up_page.dart';
 

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:hisab_kitab/newUI/check_out_page.dart';
-import 'package:hisab_kitab/newUI/nabhetekoProductAdd.dart';
-// Make sure to import NabhetekoProductPage
+import 'package:hisab_kitab/newUI/Home%20page%20icons/New%20Bill/check_out_page.dart';
 
 class GrossaryListStaff extends StatefulWidget {
   final List<String> scannedValues;
@@ -22,34 +20,42 @@ class _GrossaryListStaffState extends State<GrossaryListStaff> {
   final Map<int, int> _productQuantities = {};
   final Map<int, double> _productTotalPrices = {};
   final Map<int, Map<String, dynamic>> _productDetails = {};
-  String _totalQuantity = "0";
-  String _totalPrice = "0.00";
+  int _totalQuantity = 0;
+  double _totalPrice = 0.0;
   final TextEditingController _phoneController = TextEditingController();
 
   void _updateTotals() {
     setState(() {
-      int totalQuantity = _productQuantities.values
+      _totalQuantity = _productQuantities.values
           .fold(0, (prev, quantity) => prev + quantity);
-      double totalPrice =
+      _totalPrice =
           _productTotalPrices.values.fold(0.0, (prev, total) => prev + total);
-      _totalQuantity = totalQuantity.toString();
-      _totalPrice = totalPrice.toStringAsFixed(2);
     });
   }
 
   void _incrementQuantity(int index, double itemPrice) {
     setState(() {
-      _productQuantities[index] = (_productQuantities[index] ?? 0) + 1;
-      _productTotalPrices[index] = itemPrice * _productQuantities[index]!;
+      int currentQuantity = _productQuantities[index] ?? 0;
+      currentQuantity++;
+      _productQuantities[index] = currentQuantity;
+
+      double totalPrice = itemPrice * currentQuantity;
+      _productTotalPrices[index] = totalPrice;
+
       _updateTotals();
     });
   }
 
   void _decrementQuantity(int index, double itemPrice) {
     setState(() {
-      if ((_productQuantities[index] ?? 0) > 0) {
-        _productQuantities[index] = (_productQuantities[index] ?? 0) - 1;
-        _productTotalPrices[index] = itemPrice * _productQuantities[index]!;
+      int currentQuantity = _productQuantities[index] ?? 0;
+      if (currentQuantity > 0) {
+        currentQuantity--;
+        _productQuantities[index] = currentQuantity;
+
+        double totalPrice = itemPrice * currentQuantity;
+        _productTotalPrices[index] = totalPrice;
+
         _updateTotals();
       }
     });
@@ -62,8 +68,8 @@ class _GrossaryListStaffState extends State<GrossaryListStaff> {
         builder: (context) => CheckOutPage(
           customerPhone: _phoneController.text.trim(),
           productDetails: _productDetails.values.toList(),
-          totalQuantity: _totalQuantity,
-          totalPrice: _totalPrice,
+          totalQuantity: _totalQuantity.toString(),
+          totalPrice: _totalPrice.toStringAsFixed(2),
         ),
       ),
     );
@@ -72,7 +78,7 @@ class _GrossaryListStaffState extends State<GrossaryListStaff> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance.collection('Products').snapshots(),
+      stream: FirebaseFirestore.instance.collection('ProductsNew').snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
@@ -83,11 +89,6 @@ class _GrossaryListStaffState extends State<GrossaryListStaff> {
         }
 
         final documents = snapshot.data!.docs;
-        print('Total documents fetched: ${documents.length}');
-
-        documents.forEach((doc) {
-          print('Document fetched with barcode: ${doc['Barcode']}');
-        });
 
         return Column(
           children: [
@@ -97,15 +98,10 @@ class _GrossaryListStaffState extends State<GrossaryListStaff> {
                 itemBuilder: (context, index) {
                   final barcode = widget.scannedValues[index];
                   final matchedDocs = documents
-                      .where((doc) => doc['Barcode'] == barcode)
+                      .where((doc) => doc['Barcode'].trim() == barcode.trim())
                       .toList();
-                  print(
-                      'Scanned value: $barcode, Matched documents: ${matchedDocs.length}');
 
                   if (matchedDocs.isEmpty) {
-                    print('No matched document found for barcode: $barcode');
-                    // Navigate to NabhetekoProductPage if product is not found
-
                     return ListTile(
                       leading: Icon(Icons.shopping_bag),
                       title: Text("Item ${index + 1}"),
@@ -143,16 +139,14 @@ class _GrossaryListStaffState extends State<GrossaryListStaff> {
 
                   final doc = matchedDocs.first;
                   final itemName = doc['Name'] ?? 'Unknown';
-                  final itemPriceString = doc['Price'].toString();
-                  final itemPrice = double.tryParse(itemPriceString) ?? 0.0;
+                  final itemPrice = doc['Price']?.toDouble() ?? 0.0;
 
                   _productDetails[index] = {
                     'name': itemName,
-                    'price': itemPriceString,
+                    'price': itemPrice,
                     'barcode': widget.scannedValues[index],
-                    'quantity': (_productQuantities[index] ?? 0).toString(),
-                    'totalPrice':
-                        (_productTotalPrices[index] ?? 0.0).toStringAsFixed(2),
+                    'quantity': _productQuantities[index] ?? 0,
+                    'totalPrice': _productTotalPrices[index] ?? 0.0,
                   };
 
                   return Card(
@@ -172,14 +166,15 @@ class _GrossaryListStaffState extends State<GrossaryListStaff> {
                                 onPressed: () =>
                                     _decrementQuantity(index, itemPrice),
                               ),
-                              Text((_productQuantities[index] ?? 0).toString()),
+                              Text(
+                                  _productQuantities[index]?.toString() ?? '0'),
                               IconButton(
                                 icon: Icon(Icons.add),
                                 onPressed: () =>
                                     _incrementQuantity(index, itemPrice),
                               ),
                               Text(
-                                  "Total: \$${(_productTotalPrices[index] ?? 0.0).toStringAsFixed(2)}"),
+                                  "Total: \$${_productTotalPrices[index]?.toStringAsFixed(2) ?? '0.00'}"),
                             ],
                           ),
                         ],
@@ -223,7 +218,7 @@ class _GrossaryListStaffState extends State<GrossaryListStaff> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text("Total Quantity: $_totalQuantity"),
-                  Text("Total Price: \$$_totalPrice"),
+                  Text("Total Price: \$${_totalPrice.toStringAsFixed(2)}"),
                   Row(
                     children: [
                       ElevatedButton(

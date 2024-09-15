@@ -1,104 +1,58 @@
-// import 'package:flutter/material.dart';
-// import 'package:hisab_kitab/reuseable_widgets/Table.dart';
-// import 'package:hisab_kitab/utils/scannerr.dart';
-// import 'package:hisab_kitab/reuseable_widgets/buttons.dart';
-// import 'package:hisab_kitab/reuseable_widgets/getItemsFromDatabase.dart';
-// import 'package:hisab_kitab/utils/gradiants.dart'; // Import the CustomScanner widget
-// import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:flutter/material.dart';
+import 'package:hisab_kitab/newUI/Drawers/drawer.dart';
 
-// class AdminUserScreen extends StatefulWidget {
-//   const AdminUserScreen({super.key});
+class AdminUserScreen extends StatelessWidget {
+  final String userName;
+  final String shopName;
+  final String phoneNumber;
+  final String loginTime;
 
-//   @override
-//   State<AdminUserScreen> createState() => _AdminUserScreenState();
-// }
+  const AdminUserScreen({
+    Key? key,
+    required this.userName,
+    required this.shopName,
+    required this.phoneNumber,
+    required this.loginTime,
+  }) : super(key: key);
 
-// class _AdminUserScreenState extends State<AdminUserScreen> {
-//   final List<String> _scannedValues = [];
-//   bool _isScanning = false;
-//   final MobileScannerController _scannerController = MobileScannerController();
-
-//   void _handleScanResult(String result) {
-//     setState(() {
-//       if (!_scannedValues.contains(result)) {
-//         _scannedValues.add(result);
-//         // _isScanning = false;
-//         // _scannerController.stop(); // Stop the scanner
-//       }
-//     });
-//   }
-
-//   void _startScanning() {
-//     setState(() {
-//       _isScanning = true;
-//       _scannerController.start(); // Ensure the scanner is started
-//     });
-//   }
-
-//   void _handleDelete(int index) {
-//     setState(() {
-//       _scannedValues.removeAt(index);
-//     });
-//   }
-
-//   @override
-//   void dispose() {
-//     _scannerController.dispose(); // Dispose the controller when not needed
-//     super.dispose();
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         leading: const BackButton(),
-//         title: const Text("Admin-Screen"),
-//         toolbarHeight: 50,
-//         centerTitle: true,
-//       ),
-//       body: Stack(
-//         children: [
-//           SingleChildScrollView(
-//             scrollDirection: Axis.vertical,
-//             child: Center(
-//               child: Column(
-//                 children: [
-//                   const SizedBox(height: 220),
-//                   BanakoButton(
-//                     textSize: 20,
-//                     backgroundColor: Colors.black,
-//                     height: 50,
-//                     text: "Scan Items",
-//                     textColor: Colors.black,
-//                     width: 200,
-//                     onPressed: _startScanning,
-//                   ),
-//                   const SizedBox(height: 20),
-//                   SizedBox(
-//                     height: 350,
-//                     child: AddItemsToDatabaseTable(
-//                       scannedValues: _scannedValues,
-//                       onDelete: _handleDelete,
-//                     ),
-//                   ),
-//                 ],
-//               ),
-//             ),
-//           ),
-//           if (_isScanning)
-//             Align(
-//               alignment: Alignment.topCenter,
-//               child: Column(
-//                 children: [
-//                   const SizedBox(height: 0),
-//                   CustomScanner(
-//                     onScanResult: _handleScanResult,
-//                   ),
-//                 ],
-//               ),
-//             ),
-//         ],
-//       ),
-//     );
-//   }
-// }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Admin Page"),
+      ),
+      drawer: ReusableDrawer(
+        // height: 300,
+        shopName: shopName,
+        userName: userName,
+        loginTime: loginTime,
+        phoneNumber: phoneNumber,
+        drawerItems: [
+          ListTile(
+            title: const Text('Home'),
+            onTap: () {
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            title: const Text('Settings'),
+            onTap: () {
+              Navigator.pop(context);
+            },
+          ),
+        ],
+        footerItems: [
+          ListTile(
+            title: const Text('Logout'),
+            onTap: () {
+              // Handle logout
+            },
+          ),
+        ],
+      ),
+      body: const Center(
+        child: Text("Welcome Admin"),
+      ),
+    );
+  }
+}

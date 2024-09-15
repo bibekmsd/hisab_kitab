@@ -1,10 +1,10 @@
-// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
+// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors, avoid_print, use_build_context_synchronously
 
 import 'package:flutter/material.dart';
-import 'package:hisab_kitab/newUI/nabhetekoProductAdd.dart';
+import 'package:hisab_kitab/newUI/Home%20page%20icons/Add%20Products/nabhetekoProductAdd.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'grossary_list_staff.dart';
+import 'check_out.dart';
 
 class Newbill extends StatefulWidget {
   const Newbill({super.key});
@@ -47,9 +47,15 @@ class _NewbillState extends State<Newbill> {
       } else {
         // Handle case where no product is found
         print('Product not found');
-        Navigator.push(context, MaterialPageRoute(builder: (context) {
-          return NabhetekoProductPage();
-        }));
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          constraints: BoxConstraints(maxHeight: 700, minHeight: 600),
+          builder: (context) => NabhetekoProductPage(),
+        );
+        // Navigator.push(context, MaterialPageRoute(builder: (context) {
+        //   return NabhetekoProductPage();
+        // }));
       }
     } catch (e) {
       print('Error searching barcode: $e');
