@@ -1,5 +1,3 @@
-// ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously, prefer_const_constructors, sort_child_properties_last
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -49,7 +47,6 @@ class _AddCustomersState extends State<AddCustomers> {
       if (!snapshot.exists) {
         // If the document does not exist, start with bill number 1
         newBillNumber = 1;
-        // Set the 'current' field to 1 in the document
         transaction.set(billNumberDoc, {'current': newBillNumber});
       } else {
         // If the document exists, get the current value and increment it
@@ -57,7 +54,6 @@ class _AddCustomersState extends State<AddCustomers> {
         transaction.update(billNumberDoc, {'current': newBillNumber});
       }
 
-      // Return the new bill number as a string
       return newBillNumber.toString();
     });
   }
@@ -70,14 +66,12 @@ class _AddCustomersState extends State<AddCustomers> {
     final notes = _notesController.text.trim();
     final birthDate = _birthDateController.text.trim();
 
-    // Get the current date as a string
     final purchaseDate = DateTime.now().toLocal().toString().split(' ')[0];
 
     try {
       // Generate the next bill number
       String billNumber = await _getNextBillNumber();
 
-      // Prepare the history entry with product details
       Map<String, dynamic> historyEntry = {
         'Products': widget.productDetails,
         'PurchaseDate': Timestamp.fromDate(DateTime.now()),
@@ -86,14 +80,14 @@ class _AddCustomersState extends State<AddCustomers> {
       };
 
       if (phoneNo.isNotEmpty) {
-        // Store customer with membership in 'members' collection
-        final memberRef = _firestore.collection('members').doc(phoneNo);
+        // Store customer in the 'customers' collection
+        final customerRef = _firestore.collection('customers').doc(phoneNo);
 
-        // Check if the member already exists
-        final doc = await memberRef.get();
+        // Check if the customer exists
+        final doc = await customerRef.get();
         if (doc.exists) {
-          // Update existing member's details and add bill under 'bills'
-          await memberRef.update({
+          // Update existing customer's details and add bill under 'bills'
+          await customerRef.update({
             'PhoneNo': phoneNo,
             'Name': name,
             'Address': address,
@@ -102,25 +96,32 @@ class _AddCustomersState extends State<AddCustomers> {
             'updatedAt': FieldValue.serverTimestamp(),
           });
 
-          // Add bill to the subcollection 'bills' under the member
-          await memberRef.collection('bills').doc(billNumber).set(historyEntry);
+          // Add bill to the 'bills' subcollection
+          await customerRef
+              .collection('bills')
+              .doc(billNumber)
+              .set(historyEntry);
         } else {
-          // Create new member document
-          final newMemberData = {
+          // Create new customer document
+          final newCustomerData = {
             'PhoneNo': phoneNo,
             'Name': name,
             'Address': address,
             'Notes': notes,
             'BirthDate': birthDate,
             'createdAt': FieldValue.serverTimestamp(),
+            'members': FieldValue.arrayUnion([phoneNo]),
           };
-          await memberRef.set(newMemberData);
+          await customerRef.set(newCustomerData);
 
-          // Add bill to the subcollection 'bills'
-          await memberRef.collection('bills').doc(billNumber).set(historyEntry);
+          // Add bill to the 'bills' subcollection
+          await customerRef
+              .collection('bills')
+              .doc(billNumber)
+              .set(historyEntry);
         }
       } else {
-        // Non-member case: Store bill directly in 'bills' collection
+        // Non-member case: Store bill in the 'bills' collection
         await _firestore.collection('bills').doc(billNumber).set(historyEntry);
       }
 
@@ -151,7 +152,7 @@ class _AddCustomersState extends State<AddCustomers> {
     }
 
     try {
-      final doc = await _firestore.collection('members').doc(phoneNo).get();
+      final doc = await _firestore.collection('customers').doc(phoneNo).get();
       if (doc.exists) {
         final data = doc.data();
         _nameController.text = data?['Name'] ?? '';
@@ -159,7 +160,7 @@ class _AddCustomersState extends State<AddCustomers> {
         _notesController.text = data?['Notes'] ?? '';
         _birthDateController.text = data?['BirthDate'] ?? '';
         _memberSince = data?['createdAt'];
-        setState(() {}); // Update the UI to reflect changes
+        setState(() {});
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Customer not found')),
