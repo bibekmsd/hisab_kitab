@@ -1,3 +1,5 @@
+
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -35,7 +37,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
     await Future.wait([
       _calculateRevenueAndProfit(),
       _generateSalesGraph(),
-      // _getTopSellingProducts(), // Uncomment if you want to implement this feature
+      _getTopSellingProducts(),
     ]);
     setState(() => _isLoading = false);
   }
@@ -46,7 +48,6 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
     final quarterStart = DateTime(now.year, (now.month - 1) ~/ 3 * 3 + 1, 1);
     final yearStart = DateTime(now.year, 1, 1);
 
-    // Reset all values to 0
     _monthlyRevenue = _quarterlyRevenue = _yearlyRevenue = 0;
     _monthlyProfit = _quarterlyProfit = _yearlyProfit = 0;
 
@@ -101,7 +102,6 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
     final now = DateTime.now();
     final thirtyDaysAgo = now.subtract(Duration(days: 30));
 
-    // Initialize daily sales for the last 30 days with 0
     Map<DateTime, double> dailySales = {};
     for (int i = 0; i < 30; i++) {
       final date = now.subtract(Duration(days: i));
@@ -132,6 +132,47 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
 
     _salesData.sort((a, b) => a.x.compareTo(b.x));
   }
+
+  Future<void> _getTopSellingProducts() async {
+  final now = DateTime.now();
+  final thirtyDaysAgo = now.subtract(Duration(days: 30));
+
+  final billsQuery = await _firestore
+      .collection('bills')
+      .where('PurchaseDate', isGreaterThanOrEqualTo: thirtyDaysAgo)
+      .get();
+
+  Map<String, Map<String, dynamic>> productSales = {};
+
+  for (var doc in billsQuery.docs) {
+    final bill = doc.data() as Map<String, dynamic>;
+    final products = bill['Products'] as List<dynamic>;
+
+    for (var product in products) {
+      final barcode = product['barcode'].toString();
+      final name = product['name'] as String;
+      final quantity = product['quantity'] as int;
+      
+      if (!productSales.containsKey(barcode)) {
+        productSales[barcode] = {
+          'name': name,
+          'quantitySold': 0,
+        };
+      }
+      productSales[barcode]!['quantitySold'] += quantity;
+    }
+  }
+
+  List<MapEntry<String, Map<String, dynamic>>> sortedProducts = productSales.entries.toList()
+    ..sort((a, b) => b.value['quantitySold'].compareTo(a.value['quantitySold']));
+
+  _topProducts = sortedProducts.take(5).map((entry) {
+    return {
+      'name': entry.value['name'],
+      'quantitySold': entry.value['quantitySold'],
+    };
+  }).toList();
+}
 
   @override
   Widget build(BuildContext context) {
@@ -177,13 +218,10 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
       shrinkWrap: true,
       physics: NeverScrollableScrollPhysics(),
       children: [
-        _buildSummaryCard(
-            'Monthly Revenue', _monthlyRevenue, Icons.trending_up),
+        _buildSummaryCard('Monthly Revenue', _monthlyRevenue, Icons.trending_up),
         _buildSummaryCard('Monthly Profit', _monthlyProfit, Icons.attach_money),
-        _buildSummaryCard(
-            'Quarterly Revenue', _quarterlyRevenue, Icons.timeline),
-        _buildSummaryCard(
-            'Quarterly Profit', _quarterlyProfit, Icons.account_balance),
+        _buildSummaryCard('Quarterly Revenue', _quarterlyRevenue, Icons.timeline),
+        _buildSummaryCard('Quarterly Profit', _quarterlyProfit, Icons.account_balance),
         _buildSummaryCard('Yearly Revenue', _yearlyRevenue, Icons.bar_chart),
         _buildSummaryCard('Yearly Profit', _yearlyProfit, Icons.pie_chart),
       ],
@@ -201,8 +239,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
           children: [
             Icon(icon, size: 40, color: Theme.of(context).primaryColor),
             SizedBox(height: 8),
-            Text(title,
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+            Text(title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
             SizedBox(height: 4),
             Text(
               NumberFormat.currency(symbol: '₹').format(amount),
@@ -218,198 +255,188 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
     );
   }
 
-  // Widget _buildSalesGraph() {
-  //   return Card(
-  //     elevation: 4,
-  //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-  //     child: Padding(
-  //       padding: EdgeInsets.all(16),
-  //       child: Column(
-  //         crossAxisAlignment: CrossAxisAlignment.start,
-  //         children: [
-  //           Text('Sales Trend (Last 30 Days)', style: Theme.of(context).textTheme.titleLarge),
-  //           SizedBox(height: 16),
-  //           Container(
-  //             height: 300,
-  //             child: LineChart(
-  //               LineChartData(
-  //                 gridData: FlGridData(show: false),
-  //                 titlesData: FlTitlesData(
-  //                   leftTitles: AxisTitles(
-  //                     sideTitles: SideTitles(
-  //                       showTitles: true,
-  //                       reservedSize: 40,
-  //                       getTitlesWidget: (value, meta) {
-  //                         return Text(
-  //                           '₹${value.toInt()}',
-  //                           style: TextStyle(fontSize: 10),
-  //                         );
-  //                       },
-  //                     ),
-  //                   ),
-  //                   bottomTitles: AxisTitles(
-  //                     sideTitles: SideTitles(
-  //                       showTitles: true,
-  //                       getTitlesWidget: (value, meta) {
-  //                         final date = DateTime.fromMillisecondsSinceEpoch(value.toInt());
-  //                         return Padding(
-  //                           padding: EdgeInsets.only(top: 8),
-  //                           child: Text(
-  //                             DateFormat('dd/MM').format(date),
-  //                             style: TextStyle(fontSize: 10),
-  //                           ),
-  //                         );
-  //                       },
-  //                     ),
-  //                   ),
-  //                 ),
-  //                 lineBarsData: [
-  //                   LineChartBarData(
-  //                     spots: _salesData,
-  //                     isCurved: true,
-  //                     dotData: FlDotData(show: false),
-  //                     color: Colors.blue,
-  //                     barWidth: 2,
-  //                   ),
-  //                 ],
-  //                 borderData: FlBorderData(
-  //                   show: true,
-  //                   border: Border.all(color: Colors.black12),
-  //                 ),
-  //               ),
-  //             ),
-  //           ),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
-
-  
-Widget _buildSalesGraph() {
-  return Card(
-    elevation: 4,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-    child: Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Sales Trend (Last 30 Days)', style: Theme.of(context).textTheme.titleLarge),
-          const SizedBox(height: 24),
-          SizedBox(
-            height: 300,
-            child: LineChart(
-              LineChartData(
-                gridData: FlGridData(show: true), // Show grid lines for reference
-                titlesData: FlTitlesData(
-                  leftTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      reservedSize: 60,
-                      interval: (_getMaxY() / 5).roundToDouble(), // Dynamic interval for Y-axis
-                      getTitlesWidget: (value, meta) {
-                        return Text(
-                          '₹${value.toInt()}', // Format as currency or sales number
-                          style: const TextStyle(fontSize: 12),
-                        );
-                      },
-                    ),
-                  ),
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      reservedSize: 40,
-                      interval: _getXAxisInterval(), // Dynamic interval for X-axis
-                      getTitlesWidget: (value, meta) {
-                        final date = DateTime.fromMillisecondsSinceEpoch(value.toInt());
-                        return Padding(
-                          padding: const EdgeInsets.only(top: 8),
-                          child: Text(
-                            DateFormat('dd/MM').format(date), // Format as 'day/month'
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                ),
-                lineBarsData: [
-                  LineChartBarData(
-                    spots: _salesData,
-                    isCurved: true,
-                    dotData: FlDotData(show: false),
-                    color: Colors.blue,
-                    barWidth: 3,
-                  ),
-                ],
-                borderData: FlBorderData(
-                  show: true,
-                  border: Border.all(color: Colors.black12),
-                ),
-                minX: _salesData.first.x,
-                maxX: _salesData.last.x,
-                minY: 0,
-                maxY: _getMaxY(),
-              ),
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
-// Function to get the max Y value dynamically from the sales data
-double _getMaxY() {
-  if (_salesData.isNotEmpty) {
-    return (_salesData.map((spot) => spot.y).reduce(max) * 1.2).roundToDouble();
-  } else {
-    return 0.0; // Handle empty data
-  }
-}
-
-// Function to get the interval for X-axis based on date range
-double _getXAxisInterval() {
-  if (_salesData.isNotEmpty) {
-    final dateRange = _salesData.last.x - _salesData.first.x;
-    return (dateRange / 5).roundToDouble(); // Display 5 date labels evenly
-  } else {
-    return 1.0; // Default interval for empty or minimal data
-  }
-}
-  Widget _buildTopProductsSection() {
+  Widget _buildSalesGraph() {
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Top 5 Products',
-                style: Theme.of(context).textTheme.titleLarge),
-            SizedBox(height: 16),
-            _topProducts.isNotEmpty
-                ? ListView.separated(
-                    shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
-                    itemCount: _topProducts.length,
-                    itemBuilder: (context, index) {
-                      final product = _topProducts[index];
-                      return ListTile(
-                        title: Text(product['name']),
-                        trailing: Text('${product['quantitySold']} units sold'),
+            Text(
+              'Sales Trend (Last 30 Days)',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              height: 300,
+              child: LineChart(
+                LineChartData(
+                  gridData: FlGridData(
+                    show: true,
+                    drawVerticalLine: true,
+                    getDrawingHorizontalLine: (value) {
+                      return FlLine(
+                        color: Colors.grey.shade300,
+                        strokeWidth: 1,
                       );
                     },
-                    separatorBuilder: (context, index) => Divider(),
-                  )
-                : Text('No data available'),
+                    getDrawingVerticalLine: (value) {
+                      return FlLine(
+                        color: Colors.grey.shade300,
+                        strokeWidth: 1,
+                      );
+                    },
+                  ),
+                  titlesData: FlTitlesData(
+                    leftTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: 60,
+                        interval: _calculateYAxisInterval(),
+                        getTitlesWidget: (value, meta) {
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: Text(
+                              '₹${NumberFormat.compact().format(value)}',
+                              style: const TextStyle(fontSize: 10),
+                              textAlign: TextAlign.right,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: 40,
+                        interval: _calculateXAxisInterval(),
+                        getTitlesWidget: (value, meta) {
+                          final date = DateTime.fromMillisecondsSinceEpoch(value.toInt());
+                          return Transform.rotate(
+                            angle: -0.5,
+                            child: Text(
+                              DateFormat('dd/MM').format(date),
+                              style: const TextStyle(fontSize: 10),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  ),
+                  lineBarsData: [
+                    LineChartBarData(
+                      spots: _salesData,
+                      isCurved: true,
+                      color: Colors.blue,
+                      barWidth: 3,
+                      isStrokeCapRound: true,
+                      dotData: FlDotData(
+                        show: false,
+                      ),
+                      belowBarData: BarAreaData(
+                        show: true,
+                        color: Colors.blue.withOpacity(0.2),
+                      ),
+                    ),
+                  ],
+                  borderData: FlBorderData(
+                    show: true,
+                    border: Border.all(color: Colors.black12),
+                  ),
+                  minX: _salesData.first.x,
+                  maxX: _salesData.last.x,
+                  minY: 0,
+                  maxY: _getMaxY(),
+                ),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
+
+  double _getMaxY() {
+    if (_salesData.isNotEmpty) {
+      return (_salesData.map((spot) => spot.y).reduce(max) * 1.2).roundToDouble();
+    } else {
+      return 1000.0; // Default max value if no data
+    }
+  }
+
+  double _calculateYAxisInterval() {
+    final maxY = _getMaxY();
+    return (maxY / 5).roundToDouble(); // Display 5 Y-axis labels
+  }
+
+  double _calculateXAxisInterval() {
+    if (_salesData.isNotEmpty) {
+      final totalDays = (_salesData.last.x - _salesData.first.x) / (24 * 60 * 60 * 1000);
+      return (totalDays / 6).roundToDouble() * 24 * 60 * 60 * 1000; // Display 6 X-axis labels
+    } else {
+      return 24 * 60 * 60 * 1000; // Default to 1 day if no data
+    }
+  }
+  Widget _buildTopProductsSection() {
+  return Card(
+    elevation: 4,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    child: Padding(
+      padding: EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Top 5 Products',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+          ),
+          SizedBox(height: 16),
+          _topProducts.isNotEmpty
+              ? ListView.separated(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemCount: _topProducts.length,
+                  itemBuilder: (context, index) {
+                    final product = _topProducts[index];
+                    return ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: Theme.of(context).primaryColor,
+                        child: Text('${index + 1}'),
+                      ),
+                      title: Text(
+                        product['name'],
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      trailing: Text(
+                        '${NumberFormat.compact().format(product['quantitySold'])} sold',
+                        style: TextStyle(
+                          color: Theme.of(context).primaryColor,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    );
+                  },
+                  separatorBuilder: (context, index) => Divider(),
+                )
+              : Center(
+                  child: Text(
+                    'No data available',
+                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                  ),
+                ),
+        ],
+      ),
+    ),
+  );
+}
 }
