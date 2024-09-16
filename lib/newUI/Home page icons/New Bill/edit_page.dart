@@ -5,18 +5,17 @@ class EditProductPage extends StatefulWidget {
   final double initialMRP;
   final double initialPrice;
   final double initialWholesalePrice;
-  final double initialQuantity;
+  final int initialQuantity;
   final double initialDiscount;
 
-  const EditProductPage({
-    Key? key,
+  EditProductPage({
     required this.initialProductName,
     required this.initialMRP,
     required this.initialPrice,
     required this.initialWholesalePrice,
     required this.initialQuantity,
     required this.initialDiscount,
-  }) : super(key: key);
+  });
 
   @override
   _EditProductPageState createState() => _EditProductPageState();
@@ -30,7 +29,8 @@ class _EditProductPageState extends State<EditProductPage> {
   late TextEditingController _quantityController;
   late TextEditingController _discountController;
   bool _updateInventory = false;
-  String _discountType = 'Rupees';
+  String _discountType = 'Rupees'; // Default discount type is "Rupees"
+  double _finalPrice = 0.0;
 
   @override
   void initState() {
@@ -46,6 +46,28 @@ class _EditProductPageState extends State<EditProductPage> {
         TextEditingController(text: widget.initialQuantity.toString());
     _discountController =
         TextEditingController(text: widget.initialDiscount.toString());
+
+    // Calculate initial final price based on the discount type
+    _calculateFinalPrice();
+  }
+
+  void _calculateFinalPrice() {
+    double originalPrice = double.tryParse(_priceController.text) ?? 0.0;
+    double discount = double.tryParse(_discountController.text) ?? 0.0;
+
+    // Apply discount based on the selected type
+    if (_discountType == 'Percentage') {
+      _finalPrice = originalPrice - (originalPrice * discount / 100);
+    } else if (_discountType == 'Rupees') {
+      _finalPrice = originalPrice - discount;
+    }
+
+    // Ensure the final price is not negative
+    if (_finalPrice < 0) {
+      _finalPrice = 0;
+    }
+
+    setState(() {});
   }
 
   @override
@@ -63,72 +85,64 @@ class _EditProductPageState extends State<EditProductPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Edit'),
+        title: const Text('Edit'),
         leading: IconButton(
-          icon: Icon(Icons.close),
+          icon: const Icon(Icons.close),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Product Name'),
-            TextField(controller: _productNameController),
-            SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('New MRP/ Pc.'),
-                      TextField(
-                          controller: _mrpController,
-                          keyboardType: TextInputType.number),
-                    ],
-                  ),
-                ),
-                SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('New Price/ Pc.'),
-                      TextField(
-                          controller: _priceController,
-                          keyboardType: TextInputType.number),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 16),
-            Text('New Wholesale Price/ Pc.'),
+            const Text('Product Name'),
             TextField(
-                controller: _wholesalePriceController,
-                keyboardType: TextInputType.number),
-            SizedBox(height: 16),
+              controller: _productNameController,
+              enabled: false, // Read-only
+            ),
+            const SizedBox(height: 16),
             Row(
               children: [
-                Checkbox(
-                  value: _updateInventory,
-                  onChanged: (value) =>
-                      setState(() => _updateInventory = value!),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('MRP/ Pc.'),
+                      TextField(
+                        controller: _mrpController,
+                        enabled: false, // Read-only
+                        keyboardType: TextInputType.number,
+                      ),
+                    ],
+                  ),
                 ),
-                Text('Update in inventory'),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Wholesale Price/ Pc.'),
+                      TextField(
+                        controller: _wholesalePriceController,
+                        enabled: false, // Read-only
+                        keyboardType: TextInputType.number,
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
-            SizedBox(height: 16),
-            Text('Quantity'),
+            const SizedBox(height: 16),
+            const Text('Quantity'),
             TextField(
               controller: _quantityController,
+              enabled: false, // Read-only
               keyboardType: TextInputType.number,
-              decoration: InputDecoration(suffixText: 'Pc.'),
+              decoration: const InputDecoration(suffixText: 'Pc.'),
             ),
-            SizedBox(height: 16),
-            Text('Discount'),
+            const SizedBox(height: 16),
+            const Text('Discount'),
             Row(
               children: [
                 Expanded(
@@ -137,6 +151,8 @@ class _EditProductPageState extends State<EditProductPage> {
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
                         suffixText: _discountType == 'Rupees' ? 'Rs.' : '%'),
+                    onChanged: (value) =>
+                        _calculateFinalPrice(), // Recalculate price on change
                   ),
                 ),
                 PopupMenuButton<String>(
@@ -144,6 +160,7 @@ class _EditProductPageState extends State<EditProductPage> {
                   onSelected: (String value) {
                     setState(() {
                       _discountType = value;
+                      _calculateFinalPrice(); // Recalculate price when discount type changes
                     });
                   },
                   itemBuilder: (BuildContext context) =>
@@ -158,34 +175,32 @@ class _EditProductPageState extends State<EditProductPage> {
                     ),
                   ],
                   child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
                     child: Row(
                       children: [
                         Text(_discountType),
-                        Icon(Icons.arrow_drop_down),
+                        const Icon(Icons.arrow_drop_down),
                       ],
                     ),
                   ),
                 ),
               ],
             ),
-            SizedBox(height: 16),
-            ExpansionTile(
-              title: Text('Additional Details'),
-              children: [
-                // Add additional fields here
-              ],
+            const SizedBox(height: 16),
+            Text(
+              'Final Price/Pc: Rs. $_finalPrice',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Row(
               children: [
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    child: Text('Cancel'),
+                    child: const Text('Cancel'),
                   ),
                 ),
-                SizedBox(width: 16),
+                const SizedBox(width: 16),
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {
@@ -193,21 +208,20 @@ class _EditProductPageState extends State<EditProductPage> {
                       final updatedProduct = {
                         'ProductName': _productNameController.text,
                         'MRP': double.tryParse(_mrpController.text) ?? 0.0,
-                        'Price': double.tryParse(_priceController.text) ?? 0.0,
+                        'Price': _finalPrice, // Use final price after discount
                         'WholesalePrice':
                             double.tryParse(_wholesalePriceController.text) ??
                                 0.0,
-                        'Quantity':
-                            double.tryParse(_quantityController.text) ?? 0.0,
+                        'Quantity': int.tryParse(_quantityController.text) ??
+                            0, // Ensure it's parsed as int
                         'Discount':
                             double.tryParse(_discountController.text) ?? 0.0,
                         'DiscountType': _discountType,
                         'UpdateInventory': _updateInventory,
-                        // Add other fields as necessary
                       };
                       Navigator.of(context).pop(updatedProduct);
                     },
-                    child: Text('Done'),
+                    child: const Text('Done'),
                   ),
                 ),
               ],

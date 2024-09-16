@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:hisab_kitab/newUI/Home%20page%20icons/Add%20Products/nabhetekoProductAdd.dart';
+import 'package:hisab_kitab/newUI/Home%20page%20icons/New%20Bill/edit_page.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:hisab_kitab/newUI/Home%20page%20icons/New%20Bill/edit.dart'; // Import the edit page
+import 'check_out_page.dart';
+import 'package:hisab_kitab/newUI/Home%20page%20icons/Add%20Products/nabhetekoProductAdd.dart';
 
 class Newbill extends StatefulWidget {
   const Newbill({super.key});
@@ -12,277 +13,318 @@ class Newbill extends StatefulWidget {
 }
 
 class _NewbillState extends State<Newbill> {
-  final List<Map<String, dynamic>> _scannedProducts = [];
+  final List<Map<String, dynamic>> _scannedValues = [];
   final TextEditingController barcodeController = TextEditingController();
-  bool isScanning = false;  
+  bool isScanning = false;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
-  @override
-  void initState() {
-    super.initState();
-  }
+  MobileScannerController cameraController = MobileScannerController();
 
   @override
   void dispose() {
     barcodeController.dispose();
+    cameraController.dispose();
     super.dispose();
   }
 
-  Future<void> _searchBarcode(String barcode) async {
+  Future<void> _searchBarcodeOrName(String searchTerm) async {
     try {
       final querySnapshot = await _firestore
           .collection('ProductsNew')
-          .where('Barcode', isEqualTo: barcode)
+          .where('Barcode', isEqualTo: searchTerm)
           .get();
 
-      if (querySnapshot.docs.isNotEmpty) {
+      if (querySnapshot.docs.isEmpty) {
+        final nameQuerySnapshot = await _firestore
+            .collection('ProductsNew')
+            .where('Name', isEqualTo: searchTerm)
+            .get();
+
+        if (nameQuerySnapshot.docs.isNotEmpty) {
+          final productData = nameQuerySnapshot.docs.first.data();
+          setState(() {
+            _scannedValues.add({
+              'name': productData['Name'],
+              'barcode': productData['Barcode'],
+              'price': productData['Price'],
+              'quantity': 1,
+              'totalPrice': productData['Price'],
+            });
+          });
+        } else {
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            constraints: const BoxConstraints(maxHeight: 700, minHeight: 600),
+            builder: (context) => NabhetekoProductPage(),
+          );
+        }
+      } else {
         final productData = querySnapshot.docs.first.data();
         setState(() {
-          if (!_scannedProducts
-              .any((product) => product['Barcode'] == productData['Barcode'])) {
-            _scannedProducts.add(productData);
-          }
+          _scannedValues.add({
+            'name': productData['Name'],
+            'barcode': productData['Barcode'],
+            'price': productData['Price'],
+            'quantity': 1,
+            'totalPrice': productData['Price'],
+          });
         });
-      } else {
-        print('Product not found');
-        showModalBottomSheet(
-          context: context,
-          isScrollControlled: true,
-          constraints: const BoxConstraints(maxHeight: 700, minHeight: 600),
-          builder: (context) => NabhetekoProductPage(),
-        );
       }
     } catch (e) {
-      print('Error searching barcode: $e');
+      print('Error searching barcode or name: $e');
     }
   }
 
   void _handleDelete(int index) {
     setState(() {
-      _scannedProducts.removeAt(index);
+      _scannedValues.removeAt(index);
     });
   }
 
   void handleScanResult(BarcodeCapture capture) {
-    for (final barcode in capture.barcodes) {
-      final String? code = barcode.rawValue;
-      if (code != null) {
-        _searchBarcode(code);
+    setState(() {
+      for (final barcode in capture.barcodes) {
+        final String? code = barcode.rawValue;
+        if (code != null) {
+          _searchBarcodeOrName(code);
+        }
+      }
+    });
+  }
+
+  void _incrementQuantity(int index) {
+    setState(() {
+      _scannedValues[index]['quantity']++;
+      _scannedValues[index]['totalPrice'] =
+          _scannedValues[index]['price'] * _scannedValues[index]['quantity'];
+    });
+  }
+
+  void _decrementQuantity(int index) {
+    setState(() {
+      if (_scannedValues[index]['quantity'] > 1) {
+        _scannedValues[index]['quantity']--;
+        _scannedValues[index]['totalPrice'] =
+            _scannedValues[index]['price'] * _scannedValues[index]['quantity'];
+      }
+    });
+  }
+
+  Future<void> _updateStockAfterCheckout() async {
+    for (var product in _scannedValues) {
+      final String barcode = product['barcode'];
+      final int purchasedQuantity = product['quantity'];
+
+      try {
+        DocumentSnapshot productSnapshot =
+            await _firestore.collection('ProductsNew').doc(barcode).get();
+
+        if (productSnapshot.exists) {
+          final currentStock = productSnapshot['Quantity'];
+          final newStock = currentStock - purchasedQuantity;
+
+          await _firestore.collection('ProductsNew').doc(barcode).update({
+            'Quantity':
+                newStock < 0 ? 0 : newStock, // Ensure stock doesn't go below 0
+          });
+        }
+      } catch (e) {
+        print('Error updating stock for $barcode: $e');
       }
     }
   }
 
-  void _editProduct(int index) {
-    final product = _scannedProducts[index];
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => EditProductPage(
-          initialProductName: product['ProductName'] ?? '',
-          initialMRP: (product['MRP'] ?? 0.0).toDouble(),
-          initialPrice: (product['Price'] ?? 0.0).toDouble(),
-          initialWholesalePrice: (product['WholesalePrice'] ?? 0.0).toDouble(),
-          initialQuantity: (product['Quantity'] ?? 0.0).toDouble(),
-          initialDiscount: (product['Discount'] ?? 0.0).toDouble(),
-        ),
-      ),
-    ).then((editedProduct) {
-      if (editedProduct != null) {
-        setState(() {
-          _scannedProducts[index] = editedProduct;
-        });
-      }
-    });
-  }
-
-  void _increaseQuantity(int index) {
+  // This function will handle the update of product details
+  void _updateProductDetails(int index, Map<String, dynamic> updatedProduct) {
     setState(() {
-      _scannedProducts[index]['Quantity'] += 1;
-    });
-  }
-
-  void _decreaseQuantity(int index) {
-    setState(() {
-      if (_scannedProducts[index]['Quantity'] > 0) {
-        _scannedProducts[index]['Quantity'] -= 1;
-      }
-    });
-  }
-
-  int getTotalQuantity() {
-    return _scannedProducts.fold(0, (sum, product) {
-      final int quantity = product['Quantity'] is int
-          ? product['Quantity'] as int
-          : (product['Quantity'] as double).toInt();
-      return sum + quantity;
-    });
-  }
-
-  double getTotalPrice() {
-    return _scannedProducts.fold(0.0, (sum, product) {
-      final double price = product['Price'] is int
-          ? (product['Price'] as int).toDouble()
-          : product['Price'];
-      final double discount = product['Discount'] is int
-          ? (product['Discount'] as int).toDouble()
-          : product['Discount'] ?? 0.0;
-      final int quantity = product['Quantity'] is int
-          ? product['Quantity']
-          : (product['Quantity'] as double).toInt();
-
-      // Calculate discounted price
-      final double discountedPrice = price * (1 - discount / 100);
-      return sum + (discountedPrice * quantity);
+      _scannedValues[index] = {
+        'name': updatedProduct['ProductName'],
+        'barcode': _scannedValues[index]
+            ['barcode'], // Barcode remains unchanged
+        'price': updatedProduct['Price'], // Updated price
+        'quantity': _scannedValues[index]['quantity'], // Keep the same quantity
+        'totalPrice':
+            updatedProduct['Price'] * _scannedValues[index]['quantity'],
+      };
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final totalQuantity = _scannedValues.fold<int>(
+        0, (sum, item) => sum + (item['quantity'] as int));
+    final totalPrice =
+        _scannedValues.fold<double>(0, (sum, item) => sum + item['totalPrice']);
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 123, 139, 123),
         title: const Text("Naya Bill"),
       ),
-      body: Stack(
+      body: Column(
         children: [
-          Column(
-            children: [
-              Container(
-                height: 100,
-                decoration: const BoxDecoration(color: Colors.grey),
-                child: Row(
-                  children: [
-                    IconButton(
-                      onPressed: () {
-                        setState(() {
-                          isScanning = !isScanning;
-                        });
-                      },
-                      icon: const Icon(Icons.barcode_reader),
-                      iconSize: 42,
-                    ),
-                    const Text(
-                      "Scan Barcode",
-                      style:
-                          TextStyle(fontSize: 26, fontWeight: FontWeight.w600),
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                child: TextField(
-                  controller: barcodeController,
-                  keyboardType: const TextInputType.numberWithOptions(),
-                  decoration: const InputDecoration(
-                    hintText: "Search Barcode",
-                    prefixIcon: Icon(Icons.qr_code_scanner),
+          Container(
+            height: 100,
+            decoration: const BoxDecoration(color: Colors.grey),
+            child: isScanning
+                ? MobileScanner(
+                    controller: cameraController,
+                    onDetect: handleScanResult,
+                  )
+                : Row(
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          setState(() {
+                            isScanning = !isScanning;
+                          });
+                        },
+                        icon: const Icon(Icons.barcode_reader),
+                        iconSize: 42,
+                      ),
+                      const Text(
+                        "Scan Barcode",
+                        style: TextStyle(
+                            fontSize: 26, fontWeight: FontWeight.w600),
+                      )
+                    ],
                   ),
-                  onSubmitted: (value) {
-                    _searchBarcode(value);
-                    barcodeController.clear();
-                  },
-                ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            child: TextField(
+              controller: barcodeController,
+              decoration: const InputDecoration(
+                hintText: "Search Barcode or Name",
+                prefixIcon: Icon(Icons.qr_code_scanner),
               ),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: _scannedProducts.length,
-                  itemBuilder: (context, index) {
-                    final product = _scannedProducts[index];
-                    final double price = product['Price'] ?? 0.0;
-                    final double discount = product['Discount'] ?? 0.0;
-                    final double discountedPrice =
-                        price * (1 - discount / 100); // Discounted price
+              onSubmitted: (value) {
+                _searchBarcodeOrName(value);
+                barcodeController.clear();
+              },
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: _scannedValues.length,
+              itemBuilder: (context, index) {
+                final product = _scannedValues[index];
+                return Card(
+                  child: ListTile(
+                    title: Row(
+                      children: [
+                        Column(
+                          children: [
+                            CircleAvatar(
+                              radius: 30,
+                              backgroundImage: AssetImage(
+                                  'assets/images/default_product.png'),
+                              child: product['imageUrl'] != null
+                                  ? null
+                                  : const Icon(
+                                      Icons.image,
+                                      size: 30,
+                                    ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.edit),
+                              onPressed: () async {
+                                final updatedProduct = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => EditProductPage(
+                                      initialProductName: product['name'],
+                                      initialMRP: product['price'],
+                                      initialPrice: product['price'],
+                                      initialWholesalePrice: product['price'],
+                                      initialQuantity: product['quantity'],
+                                      initialDiscount: 0.0,
+                                    ),
+                                  ),
+                                );
 
-                    return ListTile(
-                      leading: product['ProductImage'] != null
-                          ? Image.network(product['ProductImage'], width: 50)
-                          : const Icon(Icons.shopping_bag),
-                      title: Text(product['ProductName'] ?? 'Unknown Product'),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                              'Original Price: Rs. ${price.toStringAsFixed(2)}'),
-                          Text('Discount: ${discount.toStringAsFixed(2)}%'),
-                          Text(
-                              'Discounted Price: Rs. ${discountedPrice.toStringAsFixed(2)}'),
-                          // Place quantity incrementor below the product details
-                          Row(
+                                // Check if product was updated
+                                if (updatedProduct != null) {
+                                  _updateProductDetails(index, updatedProduct);
+                                }
+                              },
+                            ),
+                          ],
+                        ),
+                        const SizedBox(width: 20),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              IconButton(
-                                icon: const Icon(Icons.remove),
-                                onPressed: () => _decreaseQuantity(index),
-                              ),
-                              Text(
-                                product['Quantity']?.toString() ?? '0',
-                                style: const TextStyle(fontSize: 18),
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.add),
-                                onPressed: () => _increaseQuantity(index),
-                              ),
+                              Text('Name: ${product['name']}'),
+                              Text('Barcode: ${product['barcode']}'),
+                              Text('Price: ${product['price']}'),
+                              Text('Quantity: ${product['quantity']}'),
+                              Text('Total: ${product['totalPrice']}'),
                             ],
                           ),
-                        ],
-                      ),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.edit),
-                            onPressed: () => _editProduct(index),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.delete),
-                            onPressed: () => _handleDelete(index),
-                          ),
-                        ],
+                        ),
+                      ],
+                    ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.remove_circle_outline),
+                          onPressed: () => _decrementQuantity(index),
+                        ),
+                        Text('${product['quantity']}'),
+                        IconButton(
+                          icon: const Icon(Icons.add_circle_outline),
+                          onPressed: () => _incrementQuantity(index),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete),
+                          onPressed: () => _handleDelete(index),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Total Quantity: $totalQuantity',
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  'Total Price: $totalPrice',
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: () async {
+                    await _updateStockAfterCheckout();
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CheckOutPage(
+                          productDetails: _scannedValues,
+                          totalQuantity: totalQuantity.toString(),
+                          totalPrice: totalPrice.toStringAsFixed(2),
+                          customerPhone: '',
+                        ),
                       ),
                     );
                   },
+                  child: const Text('Proceed to Checkout'),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    Text(
-                      'Total Quantity: ${getTotalQuantity()}',
-                      style: const TextStyle(fontSize: 20),
-                    ),
-                    Text(
-                      'Total Price after Discount: Rs. ${getTotalPrice().toStringAsFixed(2)}',
-                      style: const TextStyle(fontSize: 20),
-                    ),
-                    const SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: () {
-                        // Handle checkout logic here
-                      },
-                      child: const Text('Checkout'),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          if (isScanning)
-            Positioned.fill(
-              child: Align(
-                alignment: Alignment.topCenter,
-                child: SizedBox(
-                  width: 300,
-                  height: 100,
-                  child: MobileScanner(
-                    fit: BoxFit.cover,
-                    controller: MobileScannerController(),
-                    onDetect: handleScanResult,
-                  ),
-                ),
-              ),
+              ],
             ),
+          ),
         ],
       ),
     );
