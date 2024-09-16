@@ -7,10 +7,10 @@ class GrossaryListStaff extends StatefulWidget {
   final Function(int) onDelete;
 
   const GrossaryListStaff({
-    Key? key,
+    super.key,
     required this.scannedValues,
     required this.onDelete,
-  }) : super(key: key);
+  });
 
   @override
   State<GrossaryListStaff> createState() => _GrossaryListStaffState();
@@ -85,7 +85,7 @@ class _GrossaryListStaffState extends State<GrossaryListStaff> {
         }
 
         if (!snapshot.hasData) {
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         }
 
         final documents = snapshot.data!.docs;
@@ -103,11 +103,11 @@ class _GrossaryListStaffState extends State<GrossaryListStaff> {
 
                   if (matchedDocs.isEmpty) {
                     return ListTile(
-                      leading: Icon(Icons.shopping_bag),
+                      leading: const Icon(Icons.shopping_bag),
                       title: Text("Item ${index + 1}"),
-                      subtitle: Text("Unknown"),
+                      subtitle: const Text("Unknown"),
                       trailing: IconButton(
-                        icon: Icon(Icons.delete),
+                        icon: const Icon(Icons.delete),
                         onPressed: () {
                           showDialog(
                             context: context,
@@ -150,9 +150,9 @@ class _GrossaryListStaffState extends State<GrossaryListStaff> {
                   };
 
                   return Card(
-                    margin: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+                    margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
                     child: ListTile(
-                      leading: Icon(Icons.shopping_bag),
+                      leading: const Icon(Icons.shopping_bag),
                       title: Text(itemName),
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -162,14 +162,14 @@ class _GrossaryListStaffState extends State<GrossaryListStaff> {
                           Row(
                             children: [
                               IconButton(
-                                icon: Icon(Icons.remove),
+                                icon: const Icon(Icons.remove),
                                 onPressed: () =>
                                     _decrementQuantity(index, itemPrice),
                               ),
                               Text(
                                   _productQuantities[index]?.toString() ?? '0'),
                               IconButton(
-                                icon: Icon(Icons.add),
+                                icon: const Icon(Icons.add),
                                 onPressed: () =>
                                     _incrementQuantity(index, itemPrice),
                               ),
@@ -180,7 +180,7 @@ class _GrossaryListStaffState extends State<GrossaryListStaff> {
                         ],
                       ),
                       trailing: IconButton(
-                        icon: Icon(Icons.delete),
+                        icon: const Icon(Icons.delete),
                         onPressed: () {
                           showDialog(
                             context: context,
@@ -223,7 +223,7 @@ class _GrossaryListStaffState extends State<GrossaryListStaff> {
                     children: [
                       ElevatedButton(
                         onPressed: _handleCheckOut,
-                        child: Text('Check Out'),
+                        child: const Text('Check Out'),
                       ),
                     ],
                   ),

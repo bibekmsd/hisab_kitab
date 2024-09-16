@@ -67,51 +67,45 @@ class CustomerDetails extends StatelessWidget {
                       style:
                           TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
                   ...history.entries.map((entry) {
-                    String date = entry.key;
-                    List purchases = entry.value;
+                    // Each entry key is the bill number
+                    String billNumber = entry.key;
+                    var purchase = entry.value;
+
+                    // Retrieve purchase details
+                    List products = purchase['Products'];
+                    DateTime purchaseDate =
+                        (purchase['PurchaseDate'] as Timestamp).toDate();
+                    String formattedDate =
+                        DateFormat('yyyy-MM-dd HH:mm').format(purchaseDate);
 
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("Date: $date",
+                        Text("Bill Number: $billNumber",
                             style: TextStyle(
                                 fontSize: 20, fontWeight: FontWeight.bold)),
-                        ...purchases.map((purchase) {
-                          List products = purchase['Products'];
-                          DateTime purchaseDate =
-                              (purchase['PurchaseDate'] as Timestamp).toDate();
-                          String formattedDate = DateFormat('yyyy-MM-dd HH:mm')
-                              .format(purchaseDate);
+                        Text("Purchase Date: $formattedDate",
+                            style: TextStyle(
+                                fontSize: 18, fontStyle: FontStyle.italic)),
+                        ...products.map((product) {
+                          String productName = product['name'];
+                          int price = product['price'] is double
+                              ? (product['price'] as double).toInt()
+                              : product['price'];
+                          int quantity = product['quantity'] is double
+                              ? (product['quantity'] as double).toInt()
+                              : product['quantity'];
+                          int totalPrice = product['totalPrice'] is double
+                              ? (product['totalPrice'] as double).toInt()
+                              : product['totalPrice'];
 
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text("Purchase Date: $formattedDate",
-                                  style: TextStyle(
-                                      fontSize: 18,
-                                      fontStyle: FontStyle.italic)),
-                              ...products.map((product) {
-                                String productName = product['name'];
-                                int price = product['price'] is double
-                                    ? (product['price'] as double).toInt()
-                                    : product['price'];
-                                int quantity = product['quantity'] is double
-                                    ? (product['quantity'] as double).toInt()
-                                    : product['quantity'];
-                                int totalPrice = product['totalPrice'] is double
-                                    ? (product['totalPrice'] as double).toInt()
-                                    : product['totalPrice'];
-
-                                return Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 4.0),
-                                  child: Text(
-                                      "$productName - $quantity x $price = $totalPrice"),
-                                );
-                              }).toList(),
-                            ],
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4.0),
+                            child: Text(
+                                "$productName - $quantity x $price = $totalPrice"),
                           );
                         }).toList(),
+                        SizedBox(height: 10),
                       ],
                     );
                   }).toList(),

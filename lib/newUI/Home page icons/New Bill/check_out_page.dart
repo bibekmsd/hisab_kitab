@@ -49,9 +49,9 @@ class CheckOutPage extends StatelessWidget {
                       children: [
                         pw.Text('Name: ${product['name']}'),
                         pw.Text('Barcode: ${product['barcode']}'),
-                        pw.Text('Price: \$${product['price']}'),
+                        pw.Text('Price: ${product['price']}'),
                         pw.Text('Quantity: ${product['quantity']}'),
-                        pw.Text('Total: \$${product['totalPrice']}'),
+                        pw.Text('Total: ${product['totalPrice']}'),
                       ],
                     ),
                   );
@@ -59,7 +59,7 @@ class CheckOutPage extends StatelessWidget {
               ),
               pw.SizedBox(height: 10),
               pw.Text('Total Quantity: $totalQuantity'),
-              pw.Text('Total Price: \$${totalPrice}'),
+              pw.Text('Total Price: $totalPrice'),
             ],
           ),
         ),
@@ -103,9 +103,9 @@ class CheckOutPage extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text('Barcode: ${product['barcode']}'),
-                          Text('Price: \$${product['price']}'),
+                          Text('Price: ${product['price']}'),
                           Text('Quantity: ${product['quantity']}'),
-                          Text('Total: \$${product['totalPrice']}'),
+                          Text('Total: ${product['totalPrice']}'),
                         ],
                       ),
                     ),
@@ -114,7 +114,7 @@ class CheckOutPage extends StatelessWidget {
               ),
             ),
             Text('Total Quantity: $totalQuantity'),
-            Text('Total Price: \$${totalPrice}'),
+            Text('Total Price: $totalPrice'),
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(

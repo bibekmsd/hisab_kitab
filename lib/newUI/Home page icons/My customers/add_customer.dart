@@ -42,14 +42,11 @@ class _AddCustomersState extends State<AddCustomers> {
     return await _firestore.runTransaction((transaction) async {
       final snapshot = await transaction.get(billNumberDoc);
 
-      // Check if the document exists, if not, initialize it
       int newBillNumber;
       if (!snapshot.exists) {
-        // If the document does not exist, start with bill number 1
         newBillNumber = 1;
         transaction.set(billNumberDoc, {'current': newBillNumber});
       } else {
-        // If the document exists, get the current value and increment it
         newBillNumber = (snapshot.data()?['current'] ?? 0) + 1;
         transaction.update(billNumberDoc, {'current': newBillNumber});
       }
@@ -58,7 +55,7 @@ class _AddCustomersState extends State<AddCustomers> {
     });
   }
 
-  // Function to save the customer and the bill number
+// Function to save the customer and the bill
   Future<void> _addBill() async {
     final phoneNo = _phoneController.text.trim();
     final name = _nameController.text.trim();
@@ -66,16 +63,14 @@ class _AddCustomersState extends State<AddCustomers> {
     final notes = _notesController.text.trim();
     final birthDate = _birthDateController.text.trim();
 
-    final purchaseDate = DateTime.now().toLocal().toString().split(' ')[0];
-
     try {
       // Generate the next bill number
       String billNumber = await _getNextBillNumber();
 
+      // Purchase history entry
       Map<String, dynamic> historyEntry = {
         'Products': widget.productDetails,
         'PurchaseDate': Timestamp.fromDate(DateTime.now()),
-        'BillNumber': billNumber,
         'CustomerPhone': phoneNo.isNotEmpty ? phoneNo : null,
       };
 
@@ -86,23 +81,25 @@ class _AddCustomersState extends State<AddCustomers> {
         // Check if the customer exists
         final doc = await customerRef.get();
         if (doc.exists) {
-          // Update existing customer's details and add bill under 'bills'
-          await customerRef.update({
+          // Update customer details
+          Map<String, dynamic> updateData = {
             'PhoneNo': phoneNo,
             'Name': name,
             'Address': address,
             'Notes': notes,
             'BirthDate': birthDate,
             'updatedAt': FieldValue.serverTimestamp(),
-          });
+          };
 
-          // Add bill to the 'bills' subcollection
-          await customerRef
-              .collection('bills')
-              .doc(billNumber)
-              .set(historyEntry);
+          // Update customer document
+          await customerRef.update(updateData);
+
+          // Ensure the 'bills' field exists or add to 'History'
+          await customerRef.update({
+            'History.$billNumber': historyEntry,
+          });
         } else {
-          // Create new customer document
+          // Create a new customer with history
           final newCustomerData = {
             'PhoneNo': phoneNo,
             'Name': name,
@@ -110,20 +107,14 @@ class _AddCustomersState extends State<AddCustomers> {
             'Notes': notes,
             'BirthDate': birthDate,
             'createdAt': FieldValue.serverTimestamp(),
-            'members': FieldValue.arrayUnion([phoneNo]),
+            'History': {billNumber: historyEntry},
           };
           await customerRef.set(newCustomerData);
-
-          // Add bill to the 'bills' subcollection
-          await customerRef
-              .collection('bills')
-              .doc(billNumber)
-              .set(historyEntry);
         }
-      } else {
-        // Non-member case: Store bill in the 'bills' collection
-        await _firestore.collection('bills').doc(billNumber).set(historyEntry);
       }
+
+      // Regardless of customer status, add the bill to the 'bills' collection
+      await _firestore.collection('bills').doc(billNumber).set(historyEntry);
 
       // Add the bill number to a central document containing all bill numbers
       await _firestore.collection('billing_data').doc('bill_numbers').set({

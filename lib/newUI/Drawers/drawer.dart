@@ -1,7 +1,5 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, sort_child_properties_last
 import 'package:flutter/material.dart';
-import 'package:hisab_kitab/pages/log_in_page.dart';
-import 'package:hisab_kitab/pages/sign_up_page.dart';
 
 class ReusableDrawer extends StatelessWidget {
   final String shopName;
