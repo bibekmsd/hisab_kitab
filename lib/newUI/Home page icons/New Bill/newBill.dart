@@ -14,6 +14,7 @@ class Newbill extends StatefulWidget {
 
 class _NewbillState extends State<Newbill> {
   final List<Map<String, dynamic>> _scannedValues = [];
+
   final TextEditingController barcodeController = TextEditingController();
   bool isScanning = false;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -23,6 +24,7 @@ class _NewbillState extends State<Newbill> {
   void dispose() {
     barcodeController.dispose();
     cameraController.dispose();
+    cameraController.dispose();
     super.dispose();
   }
 
@@ -30,6 +32,7 @@ class _NewbillState extends State<Newbill> {
     try {
       final querySnapshot = await _firestore
           .collection('ProductsNew')
+          .where('Barcode', isEqualTo: searchTerm)
           .where('Barcode', isEqualTo: searchTerm)
           .get();
 
@@ -86,7 +89,7 @@ class _NewbillState extends State<Newbill> {
       for (final barcode in capture.barcodes) {
         final String? code = barcode.rawValue;
         if (code != null) {
-          _searchBarcodeOrName(code);
+          _searchBarcodeOrName(code); // Call once
         }
       }
     });

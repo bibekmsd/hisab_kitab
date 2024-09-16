@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class NotificationPage extends StatefulWidget {
+  const NotificationPage({super.key});
+
   @override
   _NotificationPageState createState() => _NotificationPageState();
 }
@@ -48,16 +50,16 @@ class _NotificationPageState extends State<NotificationPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Low Stock Notification'),
+        title: const Text('Low Stock Notification'),
       ),
       body: lowStockProducts.isEmpty
-          ? Center(child: Text('No low stock products at the moment.'))
+          ? const Center(child: Text('No low stock products at the moment.'))
           : ListView.builder(
               itemCount: lowStockProducts.length,
               itemBuilder: (context, index) {
                 var product = lowStockProducts[index];
                 return Card(
-                  margin: EdgeInsets.all(10),
+                  margin: const EdgeInsets.all(10),
                   elevation: 5,
                   child: ListTile(
                     title: Text(product['Name'] ?? 'Unknown Product'),

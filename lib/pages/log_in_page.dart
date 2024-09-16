@@ -10,7 +10,6 @@ import 'package:hisab_kitab/reuseable_widgets/textField.dart';
 import 'package:hisab_kitab/reuseable_widgets/text_button.dart';
 import 'package:hisab_kitab/services/User_authentication/firebase_authentication.dart';
 
-import 'package:hisab_kitab/utils/gradiants.dart';
 
 class SignInPage extends StatefulWidget {
   const SignInPage({super.key});

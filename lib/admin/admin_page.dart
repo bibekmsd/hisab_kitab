@@ -8,12 +8,12 @@ class AdminUserScreen extends StatelessWidget {
   final String loginTime;
 
   const AdminUserScreen({
-    Key? key,
+    super.key,
     required this.userName,
     required this.shopName,
     required this.phoneNumber,
     required this.loginTime,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

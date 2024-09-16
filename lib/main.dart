@@ -2,8 +2,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 import 'package:hisab_kitab/newUI/Navigation%20and%20Notification/Navigation_bar.dart';
-import 'package:hisab_kitab/newUI/Home%20page%20icons/Add%20Products/nabhetekoProductAdd.dart';
-import 'package:hisab_kitab/pages/log_in_page.dart';
 
 
 
@@ -52,4 +50,4 @@ class _MyAppState extends State<MyApp> {
 //^ 4987176014955
 //^ 6928001826358
 //^ 8904106854005
-//* 8901247574328 //florozone
+//* 8901247574328 //florozon
