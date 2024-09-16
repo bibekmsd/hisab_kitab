@@ -14,7 +14,7 @@ class Newbill extends StatefulWidget {
 class _NewbillState extends State<Newbill> {
   final List<Map<String, dynamic>> _scannedProducts = [];
   final TextEditingController barcodeController = TextEditingController();
-  bool isScanning = false;
+  bool isScanning = false;  
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   @override
@@ -123,10 +123,16 @@ class _NewbillState extends State<Newbill> {
       final double price = product['Price'] is int
           ? (product['Price'] as int).toDouble()
           : product['Price'];
+      final double discount = product['Discount'] is int
+          ? (product['Discount'] as int).toDouble()
+          : product['Discount'] ?? 0.0;
       final int quantity = product['Quantity'] is int
           ? product['Quantity']
           : (product['Quantity'] as double).toInt();
-      return sum + (price * quantity);
+
+      // Calculate discounted price
+      final double discountedPrice = price * (1 - discount / 100);
+      return sum + (discountedPrice * quantity);
     });
   }
 
@@ -184,6 +190,11 @@ class _NewbillState extends State<Newbill> {
                   itemCount: _scannedProducts.length,
                   itemBuilder: (context, index) {
                     final product = _scannedProducts[index];
+                    final double price = product['Price'] ?? 0.0;
+                    final double discount = product['Discount'] ?? 0.0;
+                    final double discountedPrice =
+                        price * (1 - discount / 100); // Discounted price
+
                     return ListTile(
                       leading: product['ProductImage'] != null
                           ? Image.network(product['ProductImage'], width: 50)
@@ -193,26 +204,32 @@ class _NewbillState extends State<Newbill> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                              'Price: ${product['Price']?.toString() ?? 'N/A'}'),
+                              'Original Price: Rs. ${price.toStringAsFixed(2)}'),
+                          Text('Discount: ${discount.toStringAsFixed(2)}%'),
                           Text(
-                              'Quantity: ${product['Quantity']?.toString() ?? '0'}'),
+                              'Discounted Price: Rs. ${discountedPrice.toStringAsFixed(2)}'),
+                          // Place quantity incrementor below the product details
+                          Row(
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.remove),
+                                onPressed: () => _decreaseQuantity(index),
+                              ),
+                              Text(
+                                product['Quantity']?.toString() ?? '0',
+                                style: const TextStyle(fontSize: 18),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.add),
+                                onPressed: () => _increaseQuantity(index),
+                              ),
+                            ],
+                          ),
                         ],
                       ),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          IconButton(
-                            icon: const Icon(Icons.remove),
-                            onPressed: () => _decreaseQuantity(index),
-                          ),
-                          Text(
-                            product['Quantity']?.toString() ?? '0',
-                            style: const TextStyle(fontSize: 18),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.add),
-                            onPressed: () => _increaseQuantity(index),
-                          ),
                           IconButton(
                             icon: const Icon(Icons.edit),
                             onPressed: () => _editProduct(index),
@@ -236,7 +253,7 @@ class _NewbillState extends State<Newbill> {
                       style: const TextStyle(fontSize: 20),
                     ),
                     Text(
-                      'Total Price: Rs. ${getTotalPrice().toStringAsFixed(2)}',
+                      'Total Price after Discount: Rs. ${getTotalPrice().toStringAsFixed(2)}',
                       style: const TextStyle(fontSize: 20),
                     ),
                     const SizedBox(height: 20),
