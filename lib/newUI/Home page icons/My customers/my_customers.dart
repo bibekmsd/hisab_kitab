@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hisab_kitab/newUI/Home%20page%20icons/My%20customers/customer_details.dart';
 import 'package:intl/intl.dart';
-import 'package:mobile_scanner/mobile_scanner.dart'; // Import intl package for date formatting
+// Import intl package for date formatting
 
 class MyCustomers extends StatefulWidget {
   const MyCustomers({super.key});

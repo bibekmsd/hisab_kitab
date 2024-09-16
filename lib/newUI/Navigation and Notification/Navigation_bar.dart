@@ -1,21 +1,19 @@
-// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors, sort_child_properties_last
-
 import 'package:flutter/material.dart';
-
-import 'package:hisab_kitab/newUI/Drawers/admin_drawer.dart';
 import 'package:hisab_kitab/newUI/Home%20page%20icons/analytics_page.dart';
-import 'package:hisab_kitab/newUI/Drawers/drawer.dart';
-import 'package:hisab_kitab/reuseable_widgets/row_card_widget.dart';
 import 'package:hisab_kitab/newUI/Navigation%20and%20Notification/Homepage.dart';
 import 'package:hisab_kitab/newUI/Navigation%20and%20Notification/settings_page.dart';
-import 'package:hisab_kitab/newUI/Navigation%20and%20Notification/staff_homepage.dart';
-
 
 class NavigationBarBanako extends StatefulWidget {
-  const NavigationBarBanako({super.key});
+  final String userRole;
+  final String username; // Add username parameter
+
+  const NavigationBarBanako(
+      {super.key,
+      required this.userRole,
+      required this.username}); // Update constructor
 
   @override
-  State<NavigationBarBanako> createState() => _NavigationBarBanakoState();
+  _NavigationBarBanakoState createState() => _NavigationBarBanakoState();
 }
 
 class _NavigationBarBanakoState extends State<NavigationBarBanako> {
@@ -23,7 +21,22 @@ class _NavigationBarBanakoState extends State<NavigationBarBanako> {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> pages = [HomePage(), AnalyticsPage(), SettingsPage()];
+    List<Widget> pages;
+
+    print("Navigation role: ${widget.userRole}"); // Debug print
+
+    // Pass username to pages that need it
+    if (widget.userRole == 'admin') {
+      pages = [
+        HomePage(userRole: widget.userRole, username: widget.username),
+        AnalyticsPage() // Update constructor if needed
+      ];
+    } else {
+      pages = [
+        HomePage(userRole: widget.userRole, username: widget.username),
+        AnalyticsPage() // Update constructor if needed
+      ];
+    }
 
     return Scaffold(
       body: pages[currentPage],
@@ -35,7 +48,7 @@ class _NavigationBarBanakoState extends State<NavigationBarBanako> {
           });
         },
         iconSize: 28,
-        items: [
+        items: const [
           BottomNavigationBarItem(
             label: "Home",
             icon: Icon(Icons.home_outlined),
@@ -50,9 +63,6 @@ class _NavigationBarBanakoState extends State<NavigationBarBanako> {
           ),
         ],
       ),
-      // drawer: Column(
-      //   children: [StaffHomePage()],
-      // ),
     );
   }
 }

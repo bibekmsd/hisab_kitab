@@ -1,16 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:hisab_kitab/admin/admin_page.dart';
-import 'package:hisab_kitab/Staff/staff_page.dart';
-
+import 'package:hisab_kitab/newUI/Navigation%20and%20Notification/Homepage.dart';
 import 'package:hisab_kitab/pages/sign_up_page.dart';
 import 'package:hisab_kitab/reuseable_widgets/buttons.dart';
 import 'package:hisab_kitab/reuseable_widgets/textField.dart';
 import 'package:hisab_kitab/reuseable_widgets/text_button.dart';
 import 'package:hisab_kitab/services/User_authentication/firebase_authentication.dart';
-
-import 'package:hisab_kitab/utils/gradiants.dart';
+import 'dart:math';
 
 class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
@@ -33,12 +30,9 @@ class _SignInPageState extends State<SignInPage> {
       ),
       body: Stack(
         children: [
-          // Gradient background
-          // const MeroGradiant(),
-          // Centered content
           Center(
             child: Column(
-              mainAxisSize: MainAxisSize.min, // Center the column itself
+              mainAxisSize: MainAxisSize.min,
               children: [
                 BanakoTextField(
                   hintText: "Enter Email",
@@ -55,14 +49,13 @@ class _SignInPageState extends State<SignInPage> {
                 ),
                 const SizedBox(height: 16),
                 Row(
-                  // ignore: sort_child_properties_last
                   children: [
                     BanakoButton(
                       textSize: 18,
                       backgroundColor: Colors.black,
                       height: 48,
                       text: "Log In",
-                      textColor: Colors.black,
+                      textColor: Colors.white,
                       width: 116,
                       onPressed: _signIn,
                     ),
@@ -99,6 +92,20 @@ class _SignInPageState extends State<SignInPage> {
     );
   }
 
+  Future<Map<String, dynamic>> getShopDetails() async {
+    DocumentSnapshot adminDoc = await FirebaseFirestore.instance
+        .collection('admin')
+        .doc('09099090') // Replace with actual document ID if needed
+        .get();
+    return adminDoc.data() as Map<String, dynamic>;
+  }
+
+  String generateRandomPanNumber() {
+    Random random = Random();
+    String randomNumber = random.nextInt(1000000000).toString().padLeft(9, '0');
+    return "PAN$randomNumber";
+  }
+
   _signIn() async {
     String email = _emailController.text;
     String password = _passwordController.text;
@@ -106,42 +113,69 @@ class _SignInPageState extends State<SignInPage> {
     User? user = await _auth.signInWithEmailAndPassword(email, password);
 
     if (user != null) {
-      // Retrieve user role and other details from Firestore
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get();
+      try {
+        DocumentSnapshot userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get();
 
-      if (userDoc.exists) {
-        String role = userDoc.get('role');
-        String userName = userDoc.get('username');
-        String shopName = userDoc.get('shopName');
-        String phoneNumber = userDoc.get('phoneNumber');
-        String loginTime = DateTime.now().toString(); // Current login time
+        if (userDoc.exists) {
+          Map<String, dynamic>? userData =
+              userDoc.data() as Map<String, dynamic>?;
 
-        // Navigate based on role and pass user details
-        if (role == 'admin') {
-          Navigator.of(context)
-              .pushReplacement(MaterialPageRoute(builder: (context) {
-            return AdminUserScreen(
-              userName: userName,
-              shopName: shopName,
-              phoneNumber: phoneNumber,
-              loginTime: loginTime,
-            );
-          }));
-        } else if (role == 'staff') {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) {
-              return StaffUserScreen(
-                userName: userName,
-                shopName: shopName,
-                phoneNumber: phoneNumber,
-                loginTime: loginTime,
-              );
-            }),
-          );
+          if (userData != null) {
+            String role = userData['role'] ?? '';
+            String userName = userData['username'] ?? '';
+            String phoneNumber = userData['phoneNumber'] ?? '';
+            String loginTime = DateTime.now().toString();
+
+            String? panNumber = userData.containsKey('panNumber')
+                ? userData['panNumber']
+                : generateRandomPanNumber();
+
+            if (role == 'staff' || role == 'admin') {
+              if (panNumber != null && panNumber.isNotEmpty) {
+                Map<String, dynamic> adminData = await getShopDetails();
+
+                String shopName = adminData['shopName'] ?? '';
+                String address = adminData['Address'] ?? '';
+
+                await FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(user.uid)
+                    .update({
+                  'shopName': shopName,
+                  'address': address,
+                  'panNumber': panNumber,
+                  'lastLogin': loginTime,
+                });
+
+                Navigator.of(context)
+                    .pushReplacement(MaterialPageRoute(builder: (context) {
+                  return HomePage(
+                    userRole: role, // Pass role to HomePage
+                    username: userName, // Pass username to HomePage
+                  );
+                }));
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("PAN Number is missing")));
+              }
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Role not recognized")));
+            }
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text("User data not found")));
+          }
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("User document not found")));
         }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Error fetching user data: $e")));
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
