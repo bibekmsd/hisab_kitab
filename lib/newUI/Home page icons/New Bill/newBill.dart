@@ -30,13 +30,14 @@ class _NewbillState extends State<Newbill> {
 
   Future<void> _searchBarcodeOrName(String searchTerm) async {
     try {
+      // Search for the product by barcode first
       final querySnapshot = await _firestore
           .collection('ProductsNew')
-          .where('Barcode', isEqualTo: searchTerm)
           .where('Barcode', isEqualTo: searchTerm)
           .get();
 
       if (querySnapshot.docs.isEmpty) {
+        // If no barcode match, search by product name
         final nameQuerySnapshot = await _firestore
             .collection('ProductsNew')
             .where('Name', isEqualTo: searchTerm)
@@ -54,6 +55,7 @@ class _NewbillState extends State<Newbill> {
             });
           });
         } else {
+          // If no product found, show modal to add the new product
           showModalBottomSheet(
             context: context,
             isScrollControlled: true,
@@ -62,6 +64,7 @@ class _NewbillState extends State<Newbill> {
           );
         }
       } else {
+        // If a barcode match is found
         final productData = querySnapshot.docs.first.data();
         setState(() {
           _scannedValues.add({
