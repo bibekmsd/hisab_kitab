@@ -1,7 +1,9 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-
+// import 'package:hisab_kitab/newUI/Home%20page%20icons/Transactions.dart';
 import 'package:hisab_kitab/newUI/Navigation%20and%20Notification/Navigation_bar.dart';
+
+// import 'package:hisab_kitab/newUI/Navigation%20and%20Notification/Navigation_bar.dart';
 
 
 
@@ -44,6 +46,7 @@ class _MyAppState extends State<MyApp> {
       // home: const StaffUserScreen(),
       home: const NavigationBarBanako(),
       // home: NabhetekoProductPage(),
+      //home :const TransactionsPage(),
     );
   }
 }
