@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 
 class EditProductPage extends StatefulWidget {
   final String initialProductName;
-  final double initialMRP;
-  final double initialPrice;
-  final double initialWholesalePrice;
+  final int initialMRP;
+  final int initialPrice;
+  final int initialWholesalePrice;
   final int initialQuantity;
   final double initialDiscount;
+  final String initialImageUrl; // Added to handle ImageUrl
 
   EditProductPage({
     required this.initialProductName,
@@ -15,6 +16,7 @@ class EditProductPage extends StatefulWidget {
     required this.initialWholesalePrice,
     required this.initialQuantity,
     required this.initialDiscount,
+    required this.initialImageUrl, // Added to handle ImageUrl
   });
 
   @override
@@ -28,6 +30,7 @@ class _EditProductPageState extends State<EditProductPage> {
   late TextEditingController _wholesalePriceController;
   late TextEditingController _quantityController;
   late TextEditingController _discountController;
+  late TextEditingController _imageUrlController; // Added for ImageUrl
   bool _updateInventory = false;
   String _discountType = 'Rupees'; // Default discount type is "Rupees"
   double _finalPrice = 0.0;
@@ -46,6 +49,8 @@ class _EditProductPageState extends State<EditProductPage> {
         TextEditingController(text: widget.initialQuantity.toString());
     _discountController =
         TextEditingController(text: widget.initialDiscount.toString());
+    _imageUrlController = TextEditingController(
+        text: widget.initialImageUrl); // Initialize ImageUrl
 
     // Calculate initial final price based on the discount type
     _calculateFinalPrice();
@@ -78,6 +83,7 @@ class _EditProductPageState extends State<EditProductPage> {
     _wholesalePriceController.dispose();
     _quantityController.dispose();
     _discountController.dispose();
+    _imageUrlController.dispose(); // Dispose ImageUrl controller
     super.dispose();
   }
 
@@ -188,8 +194,16 @@ class _EditProductPageState extends State<EditProductPage> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Final Price/Pc: Rs. $_finalPrice',
+              'Final Price/Pc: Rs. ${_finalPrice.toStringAsFixed(2)}',
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            const Text('Image URL'),
+            TextField(
+              controller: _imageUrlController,
+              decoration: const InputDecoration(
+                hintText: 'Enter Image URL',
+              ),
             ),
             const SizedBox(height: 16),
             Row(
@@ -212,12 +226,14 @@ class _EditProductPageState extends State<EditProductPage> {
                         'WholesalePrice':
                             double.tryParse(_wholesalePriceController.text) ??
                                 0.0,
-                        'Quantity': int.tryParse(_quantityController.text) ??
-                            0, // Ensure it's parsed as int
+                        'Quantity': int.tryParse(_quantityController.text) ?? 0,
                         'Discount':
                             double.tryParse(_discountController.text) ?? 0.0,
                         'DiscountType': _discountType,
                         'UpdateInventory': _updateInventory,
+                        'ImageUrl': _imageUrlController.text.isNotEmpty
+                            ? _imageUrlController.text
+                            : 'assets/default_image.png', // Use the updated ImageUrl
                       };
                       Navigator.of(context).pop(updatedProduct);
                     },

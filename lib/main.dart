@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+
 import 'package:hisab_kitab/newUI/Navigation%20and%20Notification/homepage_body.dart';
 import 'package:hisab_kitab/newUI/settings%20folder/settings_page.dart';
 import 'package:hisab_kitab/pages/sign_in_page.dart';
@@ -47,8 +48,12 @@ class _MyAppState extends State<MyApp> {
               titleMedium: TextStyle(fontSize: 20),
             ),
           ),
-          home: const SignInPage(),
+          // home: const SignInPage(),
+          // home: const HomepageBody(userRole: "admin"),
+          // home: SettingsPage(),
+          // home: AnalyticsPage(),
           // You can test other pages here
+          home: HomePage(userRole: "admin", username: "bibek_msd"),
         );
       },
     );

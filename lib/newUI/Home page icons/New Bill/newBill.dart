@@ -13,6 +13,7 @@ class Newbill extends StatefulWidget {
 }
 
 class _NewbillState extends State<Newbill> {
+  bool _isLoading = false;
   final List<Map<String, dynamic>> _scannedValues = [];
 
   final TextEditingController barcodeController = TextEditingController();
@@ -52,6 +53,7 @@ class _NewbillState extends State<Newbill> {
               'price': productData['Price'],
               'quantity': 1,
               'totalPrice': productData['Price'],
+              'ImageUrl': productData['ImageUrl']
             });
           });
         } else {
@@ -73,6 +75,7 @@ class _NewbillState extends State<Newbill> {
             'price': productData['Price'],
             'quantity': 1,
             'totalPrice': productData['Price'],
+            'ImageUrl': productData['ImageUrl']
           });
         });
       }
@@ -151,6 +154,7 @@ class _NewbillState extends State<Newbill> {
         'quantity': _scannedValues[index]['quantity'], // Keep the same quantity
         'totalPrice':
             updatedProduct['Price'] * _scannedValues[index]['quantity'],
+        'ImageUrl': updatedProduct['ImageUrl']
       };
     });
   }
@@ -223,14 +227,18 @@ class _NewbillState extends State<Newbill> {
                           children: [
                             CircleAvatar(
                               radius: 30,
-                              backgroundImage: AssetImage(
-                                  'assets/images/default_product.png'),
-                              child: product['imageUrl'] != null
-                                  ? null
-                                  : const Icon(
+                              backgroundImage: product['ImageUrl'] != null &&
+                                      product['ImageUrl'].isNotEmpty
+                                  ? NetworkImage(product['ImageUrl'])
+                                  : const AssetImage('assets/default_image.png')
+                                      as ImageProvider,
+                              child: product['ImageUrl'] == null ||
+                                      product['ImageUrl'].isEmpty
+                                  ? const Icon(
                                       Icons.image,
                                       size: 30,
-                                    ),
+                                    )
+                                  : null,
                             ),
                             IconButton(
                               icon: const Icon(Icons.edit),
@@ -245,6 +253,7 @@ class _NewbillState extends State<Newbill> {
                                       initialWholesalePrice: product['price'],
                                       initialQuantity: product['quantity'],
                                       initialDiscount: 0.0,
+                                      initialImageUrl: product['ImageUrl'],
                                     ),
                                   ),
                                 );
@@ -312,22 +321,39 @@ class _NewbillState extends State<Newbill> {
                 ),
                 const SizedBox(height: 10),
                 ElevatedButton(
-                  onPressed: () async {
-                    await _updateStockAfterCheckout();
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => CheckOutPage(
-                          productDetails: _scannedValues,
-                          totalQuantity: totalQuantity.toString(),
-                          totalPrice: totalPrice.toStringAsFixed(2),
-                          customerPhone: '',
-                        ),
-                      ),
-                    );
-                  },
-                  child: const Text('Proceed to Checkout'),
-                ),
+                  onPressed: _isLoading
+                      ? null // Disable the button if it's loading
+                      : () async {
+                          setState(() {
+                            _isLoading = true; // Disable the button
+                          });
+
+                          try {
+                            await _updateStockAfterCheckout();
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => CheckOutPage(
+                                  productDetails: _scannedValues,
+                                  totalQuantity: totalQuantity.toString(),
+                                  totalPrice: totalPrice.toStringAsFixed(2),
+                                  customerPhone: '',
+                                ),
+                              ),
+                            );
+                          } finally {
+                            setState(() {
+                              _isLoading =
+                                  false; // Re-enable the button once done
+                            });
+                          }
+                        },
+                  child: _isLoading
+                      ? const CircularProgressIndicator(
+                          strokeWidth: BorderSide.strokeAlignCenter,
+                          color: Colors.white) // Show a spinner when loading
+                      : const Text('Proceed to Checkout'),
+                )
               ],
             ),
           ),

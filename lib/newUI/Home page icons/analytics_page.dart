@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -133,45 +132,48 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
   }
 
   Future<void> _getTopSellingProducts() async {
-  final now = DateTime.now();
-  final thirtyDaysAgo = now.subtract(Duration(days: 30));
+    final now = DateTime.now();
+    final thirtyDaysAgo = now.subtract(Duration(days: 30));
 
-  final billsQuery = await _firestore
-      .collection('bills')
-      .where('PurchaseDate', isGreaterThanOrEqualTo: thirtyDaysAgo)
-      .get();
+    final billsQuery = await _firestore
+        .collection('bills')
+        .where('PurchaseDate', isGreaterThanOrEqualTo: thirtyDaysAgo)
+        .get();
 
-  Map<String, Map<String, dynamic>> productSales = {};
+    Map<String, Map<String, dynamic>> productSales = {};
 
-  for (var doc in billsQuery.docs) {
-    final bill = doc.data() as Map<String, dynamic>;
-    final products = bill['Products'] as List<dynamic>;
+    for (var doc in billsQuery.docs) {
+      final bill = doc.data() as Map<String, dynamic>;
+      final products = bill['Products'] as List<dynamic>;
 
-    for (var product in products) {
-      final barcode = product['barcode'].toString();
-      final name = product['name'] as String;
-      final quantity = product['quantity'] as int;
-      
-      if (!productSales.containsKey(barcode)) {
-        productSales[barcode] = {
-          'name': name,
-          'quantitySold': 0,
-        };
+      for (var product in products) {
+        final barcode = product['barcode'].toString();
+        final name = product['name'] as String;
+        final quantity = product['quantity'] as int;
+
+        if (!productSales.containsKey(barcode)) {
+          productSales[barcode] = {
+            'name': name,
+            'quantitySold': 0,
+          };
+        }
+        productSales[barcode]!['quantitySold'] += quantity;
       }
-      productSales[barcode]!['quantitySold'] += quantity;
     }
+
+    List<MapEntry<String, Map<String, dynamic>>> sortedProducts = productSales
+        .entries
+        .toList()
+      ..sort(
+          (a, b) => b.value['quantitySold'].compareTo(a.value['quantitySold']));
+
+    _topProducts = sortedProducts.take(5).map((entry) {
+      return {
+        'name': entry.value['name'],
+        'quantitySold': entry.value['quantitySold'],
+      };
+    }).toList();
   }
-
-  List<MapEntry<String, Map<String, dynamic>>> sortedProducts = productSales.entries.toList()
-    ..sort((a, b) => b.value['quantitySold'].compareTo(a.value['quantitySold']));
-
-  _topProducts = sortedProducts.take(5).map((entry) {
-    return {
-      'name': entry.value['name'],
-      'quantitySold': entry.value['quantitySold'],
-    };
-  }).toList();
-}
 
   @override
   Widget build(BuildContext context) {
@@ -217,10 +219,13 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
       shrinkWrap: true,
       physics: NeverScrollableScrollPhysics(),
       children: [
-        _buildSummaryCard('Monthly Revenue', _monthlyRevenue, Icons.trending_up),
+        _buildSummaryCard(
+            'Monthly Revenue', _monthlyRevenue, Icons.trending_up),
         _buildSummaryCard('Monthly Profit', _monthlyProfit, Icons.attach_money),
-        _buildSummaryCard('Quarterly Revenue', _quarterlyRevenue, Icons.timeline),
-        _buildSummaryCard('Quarterly Profit', _quarterlyProfit, Icons.account_balance),
+        _buildSummaryCard(
+            'Quarterly Revenue', _quarterlyRevenue, Icons.timeline),
+        _buildSummaryCard(
+            'Quarterly Profit', _quarterlyProfit, Icons.account_balance),
         _buildSummaryCard('Yearly Revenue', _yearlyRevenue, Icons.bar_chart),
         _buildSummaryCard('Yearly Profit', _yearlyProfit, Icons.pie_chart),
       ],
@@ -238,7 +243,8 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
           children: [
             Icon(icon, size: 40, color: Theme.of(context).primaryColor),
             SizedBox(height: 8),
-            Text(title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+            Text(title,
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
             SizedBox(height: 4),
             Text(
               NumberFormat.currency(symbol: '₹').format(amount),
@@ -315,7 +321,8 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                         reservedSize: 40,
                         interval: _calculateXAxisInterval(),
                         getTitlesWidget: (value, meta) {
-                          final date = DateTime.fromMillisecondsSinceEpoch(value.toInt());
+                          final date = DateTime.fromMillisecondsSinceEpoch(
+                              value.toInt());
                           return Transform.rotate(
                             angle: -0.5,
                             child: Text(
@@ -326,8 +333,10 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                         },
                       ),
                     ),
-                    rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                    topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    rightTitles:
+                        AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    topTitles:
+                        AxisTitles(sideTitles: SideTitles(showTitles: false)),
                   ),
                   lineBarsData: [
                     LineChartBarData(
@@ -364,7 +373,8 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
 
   double _getMaxY() {
     if (_salesData.isNotEmpty) {
-      return (_salesData.map((spot) => spot.y).reduce(max) * 1.2).roundToDouble();
+      return (_salesData.map((spot) => spot.y).reduce(max) * 1.2)
+          .roundToDouble();
     } else {
       return 1000.0; // Default max value if no data
     }
@@ -377,67 +387,71 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
 
   double _calculateXAxisInterval() {
     if (_salesData.isNotEmpty) {
-      final totalDays = (_salesData.last.x - _salesData.first.x) / (24 * 60 * 60 * 1000);
-      return (totalDays / 6).roundToDouble() * 24 * 60 * 60 * 1000; // Display 6 X-axis labels
+      final totalDays =
+          (_salesData.last.x - _salesData.first.x) / (24 * 60 * 60 * 1000);
+      return (totalDays / 6).roundToDouble() *
+          24 *
+          60 *
+          60 *
+          1000; // Display 6 X-axis labels
     } else {
       return 24 * 60 * 60 * 1000; // Default to 1 day if no data
     }
   }
+
   Widget _buildTopProductsSection() {
-  return Card(
-    elevation: 4,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-    child: Padding(
-      padding: EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Top 5 Products',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
-          ),
-          SizedBox(height: 16),
-          _topProducts.isNotEmpty
-              ? ListView.separated(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemCount: _topProducts.length,
-                  itemBuilder: (context, index) {
-                    final product = _topProducts[index];
-                    return ListTile(
-                      leading: CircleAvatar(
-                        backgroundColor: Theme.of(context).primaryColor,
-                        child: Text('${index + 1}'),
-                      ),
-                      title: Text(
-                        product['name'],
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      trailing: Text(
-                        '${NumberFormat.compact().format(product['quantitySold'])} sold',
-                        style: TextStyle(
-                          color: Theme.of(context).primaryColor,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    );
-                  },
-                  separatorBuilder: (context, index) => Divider(),
-                )
-              : Center(
-                  child: Text(
-                    'No data available',
-                    style: TextStyle(fontSize: 16, color: Colors.grey),
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Top 5 Products',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
                   ),
-                ),
-        ],
+            ),
+            SizedBox(height: 16),
+            _topProducts.isNotEmpty
+                ? ListView.separated(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    itemCount: _topProducts.length,
+                    itemBuilder: (context, index) {
+                      final product = _topProducts[index];
+                      return ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: Theme.of(context).primaryColor,
+                          child: Text('${index + 1}'),
+                        ),
+                        title: Text(
+                          product['name'],
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        trailing: Text(
+                          '${NumberFormat.compact().format(product['quantitySold'])} sold',
+                          style: TextStyle(
+                            color: Theme.of(context).primaryColor,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      );
+                    },
+                    separatorBuilder: (context, index) => Divider(),
+                  )
+                : Center(
+                    child: Text(
+                      'No data available',
+                      style: TextStyle(fontSize: 16, color: Colors.grey),
+                    ),
+                  ),
+          ],
+        ),
       ),
-    ),
-  );
+    );
+  }
 }
-}
-
-
