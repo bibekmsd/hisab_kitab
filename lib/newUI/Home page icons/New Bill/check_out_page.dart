@@ -1,6 +1,8 @@
 // ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously, prefer_const_constructors, sort_child_properties_last
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hisab_kitab/newUI/Home%20page%20icons/My%20customers/add_customer.dart';
+import 'package:hisab_kitab/newUI/Navigation%20and%20Notification/homepage_body.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
@@ -8,12 +10,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 
 class CheckOutPage extends StatelessWidget {
+  User? user = FirebaseAuth.instance.currentUser;
+
   final List<Map<String, dynamic>> productDetails;
   final String totalQuantity;
   final String totalPrice;
   final String customerPhone;
 
-  const CheckOutPage({
+  CheckOutPage({
     Key? key,
     required this.productDetails,
     required this.totalQuantity,
@@ -306,9 +310,11 @@ class CheckOutPage extends StatelessWidget {
                   icon: Icon(Icons.person_add),
                   label: Text('Add Customer'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        Colors.green, // Changed from primary to backgroundColor
+                    backgroundColor: Colors.green,
                     padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
                 ),
                 ElevatedButton.icon(
@@ -316,9 +322,59 @@ class CheckOutPage extends StatelessWidget {
                   icon: Icon(Icons.receipt),
                   label: Text('Generate PDF'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        Colors.blue, // Changed from primary to backgroundColor
+                    backgroundColor: Colors.blue,
                     padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () async {
+                    User? user = FirebaseAuth.instance.currentUser;
+                    if (user != null) {
+                      DocumentSnapshot userDoc = await FirebaseFirestore
+                          .instance
+                          .collection('users')
+                          .doc(user.uid)
+                          .get();
+
+                      String userRole = userDoc['role'];
+                      String username = userDoc['username'];
+
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder: (context) => HomePage(
+                            userRole: userRole,
+                            username: username,
+                          ),
+                        ),
+                      );
+                    } else {
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder: (context) => HomePage(
+                            userRole: 'unknown',
+                            username: 'unknown',
+                          ),
+                        ),
+                      );
+                    }
+                  },
+                  icon: Icon(Icons.home),
+                  label: Text('Home'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
                 ),
               ],

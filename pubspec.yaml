@@ -55,6 +55,7 @@ dependencies:
   # barcode_scanner: ^4.2.0
   shared_preferences: ^2.0.10
   font_awesome_flutter: ^10.3.0
+  cached_network_image: ^3.2.3
 
 dev_dependencies:
   flutter_test:

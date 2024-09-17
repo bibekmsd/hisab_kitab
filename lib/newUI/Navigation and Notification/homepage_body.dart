@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hisab_kitab/newUI/Home%20page%20icons/Transactions.dart';
+import 'package:hisab_kitab/newUI/Navigation%20and%20Notification/categories.dart';
+import 'package:hisab_kitab/newUI/Navigation%20and%20Notification/notification.dart';
 import 'package:hisab_kitab/newUI/Navigation%20and%20Notification/return_item.dart';
 import 'package:hisab_kitab/newUI/Drawers/newAdminDrawer.dart';
 import 'package:hisab_kitab/newUI/Drawers/newStaffDrawer.dart';
@@ -91,7 +93,12 @@ class HomepageBody extends StatelessWidget {
           IconButton(
             icon: Icon(Icons.notifications),
             onPressed: () {
-              // Handle notification button press
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => NotificationPage(),
+                ),
+              );
             },
           ),
         ],
@@ -215,7 +222,7 @@ class HomepageBody extends StatelessWidget {
                         );
                       case 5:
                         return BanakoCardColumn(
-                          text: "Add\nStaff",
+                          text: "Categories",
                           textColor: Colors.white,
                           backgroundGradient: MeroGradiant(),
                           radius: 16,
@@ -224,7 +231,7 @@ class HomepageBody extends StatelessWidget {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const SignUpPage(),
+                                builder: (context) => CategoriesPage(),
                               ),
                             );
                           },
