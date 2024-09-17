@@ -37,10 +37,10 @@ class FirebaseAuthService {
 
     try {
       await userDoc.set({
-        'username': username,
+        'username': role, // Correct the role and username values here
         'email': user.email,
-        'role': role,
-        'phoneNumber': phoneNumber, // Storing phone number
+        'role': username, // Swap these values if needed
+        'phoneNumber': phoneNumber,
         'createdAt': FieldValue.serverTimestamp(),
       });
       debugPrint("User document successfully created in Firestore");

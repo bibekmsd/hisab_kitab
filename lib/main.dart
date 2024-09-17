@@ -1,7 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
-import 'package:hisab_kitab/newUI/Navigation%20and%20Notification/Navigation_bar.dart';
+import 'package:hisab_kitab/newUI/Navigation%20and%20Notification/homepage_body.dart';
+import 'package:hisab_kitab/newUI/settings%20folder/settings_page.dart';
 import 'package:hisab_kitab/pages/sign_in_page.dart';
 
 Future main() async {
@@ -21,29 +22,37 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: "HisabKitab",
-      theme: ThemeData(
-          useMaterial3: true,
-          appBarTheme: const AppBarTheme(
-            centerTitle: true,
-            iconTheme: IconThemeData(color: Colors.white),
-            color: Color.fromRGBO(18, 29, 45, 1),
-            titleTextStyle: TextStyle(
-              fontSize: 24,
-              color: Color.fromARGB(255, 155, 204, 50),
+        debugShowCheckedModeBanner: false,
+        title: "HisabKitab",
+        theme: ThemeData(
+            useMaterial3: true,
+            appBarTheme: const AppBarTheme(
+              centerTitle: true,
+              iconTheme: IconThemeData(color: Colors.white),
+              color: Color.fromRGBO(18, 29, 45, 1),
+              titleTextStyle: TextStyle(
+                fontSize: 24,
+                color: Color.fromARGB(255, 155, 204, 50),
+              ),
             ),
-          ),
-          textTheme: const TextTheme(
-              titleSmall: TextStyle(fontSize: 16),
-              titleLarge: TextStyle(fontSize: 32),
-              titleMedium: TextStyle(fontSize: 20))),
-      home: const SignInPage(),
-      // home: const AdminUserScreen(),
-      // home: const StaffUserScreen(),
-      // home: const NavigationBarBanako(),
-      // home: NabhetekoProductPage(),
-    );
+            textTheme: const TextTheme(
+                titleSmall: TextStyle(fontSize: 16),
+                titleLarge: TextStyle(fontSize: 32),
+                titleMedium: TextStyle(fontSize: 20))),
+        // home: const SignInPage(),
+        // home: const AdminUserScreen(),
+        // home: const StaffUserScreen(),
+        // home: const NavigationBarBanako(),
+        // home: NabhetekoProductPage(),
+        // home: const HomePage(
+        //   userRole: "admin",
+        //   username: 'bibek_msd',
+        // ),
+        // home: const HomePage(
+        //   userRole: "admin",
+        //   username: 'bibek_msd',
+        // ),
+        home: SettingsPage());
   }
 }
 //^ 4987176014955

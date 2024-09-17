@@ -1,7 +1,10 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:hisab_kitab/newUI/Navigation%20and%20Notification/Homepage.dart';
+import 'package:hisab_kitab/newUI/Drawers/progress_indicator.dart';
+import 'package:hisab_kitab/newUI/Navigation%20and%20Notification/homepage_body.dart';
 import 'package:hisab_kitab/pages/sign_up_page.dart';
 import 'package:hisab_kitab/reuseable_widgets/buttons.dart';
 import 'package:hisab_kitab/reuseable_widgets/textField.dart';
@@ -16,17 +19,31 @@ class SignInPage extends StatefulWidget {
   State<SignInPage> createState() => _SignInPageState();
 }
 
+Future<Map<String, dynamic>> getShopDetails() async {
+  DocumentSnapshot adminDoc = await FirebaseFirestore.instance
+      .collection('admin')
+      .doc('09099090') // Replace with actual document ID if needed
+      .get();
+  return adminDoc.data() as Map<String, dynamic>;
+}
+
+String generateRandomPanNumber() {
+  Random random = Random();
+  String randomNumber = random.nextInt(1000000000).toString().padLeft(9, '0');
+  return "PAN$randomNumber";
+}
+
 class _SignInPageState extends State<SignInPage> {
   final FirebaseAuthService _auth = FirebaseAuthService();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  bool _isLoading = false; // Add this line to track loading state
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Sign-In"),
-        leading: const BackButton(),
       ),
       body: Stack(
         children: [
@@ -49,6 +66,7 @@ class _SignInPageState extends State<SignInPage> {
                 ),
                 const SizedBox(height: 16),
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     BanakoButton(
                       textSize: 18,
@@ -60,7 +78,6 @@ class _SignInPageState extends State<SignInPage> {
                       onPressed: _signIn,
                     ),
                   ],
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 ),
                 const SizedBox(height: 16),
                 Row(
@@ -87,26 +104,19 @@ class _SignInPageState extends State<SignInPage> {
               ],
             ),
           ),
+          if (_isLoading)
+            BanakoLoadingPage(), // Add this line to show loading indicator
         ],
       ),
     );
   }
 
-  Future<Map<String, dynamic>> getShopDetails() async {
-    DocumentSnapshot adminDoc = await FirebaseFirestore.instance
-        .collection('admin')
-        .doc('09099090') // Replace with actual document ID if needed
-        .get();
-    return adminDoc.data() as Map<String, dynamic>;
-  }
-
-  String generateRandomPanNumber() {
-    Random random = Random();
-    String randomNumber = random.nextInt(1000000000).toString().padLeft(9, '0');
-    return "PAN$randomNumber";
-  }
-
+  // Update the _signIn method
   _signIn() async {
+    setState(() {
+      _isLoading = true; // Start loading
+    });
+
     String email = _emailController.text;
     String password = _passwordController.text;
 
@@ -126,7 +136,6 @@ class _SignInPageState extends State<SignInPage> {
           if (userData != null) {
             String role = userData['role'] ?? '';
             String userName = userData['username'] ?? '';
-            String phoneNumber = userData['phoneNumber'] ?? '';
             String loginTime = DateTime.now().toString();
 
             String? panNumber = userData.containsKey('panNumber')
@@ -150,37 +159,44 @@ class _SignInPageState extends State<SignInPage> {
                   'lastLogin': loginTime,
                 });
 
+                setState(() {
+                  _isLoading = false; // Stop loading
+                });
+
                 Navigator.of(context)
                     .pushReplacement(MaterialPageRoute(builder: (context) {
                   return HomePage(
-                    userRole: role, // Pass role to HomePage
-                    username: userName, // Pass username to HomePage
+                    userRole: role,
+                    username: userName,
                   );
                 }));
               } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("PAN Number is missing")));
+                _showErrorAndResetLoading("PAN Number is missing");
               }
             } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Role not recognized")));
+              _showErrorAndResetLoading("Role not recognized");
             }
           } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("User data not found")));
+            _showErrorAndResetLoading("User data not found");
           }
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("User document not found")));
+          _showErrorAndResetLoading("User document not found");
         }
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Error fetching user data: $e")));
+        _showErrorAndResetLoading("Error fetching user data: $e");
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Enter Valid Credentials")));
+      _showErrorAndResetLoading("Enter Valid Credentials");
       debugPrint("Error in login");
     }
+  }
+
+  void _showErrorAndResetLoading(String message) {
+    setState(() {
+      _isLoading = false; // Stop loading
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
   }
 }
