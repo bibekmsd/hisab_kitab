@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 
 class StaffDetailPage extends StatefulWidget {
   final Map<String, dynamic> staff;
-  final Future<void> Function(String username) onDelete;
 
-  const StaffDetailPage({required this.staff, required this.onDelete, Key? key})
-      : super(key: key);
+  const StaffDetailPage({required this.staff, Key? key}) : super(key: key);
 
   @override
   _StaffDetailPageState createState() => _StaffDetailPageState();
@@ -16,6 +15,8 @@ class StaffDetailPage extends StatefulWidget {
 class _StaffDetailPageState extends State<StaffDetailPage>
     with SingleTickerProviderStateMixin {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
   late AnimationController _animationController;
   late Animation<double> _animation;
 
@@ -46,6 +47,10 @@ class _StaffDetailPageState extends State<StaffDetailPage>
   @override
   void dispose() {
     _animationController.dispose();
+    _addressController.dispose();
+    _phoneNumberController.dispose();
+    _emailController.dispose();
+    _shopNameController.dispose();
     super.dispose();
   }
 
@@ -269,7 +274,7 @@ class _StaffDetailPageState extends State<StaffDetailPage>
     );
   }
 
-  void _updateUserDetails() async {
+  Future<void> _updateUserDetails() async {
     final uid = widget.staff['uid'];
     if (uid == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -278,8 +283,7 @@ class _StaffDetailPageState extends State<StaffDetailPage>
       return;
     }
 
-    final userDoc =
-        _db.collection('users').doc(uid); // Use UID instead of username
+    final userDoc = _db.collection('users').doc(uid);
 
     try {
       await userDoc.update({
@@ -310,10 +314,7 @@ class _StaffDetailPageState extends State<StaffDetailPage>
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () {
-              _deleteUser();
-              Navigator.pop(context);
-            },
+            onPressed: _deleteUser,
             child: const Text('Delete'),
           ),
         ],
@@ -321,18 +322,22 @@ class _StaffDetailPageState extends State<StaffDetailPage>
     );
   }
 
-  void _deleteUser() async {
-    final uid = widget.staff['uid'] ?? '';
-    if (uid.isEmpty) {
+  Future<void> _deleteUser() async {
+    final uid = widget.staff['uid'];
+    if (uid == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Invalid user ID')),
+        SnackBar(content: Text('Error: User ID is null')),
       );
       return;
     }
 
     try {
-      await widget.onDelete(uid); // Pass the UID to the deletion function
-      Navigator.pop(context); // Close the page after deletion
+      await _db.collection('users').doc(uid).delete();
+      User? user = _auth.currentUser;
+      if (user != null && user.uid == uid) {
+        await user.delete();
+      }
+      Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('User deleted successfully')),
       );

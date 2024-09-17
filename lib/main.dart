@@ -1,15 +1,17 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-
 import 'package:hisab_kitab/newUI/Navigation%20and%20Notification/homepage_body.dart';
 import 'package:hisab_kitab/newUI/settings%20folder/settings_page.dart';
 import 'package:hisab_kitab/pages/sign_in_page.dart';
 
-Future main() async {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(const MyApp());
+  runApp(MyApp());
 }
+
+// Create a ValueNotifier to track theme mode (light or dark)
+ValueNotifier<bool> isDarkMode = ValueNotifier(false);
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -21,41 +23,34 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: "HisabKitab",
-        theme: ThemeData(
+    return ValueListenableBuilder(
+      valueListenable: isDarkMode,
+      builder: (context, bool isDark, _) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: "HisabKitab",
+          theme: ThemeData(
+            brightness: isDark ? Brightness.dark : Brightness.light,
             useMaterial3: true,
-            appBarTheme: const AppBarTheme(
+            appBarTheme: AppBarTheme(
               centerTitle: true,
               iconTheme: IconThemeData(color: Colors.white),
-              color: Color.fromRGBO(18, 29, 45, 1),
-              titleTextStyle: TextStyle(
+              color: isDark ? Colors.black : Color.fromRGBO(18, 29, 45, 1),
+              titleTextStyle: const TextStyle(
                 fontSize: 24,
                 color: Color.fromARGB(255, 155, 204, 50),
               ),
             ),
             textTheme: const TextTheme(
-                titleSmall: TextStyle(fontSize: 16),
-                titleLarge: TextStyle(fontSize: 32),
-                titleMedium: TextStyle(fontSize: 20))),
-        // home: const SignInPage(),
-        // home: const AdminUserScreen(),
-        // home: const StaffUserScreen(),
-        // home: const NavigationBarBanako(),
-        // home: NabhetekoProductPage(),
-        // home: const HomePage(
-        //   userRole: "admin",
-        //   username: 'bibek_msd',
-        // ),
-        // home: const HomePage(
-        //   userRole: "admin",
-        //   username: 'bibek_msd',
-        // ),
-        home: SettingsPage());
+              titleSmall: TextStyle(fontSize: 16),
+              titleLarge: TextStyle(fontSize: 32),
+              titleMedium: TextStyle(fontSize: 20),
+            ),
+          ),
+          home: const SignInPage(),
+          // You can test other pages here
+        );
+      },
+    );
   }
 }
-//^ 4987176014955
-//^ 6928001826358
-//^ 8904106854005
-//* 8901247574328 //florozon
