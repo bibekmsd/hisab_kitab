@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hisab_kitab/newUI/Home%20page%20icons/Transactions.dart';
 import 'package:hisab_kitab/newUI/Navigation%20and%20Notification/return_item.dart';
 import 'package:hisab_kitab/reuseable_widgets/card_wigdet.dart';
 import 'package:hisab_kitab/newUI/Home%20page%20icons/My%20customers/my_customers.dart';
@@ -75,7 +76,7 @@ class _HomepageBodyState extends State<HomepageBody> {
                     );
                   case 1:
                     return BanakoCardColumn(
-                        text: "View\nSupplies",
+                        text: "My\nTransactions",
                         textColor: Colors.white,
                         backgroundGradient: MeroGradiant(),
                         radius: 16,
@@ -85,7 +86,7 @@ class _HomepageBodyState extends State<HomepageBody> {
                             context,
                             MaterialPageRoute(
                               builder: (context) {
-                                return const StaffHomePage();
+                                return const TransactionsPage();
                               },
                             ),
 
