@@ -151,7 +151,7 @@ class HomepageBody extends StatelessWidget {
                         );
                       case 1:
                         return BanakoCardColumn(
-                          text: "View\nSupplies",
+                          text: "My\nTransactions",
                           textColor: Colors.white,
                           backgroundGradient: MeroGradiant(),
                           radius: 16,
@@ -160,7 +160,7 @@ class HomepageBody extends StatelessWidget {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const ReturnItem(),
+                                builder: (context) => const TransactionsPage(),
                               ),
                             );
                           },
