@@ -85,6 +85,7 @@ class _AddCustomersState extends State<AddCustomers> {
     try {
       String billNumber = await _getNextBillNumber();
 
+      // Purchase history entry
       Map<String, dynamic> historyEntry = {
         'Products': widget.productDetails,
         'PurchaseDate': Timestamp.fromDate(DateTime.now()),

@@ -16,12 +16,15 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _phoneController =
+      TextEditingController(); // Added phone number controller
 
   @override
   void dispose() {
     _usernameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _phoneController.dispose(); // Dispose of phone controller
     super.dispose();
   }
 
@@ -60,15 +63,15 @@ class _SignUpPageState extends State<SignUpPage> {
                   controller: _passwordController,
                 ),
                 const SizedBox(height: 16),
+                BanakoTextField(
+                  labelText: "Phone Number", // Added phone number field
+                  keyboardType: TextInputType.phone,
+                  controller: _phoneController,
+                ),
+                const SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // BanakoTextButton(
-                    //   text: "Master Sign-up",
-                    //   onPressed: () => _signUp(role: "admin"),
-                    //   fontSize: 20,
-                    //   textColor: Colors.deepPurpleAccent,
-                    // ),
                     BanakoTextButton(
                       text: "Sign Up",
                       onPressed: () => _signUp(role: "staff"),
@@ -89,9 +92,15 @@ class _SignUpPageState extends State<SignUpPage> {
     String username = _usernameController.text;
     String email = _emailController.text;
     String password = _passwordController.text;
+    String phoneNumber = _phoneController.text; // Get phone number
 
-    User? user =
-        await _auth.signUpWithEmailAndPassword(email, password, role, username);
+    User? user = await _auth.signUpWithEmailAndPassword(
+      email,
+      password,
+      role,
+      username,
+      phoneNumber, // Pass phone number to the sign-up method
+    );
 
     if (user != null) {
       debugPrint("User created successfully");

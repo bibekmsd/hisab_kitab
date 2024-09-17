@@ -1,11 +1,9 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-// import 'package:hisab_kitab/newUI/Home%20page%20icons/Transactions.dart';
-import 'package:hisab_kitab/newUI/Navigation%20and%20Notification/Navigation_bar.dart';
 
-// import 'package:hisab_kitab/newUI/Navigation%20and%20Notification/Navigation_bar.dart';
-
-
+import 'package:hisab_kitab/newUI/Navigation%20and%20Notification/homepage_body.dart';
+import 'package:hisab_kitab/newUI/settings%20folder/settings_page.dart';
+import 'package:hisab_kitab/pages/sign_in_page.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,10 +39,9 @@ class _MyAppState extends State<MyApp> {
               titleSmall: TextStyle(fontSize: 16),
               titleLarge: TextStyle(fontSize: 32),
               titleMedium: TextStyle(fontSize: 20))),
-      // home: const SignInPage(),
+      home: const SignInPage(),
       // home: const AdminUserScreen(),
       // home: const StaffUserScreen(),
-      home: const NavigationBarBanako(),
       // home: NabhetekoProductPage(),
       //home :const TransactionsPage(),
     );
