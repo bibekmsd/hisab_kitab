@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:hisab_kitab/main.dart';
+import 'package:hisab_kitab/newUI/settings%20folder/about_app.dart';
+import 'package:hisab_kitab/newUI/settings%20folder/forgot_pass.dart';
 import 'package:hisab_kitab/newUI/settings%20folder/manage_staff.dart';
+import 'package:hisab_kitab/newUI/settings%20folder/shop_info_page.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -9,7 +13,6 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  bool isDarkMode = false; // Track the light/dark mode
   bool notificationsEnabled = true; // Track notifications setting
 
   @override
@@ -26,12 +29,11 @@ class _SettingsPageState extends State<SettingsPage> {
             leading: const Icon(Icons.brightness_6),
             title: const Text('Dark Mode'),
             trailing: Switch(
-              value: isDarkMode,
+              value: isDarkMode.value,
               onChanged: (bool value) {
                 setState(() {
-                  isDarkMode = value;
+                  isDarkMode.value = value; // Update the theme mode
                 });
-                // Add functionality to change app theme
               },
             ),
           ),
@@ -39,9 +41,14 @@ class _SettingsPageState extends State<SettingsPage> {
           ListTile(
             leading: const Icon(Icons.lock_reset),
             title: const Text('Forgot Password?'),
-            trailing: Icon(Icons.arrow_forward_ios, size: 16),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
             onTap: () {
-              // Add forgot password functionality
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ForgotPasswordPage(),
+                ),
+              );
             },
           ),
           const Divider(),
@@ -60,34 +67,30 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
           const Divider(),
           ListTile(
-            leading: const Icon(Icons.people),
-            title: const Text('Manage Staff Accounts'),
-            trailing: Icon(Icons.arrow_forward_ios, size: 16),
+            leading: const Icon(Icons.store),
+            title: const Text('Shop Information'),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
             onTap: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ManageStaffPage(), // Corrected
+                  builder: (context) => const ShopInfoPage(),
                 ),
               );
             },
           ),
           const Divider(),
           ListTile(
-            leading: const Icon(Icons.store),
-            title: const Text('Shop Information'),
-            trailing: Icon(Icons.arrow_forward_ios, size: 16),
-            onTap: () {
-              // Navigate to shop information page
-            },
-          ),
-          const Divider(),
-          ListTile(
             leading: const Icon(Icons.info),
             title: const Text('About App'),
-            trailing: Icon(Icons.arrow_forward_ios, size: 16),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
             onTap: () {
-              // Navigate to about app page
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AboutAppPage(),
+                ),
+              );
             },
           ),
         ],

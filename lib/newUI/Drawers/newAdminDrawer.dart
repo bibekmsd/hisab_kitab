@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hisab_kitab/newUI/Drawers/progress_indicator.dart';
+import 'package:hisab_kitab/newUI/settings%20folder/manage_staff.dart';
 import 'package:hisab_kitab/pages/sign_in_page.dart';
 import 'package:hisab_kitab/pages/sign_up_page.dart';
 
@@ -166,7 +167,23 @@ class AdminDrawer extends StatelessWidget {
                   ],
                 ),
               ),
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.people),
+                title: const Text('Manage Staffs'),
+                trailing: Icon(Icons.arrow_forward_ios, size: 16),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ManageStaffPage(),
+                    ),
+                  );
+                },
+              ),
               Divider(),
+              SizedBox(height: 40),
+
               // Actions section
               ListTile(
                 leading: Icon(Icons.person_add, color: Colors.blue),
@@ -181,6 +198,7 @@ class AdminDrawer extends StatelessWidget {
                   );
                 },
               ),
+              Divider(),
               ListTile(
                 leading: Icon(Icons.logout, color: Colors.red),
                 title: Text('Logout'),
@@ -230,3 +248,18 @@ class AdminDrawer extends StatelessWidget {
     );
   }
 }
+
+// const Divider(),
+//           ListTile(
+//             leading: const Icon(Icons.people),
+//             title: const Text('Manage Staff Accounts'),
+//             trailing: Icon(Icons.arrow_forward_ios, size: 16),
+//             onTap: () {
+//               Navigator.push(
+//                 context,
+//                 MaterialPageRoute(
+//                   builder: (context) => const ManageStaffPage(),
+//                 ),
+//               );
+//             },
+//           ),
