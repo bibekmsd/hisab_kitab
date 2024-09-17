@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // Import the intl package
+import 'package:intl/intl.dart';
 
 class ReturnItem extends StatefulWidget {
-  const ReturnItem({super.key});
+  const ReturnItem({Key? key}) : super(key: key);
 
   @override
   State<ReturnItem> createState() => _ReturnItemState();
@@ -14,7 +14,7 @@ class _ReturnItemState extends State<ReturnItem> {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   List<Map<String, dynamic>> _products = [];
   String? _errorMessage;
-  String _purchaseDate = 'N/A';
+  DateTime? _purchaseDate;
 
   @override
   void dispose() {
@@ -29,7 +29,7 @@ class _ReturnItemState extends State<ReturnItem> {
       setState(() {
         _errorMessage = 'Please enter a bill number.';
         _products = [];
-        _purchaseDate = 'N/A';
+        _purchaseDate = null;
       });
       return;
     }
@@ -58,6 +58,12 @@ class _ReturnItemState extends State<ReturnItem> {
           }
         }
 
+        // Initialize returnQuantity to 0 for each product
+        uniqueProductsMap.values.forEach((product) {
+          product['returnQuantity'] = 0;
+          product['totalPrice'] = (product['price'] as num? ?? 0) * (product['quantity'] as num? ?? 0);
+        });
+
         setState(() {
           _products = uniqueProductsMap.values.toList();
 
@@ -65,18 +71,16 @@ class _ReturnItemState extends State<ReturnItem> {
           final purchaseDate = data['PurchaseDate'];
           if (purchaseDate != null) {
             if (purchaseDate is Timestamp) {
-              _purchaseDate = DateFormat('yyyy-MM-dd')
-                  .format((purchaseDate as Timestamp).toDate());
+              _purchaseDate = (purchaseDate as Timestamp).toDate();
             } else if (purchaseDate is DateTime) {
-              _purchaseDate =
-                  DateFormat('yyyy-MM-dd').format((purchaseDate as DateTime));
+              _purchaseDate = purchaseDate;
             } else {
               debugPrint(
                   'Unexpected data type for PurchaseDate: ${purchaseDate.runtimeType}');
-              _purchaseDate = 'Invalid Date Format';
+              _purchaseDate = null;
             }
           } else {
-            _purchaseDate = 'N/A';
+            _purchaseDate = null;
           }
 
           _errorMessage = null;
@@ -85,14 +89,14 @@ class _ReturnItemState extends State<ReturnItem> {
         setState(() {
           _errorMessage = 'Bill number does not exist.';
           _products = [];
-          _purchaseDate = 'N/A';
+          _purchaseDate = null;
         });
       }
     } catch (e) {
       setState(() {
         _errorMessage = 'Error fetching data: $e';
         _products = [];
-        _purchaseDate = 'N/A';
+        _purchaseDate = null;
       });
     }
   }
@@ -100,21 +104,13 @@ class _ReturnItemState extends State<ReturnItem> {
   Future<void> _updateProductQuantity(
       String barcode, int returnQuantity) async {
     try {
-      // Reference to the product document
       DocumentReference productRef = _db.collection('ProductsNew').doc(barcode);
-
-      // Fetch the current product data
       DocumentSnapshot productSnapshot = await productRef.get();
 
       if (productSnapshot.exists) {
-        // Get the current quantity
         final productData = productSnapshot.data() as Map<String, dynamic>;
         int currentQuantity = productData['Quantity'] ?? 0;
-
-        // Calculate the new quantity
         int newQuantity = currentQuantity + returnQuantity;
-
-        // Update the product quantity in the database
         await productRef.update({'Quantity': newQuantity});
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -132,48 +128,39 @@ class _ReturnItemState extends State<ReturnItem> {
     }
   }
 
-  Future<void> _returnProduct(
-      Map<String, dynamic> product, int newQuantity) async {
+  Future<void> _returnProduct(Map<String, dynamic> product) async {
     String billNumber = _billNumberController.text.trim();
-    int returnQuantity = product['quantity'] ?? 0;
+    int returnQuantity = product['returnQuantity'] ?? 0;
 
-    // Reference to the bill document
+    if (returnQuantity == 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please select a quantity to return.')),
+      );
+      return;
+    }
+
     DocumentReference billRef = _db.collection('bills').doc(billNumber);
 
     try {
-      // Fetch the current bill data
       DocumentSnapshot billSnapshot = await billRef.get();
       if (billSnapshot.exists) {
         final data = billSnapshot.data() as Map<String, dynamic>;
         List<Map<String, dynamic>> products =
             List<Map<String, dynamic>>.from(data['Products'] ?? []);
 
-        // Find the index of the product to update
         int productIndex =
             products.indexWhere((p) => p['barcode'] == product['barcode']);
 
         if (productIndex != -1) {
-          // Product exists, update its quantity and returnQuantity
+          int newQuantity = products[productIndex]['quantity'] - returnQuantity;
           products[productIndex]['quantity'] = newQuantity;
-
-          // Only update returnQuantity if the product was returned
-          if (returnQuantity > 0) {
-            products[productIndex]['returnQuantity'] = returnQuantity;
-          } else {
-            products[productIndex].remove('returnQuantity');
-          }
-
-          // Update the totalPrice in the product map
           products[productIndex]['totalPrice'] =
-              (products[productIndex]['price'] as num?)?.toDouble() ??
-                  0 * newQuantity;
+              (products[productIndex]['price'] as num? ?? 0) * newQuantity;
 
-          // Update the bill document
           await billRef.update({
             'Products': products,
           });
 
-          // Update the product quantity in ProductsNew
           await _updateProductQuantity(product['barcode'], returnQuantity);
 
           ScaffoldMessenger.of(context).showSnackBar(
@@ -182,7 +169,7 @@ class _ReturnItemState extends State<ReturnItem> {
                     'Product returned and quantity updated successfully!')),
           );
 
-          _searchBill(); // Refresh the list after returning a product
+          _searchBill();
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Product not found in the bill.')),
@@ -200,91 +187,14 @@ class _ReturnItemState extends State<ReturnItem> {
     }
   }
 
-  void _onProductTap(Map<String, dynamic> product) {
-    int availableQuantity = product['quantity'] ?? 0;
-    int selectedQuantity = 0; // Initialize return quantity to 0
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: Text(product['name'] ?? 'Product Details'),
-              content: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text('Barcode: ${product['barcode'] ?? 'N/A'}'),
-                  Text('Price: ${product['price'] ?? 0}'),
-                  Text('Available Quantity: $availableQuantity'),
-                  Text('Total Price: ${product['totalPrice'] ?? 0}'),
-                  const SizedBox(height: 16),
-                  const Text('Select return quantity:'),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.remove),
-                        onPressed: selectedQuantity > 0
-                            ? () {
-                                setState(() {
-                                  selectedQuantity--;
-                                });
-                              }
-                            : null,
-                      ),
-                      Text('$selectedQuantity'),
-                      IconButton(
-                        icon: const Icon(Icons.add),
-                        onPressed: selectedQuantity < availableQuantity
-                            ? () {
-                                setState(() {
-                                  selectedQuantity++;
-                                });
-                              }
-                            : null,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  child: const Text('Cancel'),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-                ElevatedButton(
-                  child: const Text('Return'),
-                  onPressed: selectedQuantity > 0
-                      ? () {
-                          Navigator.of(context).pop();
-                          _returnProduct(product, selectedQuantity);
-                        }
-                      : null,
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
+  bool _canReturn(DateTime? purchaseDate) {
+    if (purchaseDate == null) return false;
+    final difference = DateTime.now().difference(purchaseDate);
+    return difference.inDays <= 7;
   }
 
   @override
   Widget build(BuildContext context) {
-    // Calculate the total items count, ensuring that we handle potential 'num' types.
-    int totalItemsCount = _products.fold<int>(
-      0,
-      (sum, product) {
-        // Ensure 'quantity' is treated as an int
-        int quantity = (product['quantity'] as num?)?.toInt() ?? 0;
-        return sum + quantity;
-      },
-    );
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Return Item'),
@@ -297,81 +207,97 @@ class _ReturnItemState extends State<ReturnItem> {
           children: [
             TextField(
               controller: _billNumberController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Enter Bill Number',
                 border: OutlineInputBorder(),
+                suffixIcon: IconButton(
+                  icon: Icon(Icons.search),
+                  onPressed: _searchBill,
+                ),
               ),
             ),
             const SizedBox(height: 16),
-            Center(
-              child: ElevatedButton(
-                onPressed: _searchBill,
-                child: const Text('Search'),
-              ),
-            ),
             if (_errorMessage != null) ...[
-              const SizedBox(height: 16),
               Text(
                 _errorMessage!,
-                style: const TextStyle(color: Colors.red),
+                style: TextStyle(color: Colors.red),
               ),
+              const SizedBox(height: 16),
+            ],
+            if (_purchaseDate != null) ...[
+              Text(
+                'Purchase Date: ${DateFormat('yyyy-MM-dd').format(_purchaseDate!)}',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              if (!_canReturn(_purchaseDate))
+                Text(
+                  'Products cannot be returned after 7 days of purchase.',
+                  style: TextStyle(color: Colors.red),
+                ),
+              const SizedBox(height: 16),
             ],
             if (_products.isNotEmpty) ...[
-              const SizedBox(height: 16),
-              const Text('Purchase Date:'),
-              Text(_purchaseDate),
-              const SizedBox(height: 16),
-              const Text('Products:'),
+              Text(
+                'Products:',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 8),
               Expanded(
                 child: ListView.builder(
                   itemCount: _products.length,
                   itemBuilder: (context, index) {
                     final product = _products[index];
-                    int availableQuantity =
-                        (product['quantity'] as num?)?.toInt() ?? 0;
-                    int returnQuantity =
-                        (product['returnQuantity'] as num?)?.toInt() ?? 0;
+                    int purchasedQuantity = product['quantity'] ?? 0;
+                    int returnQuantity = product['returnQuantity'] ?? 0;
 
                     return Card(
-                      child: ListTile(
-                        title: Text(product['name'] ?? 'No Name'),
-                        subtitle: Column(
+                      elevation: 2,
+                      margin: EdgeInsets.symmetric(vertical: 8),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Barcode: ${product['barcode'] ?? 'N/A'}'),
-                            Text('Price: ${product['price'] ?? 0}'),
-                            Text('Total Price: ${product['totalPrice'] ?? 0}'),
-                            Text('Available Quantity: $availableQuantity'),
+                            Text(
+                              product['name'] ?? 'No Name',
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.bold),
+                            ),
                             const SizedBox(height: 8),
+                            Text('Barcode: ${product['barcode'] ?? 'N/A'}'),
+                            Text(
+                                'Price: ${(product['price'] as num?)?.toStringAsFixed(2) ?? '0.00'}'),
+                            Text(
+                                'Total Price: ${(product['totalPrice'] as num?)?.toStringAsFixed(2) ?? '0.00'}'),
+                            Text('Purchased Quantity: $purchasedQuantity'),
+                            const SizedBox(height: 16),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                const Text('Return Quantity:'),
+                                Text('Return Quantity:'),
                                 Row(
                                   children: [
                                     IconButton(
-                                      icon: const Icon(Icons.remove),
+                                      icon: Icon(Icons.remove),
                                       onPressed: returnQuantity > 0
                                           ? () {
                                               setState(() {
-                                                returnQuantity--;
                                                 product['returnQuantity'] =
-                                                    returnQuantity;
+                                                    returnQuantity - 1;
                                               });
                                             }
                                           : null,
                                     ),
                                     Text('$returnQuantity'),
                                     IconButton(
-                                      icon: const Icon(Icons.add),
+                                      icon: Icon(Icons.add),
                                       onPressed:
-                                          returnQuantity < availableQuantity
+                                          returnQuantity < purchasedQuantity
                                               ? () {
                                                   setState(() {
-                                                    returnQuantity++;
                                                     product['returnQuantity'] =
-                                                        returnQuantity;
+                                                        returnQuantity + 1;
                                                   });
                                                 }
                                               : null,
@@ -380,15 +306,20 @@ class _ReturnItemState extends State<ReturnItem> {
                                 ),
                               ],
                             ),
+                            const SizedBox(height: 16),
+                            Center(
+                              child: ElevatedButton(
+                                onPressed: _canReturn(_purchaseDate) &&
+                                        returnQuantity > 0
+                                    ? () => _returnProduct(product)
+                                    : null,
+                                child: Text('Return'),
+                                style: ElevatedButton.styleFrom(
+                                  minimumSize: Size(double.infinity, 36),
+                                ),
+                              ),
+                            ),
                           ],
-                        ),
-                        trailing: ElevatedButton(
-                          onPressed: () {
-                            if (returnQuantity > 0) {
-                              _returnProduct(product, returnQuantity);
-                            }
-                          },
-                          child: const Text('Return'),
                         ),
                       ),
                     );
@@ -402,3 +333,4 @@ class _ReturnItemState extends State<ReturnItem> {
     );
   }
 }
+
