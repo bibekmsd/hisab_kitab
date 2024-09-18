@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:hisab_kitab/pages/sign_in_page.dart';
 import 'package:intl/intl.dart';
+import 'package:hisab_kitab/pages/sign_in_page.dart';
 
 class StaffDrawer extends StatelessWidget {
+  const StaffDrawer({super.key});
+
   Future<Map<String, dynamic>?> _fetchStaffData() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
@@ -59,7 +61,7 @@ class StaffDrawer extends StatelessWidget {
       future: _fetchStaffData(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Drawer(
+          return const Drawer(
             child: Center(child: CircularProgressIndicator()),
           );
         } else if (snapshot.hasError) {
@@ -88,181 +90,193 @@ class StaffDrawer extends StatelessWidget {
             : 'N/A';
 
         final email = data['email'] ?? 'N/A';
-        final lastLogin = data['lastLogin'] ?? 'N/A';
+        final lastLogin = data['lastLogin'] is Timestamp
+            ? DateFormat('yyyy-MM-dd HH:mm')
+                .format((data['lastLogin'] as Timestamp).toDate())
+            : data['lastLogin'] is String
+                ? DateFormat('yyyy-MM-dd HH:mm')
+                    .format(DateTime.parse(data['lastLogin']))
+                : 'N/A';
+
         final phoneNumber = data['phoneNumber'] ?? 'N/A';
         final role = data['role'] ?? 'N/A';
         final shopName = data['shopName'] ?? 'N/A';
 
         return Drawer(
-          width: 250,
-          child: Column(
-            children: <Widget>[
-              Container(
-                color: Colors.blue,
-                width: double.infinity,
-                padding: EdgeInsets.all(16.0),
-                child: Row(
-                  children: <Widget>[
-                    Icon(
-                      Icons.menu,
-                      color: Colors.white,
-                      size: 30,
-                    ),
-                    SizedBox(width: 16.0),
-                    Expanded(
-                      child: Text(
-                        'Staff Dashboard',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
+          child: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Color(0xFF7EB6FF), Color(0xFF9599E2)],
+              ),
+            ),
+            child: SafeArea(
+              child: Column(
+                children: <Widget>[
+                  _buildHeader(
+                    shopName: shopName,
+                    username: username,
+                    address: address,
+                    role: role,
+                    phoneNumber: phoneNumber,
+                    email: email,
+                    lastLogin: lastLogin,
+                  ),
+                  Expanded(
+                    child: Container(
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(30),
+                          topRight: Radius.circular(30),
                         ),
                       ),
+                      child: ListView(
+                        padding: EdgeInsets.zero,
+                        children: [
+                          _buildMenuItem(
+                            icon: Icons.logout,
+                            title: 'Logout',
+                            onTap: () async {
+                              await FirebaseAuth.instance.signOut();
+                              StaffDataCache().setStaffData(null);
+                              Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const SignInPage()),
+                                (Route<dynamic> route) => false,
+                              );
+                            },
+                          ),
+                        ],
+                      ),
                     ),
-                  ],
-                ),
-              ),
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.blue, Colors.lightBlueAccent],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
                   ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    CircleAvatar(
-                      radius: 40,
-                      backgroundImage: AssetImage('assets/staff_photo.png'),
-                    ),
-                    SizedBox(height: 10.0), // Reduced space
-                    Text(
-                      shopName,
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(height: 6.0),
-                    Text(
-                      'Username: $username',
-                      style: TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                    SizedBox(height: 4.0),
-                    Text(
-                      'Address: $address',
-                      style: TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                    SizedBox(height: 4.0),
-                    Text(
-                      'Role: $role',
-                      style: TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                    SizedBox(height: 4.0),
-                    Text(
-                      'Phone No: \n$phoneNumber',
-                      style: TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                    SizedBox(height: 4.0),
-                    Text(
-                      'Email: $email',
-                      style: TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                    SizedBox(height: 4.0),
-                    Text(
-                      'Log Time: $lastLogin',
-                      style: TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                  ],
-                ),
+                  _buildFooter(),
+                ],
               ),
-              Divider(),
-              ListTile(
-                  leading: Icon(Icons.logout, color: Colors.red),
-                  title: Text('Logout'),
-                  onTap: () async {
-                    try {
-                      await FirebaseAuth.instance.signOut();
-                      print('User signed out');
-
-                      // Clear the cached data
-                      StaffDataCache().setStaffData(null);
-
-                      // Optionally delete the user document
-                      await deleteUserDocument();
-
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(builder: (context) => SignInPage()),
-                        (Route<dynamic> route) => false,
-                      );
-                      print('Navigated to SignInPage');
-                    } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Error during sign-out: $e')),
-                      );
-                    }
-                  }),
-              Divider(),
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: <Widget>[
-                    Text(
-                      'App Version 1.0.0',
-                      style: TextStyle(color: Colors.grey[600], fontSize: 14),
-                    ),
-                    SizedBox(height: 10.0),
-                    Text(
-                      '© The ChatGPT guys',
-                      style: TextStyle(color: Colors.grey[600], fontSize: 14),
-                    ),
-                    SizedBox(height: 4.0),
-                    Text(
-                      '2024',
-                      style: TextStyle(color: Colors.grey[600], fontSize: 14),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+            ),
           ),
         );
       },
     );
   }
+
+  Widget _buildHeader({
+    required String shopName,
+    required String username,
+    required String address,
+    required String role,
+    required String phoneNumber,
+    required String email,
+    required String lastLogin,
+  }) {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+      child: Column(
+        children: [
+          const CircleAvatar(
+            radius: 50,
+            backgroundImage: AssetImage('assets/staff_photo.png'),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            shopName,
+            style: const TextStyle(
+                color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 5),
+          Text(
+            'Username: $username',
+            style:
+                TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 16),
+          ),
+          const SizedBox(height: 20),
+          _buildInfoChip(Icons.phone, phoneNumber),
+          const SizedBox(height: 10),
+          _buildInfoChip(Icons.home, address),
+          const SizedBox(height: 10),
+          _buildInfoChip(Icons.person, role),
+          const SizedBox(height: 10),
+          _buildInfoChip(Icons.email, email),
+          const SizedBox(height: 10),
+          _buildInfoChip(Icons.access_time, 'Last Login: $lastLogin'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoChip(IconData icon, String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: Colors.white, size: 16),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(label,
+                style: const TextStyle(color: Colors.white, fontSize: 14),
+                overflow: TextOverflow.ellipsis),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMenuItem({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      leading: Icon(icon, color: Color(0xFF9599E2)),
+      title: Text(
+        title,
+        style: const TextStyle(
+          color: Color(0xFF0C1E3C),
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      onTap: onTap,
+    );
+  }
+
+  Widget _buildFooter() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 20),
+      child: const Column(
+        children: [
+          Text('App Version 1.0.0', style: TextStyle(color: Colors.white70)),
+          SizedBox(height: 5),
+          Text('© The Last Minute Guys',
+              style: TextStyle(color: Colors.white70)),
+          Text('2024', style: TextStyle(color: Colors.white70)),
+        ],
+      ),
+    );
+  }
 }
 
-// staff_data_cache.dart
 class StaffDataCache {
   static final StaffDataCache _instance = StaffDataCache._internal();
-  factory StaffDataCache() => _instance;
-  StaffDataCache._internal();
 
   Map<String, dynamic>? _staffData;
+
+  factory StaffDataCache() {
+    return _instance;
+  }
+
+  StaffDataCache._internal();
 
   Map<String, dynamic>? get staffData => _staffData;
 
   void setStaffData(Map<String, dynamic>? data) {
     _staffData = data;
-  }
-}
-
-Future<void> deleteUserDocument() async {
-  final user = FirebaseAuth.instance.currentUser;
-  if (user == null) {
-    print('No user is logged in');
-    return;
-  }
-
-  try {
-    await FirebaseFirestore.instance.collection('users').doc(user.uid).delete();
-    print('User document deleted successfully');
-  } catch (e) {
-    print('Error deleting user document: $e');
   }
 }

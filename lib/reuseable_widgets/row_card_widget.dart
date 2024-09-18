@@ -49,7 +49,7 @@ class BanakoCardRow extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: TextStyle(
+                    style: const TextStyle(
                       // color: textColor,
                       fontSize: 24.0,
                       fontWeight: FontWeight.bold,
@@ -58,7 +58,7 @@ class BanakoCardRow extends StatelessWidget {
                   const SizedBox(height: 8.0),
                   Text(
                     subtitle,
-                    style: TextStyle(
+                    style: const TextStyle(
                       // color: textColor,
                       fontSize: 16.0,
                     ),
@@ -67,13 +67,14 @@ class BanakoCardRow extends StatelessWidget {
               ),
               const Spacer(),
               Container(
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   // color: textColor.withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
                 child: IconButton(
                   icon: Icon(
                     rakhneIcon,
+                    size: 36,
                     // color: textColor,
                   ),
                   onPressed: () {},

@@ -98,116 +98,87 @@ class HomepageBody extends StatelessWidget {
           ),
         ],
       ),
-      drawer: userRole == 'admin' ? AdminDrawer() : StaffDrawer(),
+      drawer: userRole == 'admin' ? AdminDrawer() : const StaffDrawer(),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Column(
-            children: [
-              BanakoCardRow(
-                width: double.infinity,
-                height: 120,
-                title: "New Bill",
-                subtitle: "Create a new bill",
-                backgroundGradient: MeroGradiant(),
-                radius: 16,
-                rakhneIcon: Icons.shopping_cart_checkout_outlined,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const Newbill(),
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 16),
-              Expanded(
-                child: GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    mainAxisSpacing: 12,
-                    crossAxisSpacing: 12,
-                    childAspectRatio: 0.9,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Column(
+                    children: [
+                      // Larger New Bill card
+                      BanakoCardRow(
+                        width: double.infinity,
+                        height: constraints.maxHeight *
+                            0.25, // 25% of screen height
+                        title: "New Bill",
+                        subtitle: "Create a new bill",
+                        backgroundGradient: MeroGradiant(),
+                        radius: 16,
+                        rakhneIcon: Icons.shopping_cart_checkout_outlined,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const Newbill(),
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 40),
+                      // Logo placement
+                      Opacity(
+                        opacity: 0.3,
+                        child: Image.asset(
+                          'assets/logo.png',
+                          width: double.infinity,
+                          height: constraints.maxHeight *
+                              0.15, // Adjust the height as needed
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                      SizedBox(
+                          height: constraints.maxHeight *
+                              0.05), // 5% of screen height
+                      GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3,
+                          mainAxisSpacing: 12,
+                          crossAxisSpacing: 12,
+                          childAspectRatio: 1,
+                        ),
+                        itemCount: 6,
+                        itemBuilder: (context, index) {
+                          return _buildGridItem(
+                            _getGridItemData(index),
+                            context,
+                          );
+                        },
+                      ),
+                    ],
                   ),
-                  itemCount: 6,
-                  itemBuilder: (context, index) {
-                    switch (index) {
-                      case 0:
-                        return _buildGridItem(
-                          "My Stock",
-                          HeroIcons.cube,
-                          () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const MyStock())),
-                        );
-                      case 1:
-                        return _buildGridItem(
-                          "Transactions",
-                          HeroIcons.documentText,
-                          () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      const TransactionsPage())),
-                        );
-                      case 2:
-                        return _buildGridItem(
-                          "Customers",
-                          HeroIcons.userGroup,
-                          () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => MyCustomers())),
-                        );
-                      case 3:
-                        return _buildGridItem(
-                          "Return Item",
-                          HeroIcons.arrowUturnLeft,
-                          () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const ReturnItem())),
-                        );
-                      case 4:
-                        return _buildGridItem(
-                          "Add Products",
-                          HeroIcons.plusCircle,
-                          () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      const NabhetekoProductPage())),
-                        );
-                      case 5:
-                        return _buildGridItem(
-                          "Categories",
-                          HeroIcons.tag,
-                          () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => CategoriesPage())),
-                        );
-                      default:
-                        return Container();
-                    }
-                  },
                 ),
               ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
   }
 
-  Widget _buildGridItem(String text, HeroIcons heroIcon, VoidCallback onTap) {
+  Widget _buildGridItem(GridItemData data, BuildContext context) {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
-        onTap: onTap,
+        onTap: () => Navigator.push(
+            context, MaterialPageRoute(builder: (context) => data.page)),
         child: Container(
           decoration: BoxDecoration(
             gradient: MeroGradiant(),
@@ -223,18 +194,16 @@ class HomepageBody extends StatelessWidget {
                   shape: BoxShape.circle,
                 ),
                 child: HeroIcon(
-                  heroIcon,
-                  size: 32,
-                  // color: Colors.white,
+                  data.icon,
+                  size: 24, // Slightly reduced size
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 4), // Reduced spacing
               Text(
-                text,
+                data.text,
                 style: const TextStyle(
-                  // color: Colors.white,
                   fontWeight: FontWeight.bold,
-                  fontSize: 14,
+                  fontSize: 12, // Slightly reduced font size
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -244,4 +213,35 @@ class HomepageBody extends StatelessWidget {
       ),
     );
   }
+
+  GridItemData _getGridItemData(int index) {
+    switch (index) {
+      case 0:
+        return GridItemData("My Stock", HeroIcons.cube, const MyStock());
+      case 1:
+        return GridItemData(
+            "Transactions", HeroIcons.documentText, const TransactionsPage());
+      case 2:
+        return GridItemData(
+            "Customers", HeroIcons.userGroup, const MyCustomers());
+      case 3:
+        return GridItemData(
+            "Return Item", HeroIcons.arrowUturnLeft, const ReturnItem());
+      case 4:
+        return GridItemData(
+            "Add Products", HeroIcons.plusCircle, const NabhetekoProductPage());
+      case 5:
+        return GridItemData("Categories", HeroIcons.tag, CategoriesPage());
+      default:
+        throw Exception("Invalid index");
+    }
+  }
+}
+
+class GridItemData {
+  final String text;
+  final HeroIcons icon;
+  final Widget page;
+
+  GridItemData(this.text, this.icon, this.page);
 }

@@ -106,12 +106,12 @@ class _StaffDetailPageState extends State<StaffDetailPage>
           children: [
             Container(
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Colors.green.shade100, Colors.green.shade400],
-                ),
-              ),
+                  // gradient: LinearGradient(
+                  //   begin: Alignment.topCenter,
+                  //   end: Alignment.bottomCenter,
+                  //   // colors: [Colors.green.shade100, Colors.green.shade400],
+                  // ),
+                  ),
             ),
             Align(
               alignment: Alignment.topCenter,
@@ -176,7 +176,7 @@ class _StaffDetailPageState extends State<StaffDetailPage>
       padding: const EdgeInsets.symmetric(vertical: 6.0),
       child: Row(
         children: [
-          Icon(icon, color: Colors.green),
+          Icon(icon, color: Colors.lightBlue),
           const SizedBox(width: 12),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -212,14 +212,14 @@ class _StaffDetailPageState extends State<StaffDetailPage>
         controller: controller,
         decoration: InputDecoration(
           labelText: label,
-          prefixIcon: Icon(icon, color: Colors.green),
+          prefixIcon: Icon(icon, color: Colors.blueAccent),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.green),
+            borderSide: BorderSide(color: Colors.blueAccent),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.green, width: 2),
+            borderSide: BorderSide(width: 2),
           ),
         ),
       ),
@@ -242,7 +242,7 @@ class _StaffDetailPageState extends State<StaffDetailPage>
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green.shade400,
+                  // backgroundColor: Colors.green.shade400,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
                 ),

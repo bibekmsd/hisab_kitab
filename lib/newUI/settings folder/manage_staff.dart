@@ -39,7 +39,6 @@ class _ManageStaffPageState extends State<ManageStaffPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Manage Staff'),
-        backgroundColor: Colors.green,
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: _fetchStaffData(),
@@ -80,7 +79,8 @@ class StaffCard extends StatelessWidget {
         contentPadding: const EdgeInsets.all(16.0),
         title: Text(staff['username'] ?? 'N/A'),
         subtitle: Text(staff['role'] ?? 'N/A'),
-        leading: Icon(Icons.person, color: Colors.green),
+        leading:
+            Icon(Icons.person, color: const Color.fromARGB(255, 103, 153, 240)),
         onTap: () {
           Navigator.push(
             context,

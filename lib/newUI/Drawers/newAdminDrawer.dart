@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:heroicons/heroicons.dart';
 import 'package:hisab_kitab/newUI/Drawers/progress_indicator.dart';
 import 'package:hisab_kitab/newUI/settings%20folder/manage_staff.dart';
 import 'package:hisab_kitab/pages/sign_in_page.dart';
@@ -61,205 +62,208 @@ class AdminDrawer extends StatelessWidget {
       future: _fetchAdminData(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Drawer(
-            child: Center(child: BanakoLoadingPage()),
-          );
+          return Drawer(child: Center(child: BanakoLoadingPage()));
         } else if (snapshot.hasError) {
-          return Drawer(
-            child: Center(child: Text('Error: ${snapshot.error}')),
-          );
+          return Drawer(child: Center(child: Text('Error: ${snapshot.error}')));
         }
 
-        // Dummy values if not logged in
-        final data = snapshot.data ??
-            {'shopName': 'N/A', 'panNo': 'N/A', 'address': 'N/A'};
-
-        final shopName = data['shopName'] ?? 'N/A';
-        final panNo = data['panNo'] ?? 'N/A';
-        final address = data['Address'] ?? 'N/A';
-        final phoneNo = data['phoneNo'] ?? 'N/A';
-        final username = data['username'] ?? 'N/A';
+        final data = snapshot.data ?? {};
 
         return Drawer(
-          width: 250,
-          child: Column(
-            children: <Widget>[
-              // Header section with drawer icon
-              Container(
-                color: Colors.blue,
-                width: double.infinity,
-                padding: EdgeInsets.all(16.0),
-                child: Row(
-                  children: <Widget>[
-                    Icon(
-                      Icons.menu,
-                      color: Colors.white,
-                      size: 30,
-                    ),
-                    SizedBox(width: 16.0),
-                    Expanded(
-                      child: Text(
-                        'Admin Dashboard',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
+          child: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Color(0xFF7EB6FF), Color(0xFF9599E2)],
+              ),
+            ),
+            child: SafeArea(
+              child: Column(
+                children: [
+                  _buildHeader(data),
+                  Expanded(
+                    child: Container(
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(30),
+                          topRight: Radius.circular(30),
                         ),
                       ),
+                      child: ListView(
+                        padding: EdgeInsets.zero,
+                        children: [
+                          _buildMenuItem(
+                            icon: HeroIcons.userGroup,
+                            title: 'Manage Staff',
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      const ManageStaffPage()),
+                            ),
+                          ),
+                          _buildMenuItem(
+                            icon: HeroIcons.userPlus,
+                            title: 'Add User',
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const SignUpPage()),
+                            ),
+                          ),
+                          _buildMenuItem(
+                            icon: HeroIcons.arrowRightOnRectangle,
+                            title: 'Logout',
+                            onTap: () => _handleLogout(context),
+                          ),
+                        ],
+                      ),
                     ),
-                  ],
-                ),
-              ),
-              // Spacer to push content down
-
-              // Header section with shop details
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.blue, Colors.lightBlueAccent],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
                   ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    CircleAvatar(
-                      radius: 40,
-                      backgroundImage: AssetImage(
-                          'assets/admin_photo.png'), // Admin profile photo
-                    ),
-                    SizedBox(height: 16.0),
-                    Text(
-                      shopName,
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(height: 8.0),
-                    Text(
-                      'Address: $address',
-                      style: TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                    SizedBox(height: 8.0),
-                    Text(
-                      'Phone No: $phoneNo',
-                      style: TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                    SizedBox(height: 8.0),
-                    Text(
-                      'PAN No: $panNo',
-                      style: TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                    SizedBox(height: 8.0),
-                    Text(
-                      'Role: Admin',
-                      style: TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                    SizedBox(height: 8.0),
-                    Text(
-                      'User Name: $username',
-                      style: TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                  ],
-                ),
+                  _buildFooter(),
+                ],
               ),
-              const Divider(),
-              ListTile(
-                leading: const Icon(Icons.people),
-                title: const Text('Manage Staffs'),
-                trailing: Icon(Icons.arrow_forward_ios, size: 16),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const ManageStaffPage(),
-                    ),
-                  );
-                },
-              ),
-              Divider(),
-              SizedBox(height: 40),
-
-              // Actions section
-              ListTile(
-                leading: Icon(Icons.person_add, color: Colors.blue),
-                title: Text('Add User'),
-                onTap: () {
-                  // Navigate to NabhetekoProductPage when tapped
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => SignUpPage(),
-                    ),
-                  );
-                },
-              ),
-              Divider(),
-              ListTile(
-                leading: Icon(Icons.logout, color: Colors.red),
-                title: Text('Logout'),
-                onTap: () async {
-                  // Handle logout
-                  await FirebaseAuth.instance.signOut();
-
-                  // Clear cached admin data on logout
-                  AdminDataCache.instance.clearAdminData();
-
-                  // Navigate to SignInPage after logout
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (context) => SignInPage()),
-                    (Route<dynamic> route) =>
-                        false, // Removes all previous routes
-                  );
-                },
-              ),
-              Divider(),
-              // Footer section
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: <Widget>[
-                    Text(
-                      'App Version 1.0.0',
-                      style: TextStyle(color: Colors.grey[600], fontSize: 14),
-                    ),
-                    SizedBox(height: 10.0),
-                    Text(
-                      '© The ChatGPT guys',
-                      style: TextStyle(color: Colors.grey[600], fontSize: 14),
-                    ),
-                    SizedBox(height: 4.0), // Adds space between the lines
-                    Text(
-                      '2024',
-                      style: TextStyle(color: Colors.grey[600], fontSize: 14),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+            ),
           ),
         );
       },
     );
   }
-}
 
-// const Divider(),
-//           ListTile(
-//             leading: const Icon(Icons.people),
-//             title: const Text('Manage Staff Accounts'),
-//             trailing: Icon(Icons.arrow_forward_ios, size: 16),
-//             onTap: () {
-//               Navigator.push(
-//                 context,
-//                 MaterialPageRoute(
-//                   builder: (context) => const ManageStaffPage(),
-//                 ),
-//               );
-//             },
-//           ),
+  Widget _buildHeader(Map<String, dynamic> data) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+      child: Column(
+        children: [
+          const CircleAvatar(
+            radius: 45,
+            backgroundImage: AssetImage('assets/admin_photo.png'),
+          ),
+          const SizedBox(height: 15),
+          Text(
+            data['shopName']?.toString() ?? 'Shop Name N/A',
+            style: const TextStyle(
+                color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 3),
+          Text(
+            data['username']?.toString() ?? 'Username N/A',
+            style:
+                TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 14),
+          ),
+          const SizedBox(height: 15),
+          _buildInfoRow(
+            data['phoneNo']?.toString() ?? 'Phone N/A',
+            data['Address']?.toString() ?? 'Address N/A',
+            data['panNo']?.toString() ?? 'PAN N/A',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(String phone, String address, String pan) {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _buildCompactInfoChip(HeroIcons.phone, phone),
+            const SizedBox(width: 10),
+            _buildCompactInfoChip(HeroIcons.buildingOffice, address),
+          ],
+        ),
+        const SizedBox(height: 10),
+        _buildCompactInfoChip(HeroIcons.identification, 'PAN: $pan'),
+      ],
+    );
+  }
+
+  Widget _buildCompactInfoChip(HeroIcons icon, String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          HeroIcon(icon, color: Colors.white, size: 14),
+          const SizedBox(width: 5),
+          Text(
+            label,
+            style: const TextStyle(color: Colors.white, fontSize: 12),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoChip(HeroIcons icon, String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          HeroIcon(icon, color: Colors.white, size: 16),
+          const SizedBox(width: 8),
+          Text(label, style: TextStyle(color: Colors.white, fontSize: 14)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMenuItem(
+      {required HeroIcons icon,
+      required String title,
+      required VoidCallback onTap}) {
+    return ListTile(
+      leading: HeroIcon(
+        icon,
+        style: HeroIconStyle.outline,
+        color: const Color(0xFF9599E2),
+      ),
+      title: Text(
+        title,
+        style: const TextStyle(
+          color: Color(0xFF0C1E3C),
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      onTap: onTap,
+    );
+  }
+
+  Widget _buildFooter() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 20),
+      child: const Column(
+        children: [
+          Text('App Version 1.0.0', style: TextStyle(color: Colors.white70)),
+          SizedBox(height: 5),
+          Text('© The Last Minute Guys',
+              style: TextStyle(color: Colors.white70)),
+          Text('2024', style: TextStyle(color: Colors.white70)),
+        ],
+      ),
+    );
+  }
+
+  void _handleLogout(BuildContext context) async {
+    await FirebaseAuth.instance.signOut();
+    AdminDataCache.instance.clearAdminData();
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const SignInPage()),
+      (Route<dynamic> route) => false,
+    );
+  }
+}

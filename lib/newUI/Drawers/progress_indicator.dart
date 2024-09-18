@@ -1,43 +1,14 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
-class BanakoLoadingPage extends StatelessWidget {
-  final String message;
-  const BanakoLoadingPage({
-    Key? key,
-    this.message = 'Loading...',
-  }) : super(key: key);
+class BanakoLoadingPage extends StatefulWidget {
+  const BanakoLoadingPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: Colors.black.withOpacity(0.7),
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ModernLoadingIndicator(),
-            SizedBox(height: 24),
-            Text(
-              message,
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w500),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  _BanakoLoadingPageState createState() => _BanakoLoadingPageState();
 }
 
-class ModernLoadingIndicator extends StatefulWidget {
-  @override
-  _ModernLoadingIndicatorState createState() => _ModernLoadingIndicatorState();
-}
-
-class _ModernLoadingIndicatorState extends State<ModernLoadingIndicator>
+class _BanakoLoadingPageState extends State<BanakoLoadingPage>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
@@ -67,8 +38,8 @@ class _ModernLoadingIndicatorState extends State<ModernLoadingIndicator>
         );
       },
       child: Container(
-        width: 80,
-        height: 80,
+        width: 60,
+        height: 60,
         child: CustomPaint(
           painter: _ModernLoadingPainter(),
         ),
@@ -83,38 +54,28 @@ class _ModernLoadingPainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = math.min(size.width, size.height) / 2;
 
-    final gradientColors = [
-      Colors.blue,
-      Colors.purple,
-      Colors.red,
-      Colors.orange,
-      Colors.yellow,
-      Colors.green,
-    ];
-
     final paint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 8
+      ..strokeWidth = 4
       ..strokeCap = StrokeCap.round;
 
-    for (int i = 0; i < 6; i++) {
-      final startAngle = (i * math.pi / 3) - (math.pi / 2);
-      final sweepAngle = math.pi / 4;
+    // Main circle
+    paint.color = Colors.white.withOpacity(0.2);
+    canvas.drawCircle(center, radius, paint);
 
-      paint.shader = SweepGradient(
-        colors: [gradientColors[i], gradientColors[(i + 1) % 6]],
-        startAngle: startAngle,
-        endAngle: startAngle + sweepAngle,
-      ).createShader(Rect.fromCircle(center: center, radius: radius));
+    // Animated arc
+    paint.color = Colors.white;
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius),
+      -math.pi / 2,
+      math.pi * 1.5,
+      false,
+      paint,
+    );
 
-      canvas.drawArc(
-        Rect.fromCircle(center: center, radius: radius),
-        startAngle,
-        sweepAngle,
-        false,
-        paint,
-      );
-    }
+    // Center dot
+    paint.style = PaintingStyle.fill;
+    canvas.drawCircle(center, 4, paint);
   }
 
   @override
