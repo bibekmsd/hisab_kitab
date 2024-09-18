@@ -46,16 +46,19 @@ class _NewbillState extends State<Newbill> {
 
         if (nameQuerySnapshot.docs.isNotEmpty) {
           final productData = nameQuerySnapshot.docs.first.data();
-          setState(() {
-            _scannedValues.add({
-              'name': productData['Name'],
-              'barcode': productData['Barcode'],
-              'price': productData['Price'],
-              'quantity': 1,
-              'totalPrice': productData['Price'],
-              'ImageUrl': productData['ImageUrl']
+
+          if (!_isProductAlreadyScanned(productData['Barcode'])) {
+            setState(() {
+              _scannedValues.add({
+                'name': productData['Name'],
+                'barcode': productData['Barcode'],
+                'price': productData['Price'],
+                'quantity': 1,
+                'totalPrice': productData['Price'],
+                'ImageUrl': productData['ImageUrl']
+              });
             });
-          });
+          }
         } else {
           // If no product found, dispose of the camera controller and show modal
           cameraController?.dispose();
@@ -70,20 +73,28 @@ class _NewbillState extends State<Newbill> {
       } else {
         // If a barcode match is found
         final productData = querySnapshot.docs.first.data();
-        setState(() {
-          _scannedValues.add({
-            'name': productData['Name'],
-            'barcode': productData['Barcode'],
-            'price': productData['Price'],
-            'quantity': 1,
-            'totalPrice': productData['Price'],
-            'ImageUrl': productData['ImageUrl']
+
+        if (!_isProductAlreadyScanned(productData['Barcode'])) {
+          setState(() {
+            _scannedValues.add({
+              'name': productData['Name'],
+              'barcode': productData['Barcode'],
+              'price': productData['Price'],
+              'quantity': 1,
+              'totalPrice': productData['Price'],
+              'ImageUrl': productData['ImageUrl']
+            });
           });
-        });
+        }
       }
     } catch (e) {
       print('Error searching barcode or name: $e');
     }
+  }
+
+// Function to check if product is already scanned based on barcode
+  bool _isProductAlreadyScanned(String barcode) {
+    return _scannedValues.any((product) => product['barcode'] == barcode);
   }
 
   void _handleDelete(int index) {
@@ -223,71 +234,81 @@ class _NewbillState extends State<Newbill> {
               itemCount: _scannedValues.length,
               itemBuilder: (context, index) {
                 final product = _scannedValues[index];
-                return Card(
-                  elevation: 4,
-                  margin:
-                      const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      radius: 30,
-                      backgroundImage: product['ImageUrl'] != null &&
-                              product['ImageUrl'].isNotEmpty
-                          ? NetworkImage(product['ImageUrl'])
-                          : const AssetImage('assets/default_image.png')
-                              as ImageProvider,
-                      child: product['ImageUrl'] == null ||
-                              product['ImageUrl'].isEmpty
-                          ? const HeroIcon(HeroIcons.photo)
-                          : null,
+                return Padding(
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 8.0, horizontal: 16.0),
+                  child: SizedBox(
+                    // height: MediaQuery.of(context).size.height * 0.3,
+                    width: MediaQuery.of(context).size.width *
+                        0.9, // Adjusts card width
+                    child: Card(
+                      elevation: 4,
+                      margin:
+                          EdgeInsets.zero, // Remove default margin from Card
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          radius: 30,
+                          backgroundImage: product['ImageUrl'] != null &&
+                                  product['ImageUrl'].isNotEmpty
+                              ? NetworkImage(product['ImageUrl'])
+                              : const AssetImage('assets/default_image.png')
+                                  as ImageProvider,
+                          child: product['ImageUrl'] == null ||
+                                  product['ImageUrl'].isEmpty
+                              ? const HeroIcon(HeroIcons.photo)
+                              : null,
+                        ),
+                        title: Text(product['name'],
+                            style:
+                                const TextStyle(fontWeight: FontWeight.bold)),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Barcode: ${product['barcode']}'),
+                            Text('Price: ${product['price']}'),
+                            Text('Quantity: ${product['quantity']}'),
+                            Text('Total: ${product['totalPrice']}'),
+                          ],
+                        ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const HeroIcon(HeroIcons.minusCircle),
+                              onPressed: () => _decrementQuantity(index),
+                            ),
+                            Text('${product['quantity']}'),
+                            IconButton(
+                              icon: const HeroIcon(HeroIcons.plusCircle),
+                              onPressed: () => _incrementQuantity(index),
+                            ),
+                            IconButton(
+                              icon: const HeroIcon(HeroIcons.trash),
+                              onPressed: () => _handleDelete(index),
+                            ),
+                          ],
+                        ),
+                        onTap: () async {
+                          final updatedProduct = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => EditProductPage(
+                                initialProductName: product['name'],
+                                initialMRP: product['price'],
+                                initialPrice: product['price'],
+                                initialWholesalePrice: product['price'],
+                                initialQuantity: product['quantity'],
+                                initialDiscount: 0.0,
+                                initialImageUrl: product['ImageUrl'],
+                              ),
+                            ),
+                          );
+                          if (updatedProduct != null) {
+                            _updateProductDetails(index, updatedProduct);
+                          }
+                        },
+                      ),
                     ),
-                    title: Text(product['name'],
-                        style: const TextStyle(fontWeight: FontWeight.bold)),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Barcode: ${product['barcode']}'),
-                        Text('Price: ${product['price']}'),
-                        Text('Quantity: ${product['quantity']}'),
-                        Text('Total: ${product['totalPrice']}'),
-                      ],
-                    ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: const HeroIcon(HeroIcons.minusCircle),
-                          onPressed: () => _decrementQuantity(index),
-                        ),
-                        Text('${product['quantity']}'),
-                        IconButton(
-                          icon: const HeroIcon(HeroIcons.plusCircle),
-                          onPressed: () => _incrementQuantity(index),
-                        ),
-                        IconButton(
-                          icon: const HeroIcon(HeroIcons.trash),
-                          onPressed: () => _handleDelete(index),
-                        ),
-                      ],
-                    ),
-                    onTap: () async {
-                      final updatedProduct = await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => EditProductPage(
-                            initialProductName: product['name'],
-                            initialMRP: product['price'],
-                            initialPrice: product['price'],
-                            initialWholesalePrice: product['price'],
-                            initialQuantity: product['quantity'],
-                            initialDiscount: 0.0,
-                            initialImageUrl: product['ImageUrl'],
-                          ),
-                        ),
-                      );
-                      if (updatedProduct != null) {
-                        _updateProductDetails(index, updatedProduct);
-                      }
-                    },
                   ),
                 );
               },
