@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class BanakoCardColumn extends StatelessWidget {
   final VoidCallback onTap;
   final String text;
-  final Color textColor;
+  // final Color textColor;
   final Gradient backgroundGradient;
   final double radius;
   final IconData rakhneIcon;
@@ -13,7 +13,7 @@ class BanakoCardColumn extends StatelessWidget {
   const BanakoCardColumn({
     super.key,
     required this.text,
-    required this.textColor,
+    // required this.textColor,
     required this.backgroundGradient,
     required this.radius,
     required this.rakhneIcon,
@@ -45,7 +45,7 @@ class BanakoCardColumn extends StatelessWidget {
             children: [
               Icon(
                 rakhneIcon,
-                color: textColor,
+                // color: textColor,
                 size: 40,
               ),
               const SizedBox(height: 2.0),
@@ -54,8 +54,8 @@ class BanakoCardColumn extends StatelessWidget {
                 maxLines: 2,
                 overflow: TextOverflow.fade,
                 text,
-                style: TextStyle(
-                  color: textColor,
+                style: const TextStyle(
+                  // color: textColor,
                   fontSize: 18.0,
                   fontWeight: FontWeight.bold,
                 ),

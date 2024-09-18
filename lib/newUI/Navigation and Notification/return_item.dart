@@ -61,7 +61,8 @@ class _ReturnItemState extends State<ReturnItem> {
         // Initialize returnQuantity to 0 for each product
         uniqueProductsMap.values.forEach((product) {
           product['returnQuantity'] = 0;
-          product['totalPrice'] = (product['price'] as num? ?? 0) * (product['quantity'] as num? ?? 0);
+          product['totalPrice'] = (product['price'] as num? ?? 0) *
+              (product['quantity'] as num? ?? 0);
         });
 
         setState(() {
@@ -199,138 +200,202 @@ class _ReturnItemState extends State<ReturnItem> {
       appBar: AppBar(
         title: const Text('Return Item'),
         leading: const BackButton(),
+        elevation: 0,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextField(
-              controller: _billNumberController,
-              decoration: InputDecoration(
-                labelText: 'Enter Bill Number',
-                border: OutlineInputBorder(),
-                suffixIcon: IconButton(
-                  icon: Icon(Icons.search),
-                  onPressed: _searchBill,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.blue.shade50, Colors.white],
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Card(
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: TextField(
+                    controller: _billNumberController,
+                    decoration: InputDecoration(
+                      labelText: 'Enter Bill Number',
+                      border: InputBorder.none,
+                      suffixIcon: IconButton(
+                        icon: Icon(Icons.search, color: Colors.blue),
+                        onPressed: _searchBill,
+                      ),
+                    ),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 16),
-            if (_errorMessage != null) ...[
-              Text(
-                _errorMessage!,
-                style: TextStyle(color: Colors.red),
-              ),
               const SizedBox(height: 16),
-            ],
-            if (_purchaseDate != null) ...[
-              Text(
-                'Purchase Date: ${DateFormat('yyyy-MM-dd').format(_purchaseDate!)}',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              if (!_canReturn(_purchaseDate))
-                Text(
-                  'Products cannot be returned after 7 days of purchase.',
-                  style: TextStyle(color: Colors.red),
+              if (_errorMessage != null) ...[
+                Card(
+                  color: Colors.red.shade100,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      _errorMessage!,
+                      style: TextStyle(color: Colors.red.shade800),
+                    ),
+                  ),
                 ),
-              const SizedBox(height: 16),
-            ],
-            if (_products.isNotEmpty) ...[
-              Text(
-                'Products:',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: _products.length,
-                  itemBuilder: (context, index) {
-                    final product = _products[index];
-                    int purchasedQuantity = product['quantity'] ?? 0;
-                    int returnQuantity = product['returnQuantity'] ?? 0;
-
-                    return Card(
-                      elevation: 2,
-                      margin: EdgeInsets.symmetric(vertical: 8),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              product['name'] ?? 'No Name',
-                              style: TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.bold),
+                const SizedBox(height: 16),
+              ],
+              if (_purchaseDate != null) ...[
+                Card(
+                  color: Colors.blue.shade100,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Purchase Date: ${DateFormat('yyyy-MM-dd').format(_purchaseDate!)}',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        if (!_canReturn(_purchaseDate))
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Text(
+                              'Products cannot be returned after 7 days of purchase.',
+                              style: TextStyle(color: Colors.red.shade800),
                             ),
-                            const SizedBox(height: 8),
-                            Text('Barcode: ${product['barcode'] ?? 'N/A'}'),
-                            Text(
-                                'Price: ${(product['price'] as num?)?.toStringAsFixed(2) ?? '0.00'}'),
-                            Text(
-                                'Total Price: ${(product['totalPrice'] as num?)?.toStringAsFixed(2) ?? '0.00'}'),
-                            Text('Purchased Quantity: $purchasedQuantity'),
-                            const SizedBox(height: 16),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text('Return Quantity:'),
-                                Row(
-                                  children: [
-                                    IconButton(
-                                      icon: Icon(Icons.remove),
-                                      onPressed: returnQuantity > 0
-                                          ? () {
-                                              setState(() {
-                                                product['returnQuantity'] =
-                                                    returnQuantity - 1;
-                                              });
-                                            }
-                                          : null,
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+              if (_products.isNotEmpty) ...[
+                Text(
+                  'Products',
+                  style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue.shade800),
+                ),
+                const SizedBox(height: 8),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: _products.length,
+                    itemBuilder: (context, index) {
+                      final product = _products[index];
+                      int purchasedQuantity = product['quantity'] ?? 0;
+                      int returnQuantity = product['returnQuantity'] ?? 0;
+
+                      return Card(
+                        elevation: 2,
+                        margin: const EdgeInsets.symmetric(vertical: 8),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                product['name'] ?? 'No Name',
+                                style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.blue.shade800),
+                              ),
+                              const SizedBox(height: 8),
+                              Text('Barcode: ${product['barcode'] ?? 'N/A'}'),
+                              Text(
+                                  'Price: \$${(product['price'] as num?)?.toStringAsFixed(2) ?? '0.00'}'),
+                              Text(
+                                  'Total Price: \$${(product['totalPrice'] as num?)?.toStringAsFixed(2) ?? '0.00'}'),
+                              Text('Purchased Quantity: $purchasedQuantity'),
+                              const SizedBox(height: 16),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Text('Return Quantity:',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold)),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      border: Border.all(color: Colors.blue),
+                                      borderRadius: BorderRadius.circular(20),
                                     ),
-                                    Text('$returnQuantity'),
-                                    IconButton(
-                                      icon: Icon(Icons.add),
-                                      onPressed:
-                                          returnQuantity < purchasedQuantity
+                                    child: Row(
+                                      children: [
+                                        IconButton(
+                                          icon: const Icon(Icons.remove,
+                                              color: Colors.blue),
+                                          onPressed: returnQuantity > 0
                                               ? () {
                                                   setState(() {
                                                     product['returnQuantity'] =
-                                                        returnQuantity + 1;
+                                                        returnQuantity - 1;
                                                   });
                                                 }
                                               : null,
+                                        ),
+                                        Text('$returnQuantity',
+                                            style: const TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold)),
+                                        IconButton(
+                                          icon: const Icon(Icons.add,
+                                              color: Colors.blue),
+                                          onPressed:
+                                              returnQuantity < purchasedQuantity
+                                                  ? () {
+                                                      setState(() {
+                                                        product['returnQuantity'] =
+                                                            returnQuantity + 1;
+                                                      });
+                                                    }
+                                                  : null,
+                                        ),
+                                      ],
                                     ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-                            Center(
-                              child: ElevatedButton(
-                                onPressed: _canReturn(_purchaseDate) &&
-                                        returnQuantity > 0
-                                    ? () => _returnProduct(product)
-                                    : null,
-                                child: Text('Return'),
-                                style: ElevatedButton.styleFrom(
-                                  minimumSize: Size(double.infinity, 36),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              Center(
+                                child: ElevatedButton(
+                                  onPressed: _canReturn(_purchaseDate) &&
+                                          returnQuantity > 0
+                                      ? () => _returnProduct(product)
+                                      : null,
+                                  child: const Text('Return'),
+                                  style: ElevatedButton.styleFrom(
+                                    minimumSize:
+                                        const Size(double.infinity, 36),
+                                    backgroundColor: Colors.blue,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(18),
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
-              ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
   }
 }
-

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:heroicons/heroicons.dart';
 import 'package:hisab_kitab/newUI/Home%20page%20icons/New%20Bill/edit_page.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -19,13 +20,12 @@ class _NewbillState extends State<Newbill> {
   final TextEditingController barcodeController = TextEditingController();
   bool isScanning = false;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  MobileScannerController cameraController = MobileScannerController();
+  MobileScannerController? cameraController;
 
   @override
   void dispose() {
     barcodeController.dispose();
-    cameraController.dispose();
-    cameraController.dispose();
+    cameraController?.dispose();
     super.dispose();
   }
 
@@ -57,7 +57,9 @@ class _NewbillState extends State<Newbill> {
             });
           });
         } else {
-          // If no product found, show modal to add the new product
+          // If no product found, dispose of the camera controller and show modal
+          cameraController?.dispose();
+          cameraController = null;
           showModalBottomSheet(
             context: context,
             isScrollControlled: true,
@@ -168,45 +170,47 @@ class _NewbillState extends State<Newbill> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 123, 139, 123),
         title: const Text("Naya Bill"),
+        actions: [
+          IconButton(
+            icon: const HeroIcon(HeroIcons.qrCode),
+            onPressed: () {
+              setState(() {
+                isScanning = !isScanning;
+                if (isScanning) {
+                  cameraController = MobileScannerController();
+                } else {
+                  cameraController?.dispose();
+                  cameraController = null;
+                }
+              });
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [
-          Container(
-            height: 100,
-            decoration: const BoxDecoration(color: Colors.grey),
-            child: isScanning
-                ? MobileScanner(
-                    controller: cameraController,
-                    onDetect: handleScanResult,
-                  )
-                : Row(
-                    children: [
-                      IconButton(
-                        onPressed: () {
-                          setState(() {
-                            isScanning = !isScanning;
-                          });
-                        },
-                        icon: const Icon(Icons.barcode_reader),
-                        iconSize: 42,
-                      ),
-                      const Text(
-                        "Scan Barcode",
-                        style: TextStyle(
-                            fontSize: 26, fontWeight: FontWeight.w600),
-                      )
-                    ],
-                  ),
-          ),
+          if (isScanning)
+            Container(
+              height: MediaQuery.of(context).size.height * 0.12,
+              width: MediaQuery.of(context).size.width,
+              child: MobileScanner(
+                controller: cameraController!,
+                onDetect: handleScanResult,
+              ),
+            ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            padding: const EdgeInsets.all(16.0),
             child: TextField(
               controller: barcodeController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText: "Search Barcode or Name",
-                prefixIcon: Icon(Icons.qr_code_scanner),
+                prefixIcon: const HeroIcon(HeroIcons.magnifyingGlass),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                filled: true,
+                fillColor: Colors.grey[200],
               ),
               onSubmitted: (value) {
                 _searchBarcodeOrName(value);
@@ -220,85 +224,70 @@ class _NewbillState extends State<Newbill> {
               itemBuilder: (context, index) {
                 final product = _scannedValues[index];
                 return Card(
+                  elevation: 4,
+                  margin:
+                      const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                   child: ListTile(
-                    title: Row(
+                    leading: CircleAvatar(
+                      radius: 30,
+                      backgroundImage: product['ImageUrl'] != null &&
+                              product['ImageUrl'].isNotEmpty
+                          ? NetworkImage(product['ImageUrl'])
+                          : const AssetImage('assets/default_image.png')
+                              as ImageProvider,
+                      child: product['ImageUrl'] == null ||
+                              product['ImageUrl'].isEmpty
+                          ? const HeroIcon(HeroIcons.photo)
+                          : null,
+                    ),
+                    title: Text(product['name'],
+                        style: const TextStyle(fontWeight: FontWeight.bold)),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Column(
-                          children: [
-                            CircleAvatar(
-                              radius: 30,
-                              backgroundImage: product['ImageUrl'] != null &&
-                                      product['ImageUrl'].isNotEmpty
-                                  ? NetworkImage(product['ImageUrl'])
-                                  : const AssetImage('assets/default_image.png')
-                                      as ImageProvider,
-                              child: product['ImageUrl'] == null ||
-                                      product['ImageUrl'].isEmpty
-                                  ? const Icon(
-                                      Icons.image,
-                                      size: 30,
-                                    )
-                                  : null,
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.edit),
-                              onPressed: () async {
-                                final updatedProduct = await Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => EditProductPage(
-                                      initialProductName: product['name'],
-                                      initialMRP: product['price'],
-                                      initialPrice: product['price'],
-                                      initialWholesalePrice: product['price'],
-                                      initialQuantity: product['quantity'],
-                                      initialDiscount: 0.0,
-                                      initialImageUrl: product['ImageUrl'],
-                                    ),
-                                  ),
-                                );
-
-                                // Check if product was updated
-                                if (updatedProduct != null) {
-                                  _updateProductDetails(index, updatedProduct);
-                                }
-                              },
-                            ),
-                          ],
-                        ),
-                        const SizedBox(width: 20),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('Name: ${product['name']}'),
-                              Text('Barcode: ${product['barcode']}'),
-                              Text('Price: ${product['price']}'),
-                              Text('Quantity: ${product['quantity']}'),
-                              Text('Total: ${product['totalPrice']}'),
-                            ],
-                          ),
-                        ),
+                        Text('Barcode: ${product['barcode']}'),
+                        Text('Price: ${product['price']}'),
+                        Text('Quantity: ${product['quantity']}'),
+                        Text('Total: ${product['totalPrice']}'),
                       ],
                     ),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.remove_circle_outline),
+                          icon: const HeroIcon(HeroIcons.minusCircle),
                           onPressed: () => _decrementQuantity(index),
                         ),
                         Text('${product['quantity']}'),
                         IconButton(
-                          icon: const Icon(Icons.add_circle_outline),
+                          icon: const HeroIcon(HeroIcons.plusCircle),
                           onPressed: () => _incrementQuantity(index),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.delete),
+                          icon: const HeroIcon(HeroIcons.trash),
                           onPressed: () => _handleDelete(index),
                         ),
                       ],
                     ),
+                    onTap: () async {
+                      final updatedProduct = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => EditProductPage(
+                            initialProductName: product['name'],
+                            initialMRP: product['price'],
+                            initialPrice: product['price'],
+                            initialWholesalePrice: product['price'],
+                            initialQuantity: product['quantity'],
+                            initialDiscount: 0.0,
+                            initialImageUrl: product['ImageUrl'],
+                          ),
+                        ),
+                      );
+                      if (updatedProduct != null) {
+                        _updateProductDetails(index, updatedProduct);
+                      }
+                    },
                   ),
                 );
               },
@@ -322,12 +311,11 @@ class _NewbillState extends State<Newbill> {
                 const SizedBox(height: 10),
                 ElevatedButton(
                   onPressed: _isLoading
-                      ? null // Disable the button if it's loading
+                      ? null
                       : () async {
                           setState(() {
-                            _isLoading = true; // Disable the button
+                            _isLoading = true;
                           });
-
                           try {
                             await _updateStockAfterCheckout();
                             Navigator.push(
@@ -343,16 +331,23 @@ class _NewbillState extends State<Newbill> {
                             );
                           } finally {
                             setState(() {
-                              _isLoading =
-                                  false; // Re-enable the button once done
+                              _isLoading = false;
                             });
                           }
                         },
                   child: _isLoading
                       ? const CircularProgressIndicator(
-                          strokeWidth: BorderSide.strokeAlignCenter,
-                          color: Colors.white) // Show a spinner when loading
+                          strokeWidth: 2,
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
+                        )
                       : const Text('Proceed to Checkout'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ),
                 )
               ],
             ),

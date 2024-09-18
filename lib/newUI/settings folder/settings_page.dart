@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:hisab_kitab/main.dart';
 import 'package:hisab_kitab/newUI/settings%20folder/about_app.dart';
 import 'package:hisab_kitab/newUI/settings%20folder/forgot_pass.dart';
-import 'package:hisab_kitab/newUI/settings%20folder/manage_staff.dart';
 import 'package:hisab_kitab/newUI/settings%20folder/shop_info_page.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -20,7 +19,6 @@ class _SettingsPageState extends State<SettingsPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Settings"),
-        backgroundColor: Colors.green,
       ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),

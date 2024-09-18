@@ -1,5 +1,3 @@
-
-  
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -14,7 +12,6 @@ class CustomerDetails extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Customer Details'),
-        backgroundColor: Colors.blue,
       ),
       body: StreamBuilder<DocumentSnapshot>(
         stream: FirebaseFirestore.instance
@@ -115,7 +112,8 @@ class CustomerDetails extends StatelessWidget {
                               },
                               children: [
                                 TableRow(
-                                  decoration: BoxDecoration(color: Colors.grey[200]),
+                                  decoration:
+                                      BoxDecoration(color: Colors.grey[200]),
                                   children: [
                                     _buildTableHeader('Product Name'),
                                     _buildTableHeader('Quantity'),
@@ -125,9 +123,15 @@ class CustomerDetails extends StatelessWidget {
                                 ),
                                 ...products.map((product) {
                                   String productName = product['name'] ?? '';
-                                  int price = (product['price'] as num?)?.toInt() ?? 0;
-                                  int quantity = (product['quantity'] as num?)?.toInt() ?? 0;
-                                  int totalPrice = (product['totalPrice'] as num?)?.toInt() ?? 0;
+                                  int price =
+                                      (product['price'] as num?)?.toInt() ?? 0;
+                                  int quantity =
+                                      (product['quantity'] as num?)?.toInt() ??
+                                          0;
+                                  int totalPrice =
+                                      (product['totalPrice'] as num?)
+                                              ?.toInt() ??
+                                          0;
 
                                   return TableRow(
                                     children: [
@@ -154,7 +158,8 @@ class CustomerDetails extends StatelessWidget {
     );
   }
 
-Widget _buildInfoCard({required String title, required List<Widget> content}) {
+  Widget _buildInfoCard(
+      {required String title, required List<Widget> content}) {
     return Card(
       elevation: 2,
       child: Padding(
@@ -211,5 +216,4 @@ Widget _buildInfoCard({required String title, required List<Widget> content}) {
       ),
     );
   }
- 
 }

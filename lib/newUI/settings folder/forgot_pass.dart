@@ -31,7 +31,6 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Reset Password'),
-        backgroundColor: Colors.green,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -43,7 +42,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 const Icon(
                   Icons.lock_reset,
                   size: 100,
-                  color: Colors.green,
+                  // color: Colors.green,
                 ),
                 const SizedBox(height: 20),
                 const Text(
@@ -51,7 +50,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                    // color: Colors.black87,
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -81,10 +80,12 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   width: double.infinity, // Full width button
                   child: ElevatedButton.icon(
                     onPressed: _sendPasswordResetEmail,
-                    icon: const Icon(Icons.send, color: Colors.white),
+                    icon: const Icon(
+                      Icons.send,
+                    ),
                     label: const Text("Send Reset Email"),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
+                      // backgroundColor: Colors.green,
                       padding: const EdgeInsets.symmetric(
                           vertical: 15, horizontal: 20),
                       shape: RoundedRectangleBorder(
@@ -98,17 +99,16 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   ),
                 ),
                 if (_emailSent)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 20),
+                  const Padding(
+                    padding: EdgeInsets.only(top: 20),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                        Icon(Icons.check_circle, color: Colors.green),
+                      children: [
+                        Icon(Icons.check_circle),
                         SizedBox(width: 8),
                         Text(
                           "Password reset email sent! Check your inbox.",
                           style: TextStyle(
-                            color: Colors.green,
                             fontWeight: FontWeight.bold,
                           ),
                         ),

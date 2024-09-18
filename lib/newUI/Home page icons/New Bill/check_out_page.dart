@@ -212,7 +212,6 @@ class CheckOutPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Check Out'),
-        backgroundColor: Colors.blue,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -322,7 +321,6 @@ class CheckOutPage extends StatelessWidget {
                   icon: Icon(Icons.receipt),
                   label: Text('Generate PDF'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
                     padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class BanakoCardRow extends StatelessWidget {
   final String title;
   final String subtitle;
-  final Color textColor;
+  // final Color textColor;
   final Gradient backgroundGradient;
   final double radius;
   final IconData rakhneIcon;
@@ -14,7 +14,7 @@ class BanakoCardRow extends StatelessWidget {
     super.key,
     required this.title,
     required this.subtitle,
-    required this.textColor,
+    // required this.textColor,
     required this.backgroundGradient,
     required this.radius,
     required this.rakhneIcon,
@@ -50,7 +50,7 @@ class BanakoCardRow extends StatelessWidget {
                   Text(
                     title,
                     style: TextStyle(
-                      color: textColor,
+                      // color: textColor,
                       fontSize: 24.0,
                       fontWeight: FontWeight.bold,
                     ),
@@ -59,7 +59,7 @@ class BanakoCardRow extends StatelessWidget {
                   Text(
                     subtitle,
                     style: TextStyle(
-                      color: textColor,
+                      // color: textColor,
                       fontSize: 16.0,
                     ),
                   ),
@@ -68,13 +68,13 @@ class BanakoCardRow extends StatelessWidget {
               const Spacer(),
               Container(
                 decoration: BoxDecoration(
-                  color: textColor.withOpacity(0.1),
+                  // color: textColor.withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
                 child: IconButton(
                   icon: Icon(
                     rakhneIcon,
-                    color: textColor,
+                    // color: textColor,
                   ),
                   onPressed: () {},
                 ),

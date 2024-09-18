@@ -16,12 +16,8 @@ class _CategoriesPageState extends State<CategoriesPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Browse Products from our catalogue'),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            // handle back press
-          },
-        ),
+       
+      
       ),
       body: Row(
         children: [
@@ -45,17 +41,6 @@ class _CategoriesPageState extends State<CategoriesPage> {
             ),
           ),
         ],
-      ),
-      bottomNavigationBar: BottomAppBar(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: ElevatedButton(
-            onPressed: () {
-              // Handle Next button press
-            },
-            child: Text("Next (0)"), // Dynamically update count
-          ),
-        ),
       ),
     );
   }
@@ -155,6 +140,26 @@ class ProductList extends StatelessWidget {
 
         final products = snapshot.data!.docs;
 
+        if (products.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.info_outline,
+                  size: 50,
+                  color: Colors.grey,
+                ),
+                SizedBox(height: 10),
+                Text(
+                  'No items',
+                  style: TextStyle(fontSize: 18, color: Colors.grey),
+                ),
+              ],
+            ),
+          );
+        }
+
         return ListView.builder(
           itemCount: products.length,
           itemBuilder: (context, index) {
@@ -203,12 +208,6 @@ class ProductItem extends StatelessWidget {
         ),
         title: Text(name),
         subtitle: Text('₹ ${price.toStringAsFixed(2)}'),
-        trailing: Checkbox(
-          value: false,
-          onChanged: (bool? value) {
-            // Handle checkbox toggle
-          },
-        ),
       ),
     );
   }

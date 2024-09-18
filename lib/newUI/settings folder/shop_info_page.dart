@@ -35,7 +35,6 @@ class _ShopInfoPageState extends State<ShopInfoPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Shop Information'),
-        backgroundColor: Colors.green,
       ),
       body: shopData == null
           ? const Center(child: CircularProgressIndicator())
@@ -76,30 +75,21 @@ class _ShopInfoPageState extends State<ShopInfoPage> {
 
   // Create a header with a large shop icon
   Widget _buildHeaderWithIcon() {
-    return Column(
+    return const Column(
       children: [
         Icon(
           Icons.store_mall_directory,
           size: 100,
-          color: Colors.green,
         ),
-        const SizedBox(height: 10),
-        const Text(
+        SizedBox(height: 10),
+        Text(
           "Shop Details",
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,
-            color: Colors.green,
           ),
         ),
-        const SizedBox(height: 10),
-        const Text(
-          "Here are the details of the shop:",
-          style: TextStyle(
-            fontSize: 16,
-            color: Colors.grey,
-          ),
-        ),
+        SizedBox(height: 10),
       ],
     );
   }
@@ -119,8 +109,7 @@ class _ShopInfoPageState extends State<ShopInfoPage> {
         child: Row(
           children: [
             CircleAvatar(
-              backgroundColor: Colors.green,
-              child: Icon(icon, color: Colors.white),
+              child: Icon(icon),
             ),
             const SizedBox(width: 20),
             Column(
@@ -137,7 +126,7 @@ class _ShopInfoPageState extends State<ShopInfoPage> {
                 Text(
                   subtitle,
                   style: const TextStyle(
-                    color: Colors.grey,
+                    // color: Colors.grey,
                     fontSize: 14,
                   ),
                 ),

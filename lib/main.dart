@@ -3,11 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:hisab_kitab/newUI/Navigation%20and%20Notification/homepage_body.dart';
 import 'package:hisab_kitab/newUI/settings%20folder/settings_page.dart';
 import 'package:hisab_kitab/pages/sign_in_page.dart';
+import 'package:hisab_kitab/utils/theme_data.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 // Create a ValueNotifier to track theme mode (light or dark)
@@ -34,49 +35,49 @@ class _MyAppState extends State<MyApp> {
     end: Alignment.bottomRight,
   );
 
+  // Dark theme
   // Light theme
   final ThemeData lightTheme = ThemeData(
     brightness: Brightness.light,
     primaryColor: lightBlue,
     scaffoldBackgroundColor: veryLightBlue,
-    appBarTheme: AppBarTheme(
+    appBarTheme: const AppBarTheme(
       centerTitle: true,
-      iconTheme: IconThemeData(color: darkNavy),
+      iconTheme: IconThemeData(color: lightTextColor),
       backgroundColor: lightBlue,
       titleTextStyle: TextStyle(
         fontSize: 24,
-        color: darkNavy,
+        color: lightTextColor,
         fontWeight: FontWeight.bold,
       ),
     ),
-    textTheme: TextTheme(
-      titleSmall: TextStyle(fontSize: 16, color: darkNavy),
-      titleMedium: TextStyle(fontSize: 20, color: darkNavy),
-      titleLarge: TextStyle(fontSize: 32, color: darkNavy),
-      bodyMedium: TextStyle(color: darkNavy),
+    textTheme: const TextTheme(
+      titleSmall: TextStyle(fontSize: 16, color: lightTextColor),
+      titleMedium: TextStyle(fontSize: 20, color: lightTextColor),
+      titleLarge: TextStyle(fontSize: 32, color: lightTextColor),
+      bodyMedium: TextStyle(color: lightTextColor),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        foregroundColor: darkNavy,
+        foregroundColor: lightTextColor,
         backgroundColor: lightBlue,
       ),
     ),
-    colorScheme: ColorScheme.light(
+    colorScheme: const ColorScheme.light(
       primary: lightBlue,
       secondary: purple,
       surface: veryLightBlue,
-      background: veryLightBlue,
     ),
   );
 
-  // Dark theme
+// Dark theme
   final ThemeData darkTheme = ThemeData(
     brightness: Brightness.dark,
     primaryColor: darkNavy,
     scaffoldBackgroundColor: darkNavy,
-    appBarTheme: AppBarTheme(
+    appBarTheme: const AppBarTheme(
       centerTitle: true,
-      iconTheme: IconThemeData(color: veryLightBlue),
+      iconTheme: IconThemeData(color: darkTextColor),
       backgroundColor: darkNavy,
       titleTextStyle: TextStyle(
         fontSize: 24,
@@ -84,23 +85,22 @@ class _MyAppState extends State<MyApp> {
         fontWeight: FontWeight.bold,
       ),
     ),
-    textTheme: TextTheme(
-      titleSmall: TextStyle(fontSize: 16, color: veryLightBlue),
-      titleMedium: TextStyle(fontSize: 20, color: veryLightBlue),
-      titleLarge: TextStyle(fontSize: 32, color: veryLightBlue),
-      bodyMedium: TextStyle(color: veryLightBlue),
+    textTheme: const TextTheme(
+      titleSmall: TextStyle(fontSize: 16, color: darkTextColor),
+      titleMedium: TextStyle(fontSize: 20, color: darkTextColor),
+      titleLarge: TextStyle(fontSize: 32, color: darkTextColor),
+      bodyMedium: TextStyle(color: darkTextColor),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        foregroundColor: veryLightBlue,
+        foregroundColor: darkTextColor,
         backgroundColor: purple,
       ),
     ),
-    colorScheme: ColorScheme.dark(
+    colorScheme: const ColorScheme.dark(
       primary: purple,
       secondary: lightBlue,
       surface: darkNavy,
-      background: darkNavy,
     ),
   );
 
@@ -113,23 +113,23 @@ class _MyAppState extends State<MyApp> {
           debugShowCheckedModeBanner: false,
           title: "HisabKitab",
           theme: isDark ? darkTheme : lightTheme,
-          home: HomePage(userRole: "admin", username: "bibek_msd"),
+          home: const HomePage(userRole: "admin", username: "bibek_msd"),
         );
       },
     );
   }
 }
 
-// Custom gradient background widget
 class GradientBackground extends StatelessWidget {
   final Widget child;
 
+  // ignore: use_super_parameters
   const GradientBackground({Key? key, required this.child}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         gradient: _MyAppState.primaryGradient,
       ),
       child: child,

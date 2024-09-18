@@ -105,7 +105,6 @@ class _MyCustomersState extends State<MyCustomers> {
       appBar: AppBar(
         title: const Text("My Customers"),
         elevation: 0,
-        backgroundColor: Colors.blue.shade800,
         actions: [
           // Add export button in the app bar
           IconButton(
@@ -157,7 +156,8 @@ class _MyCustomersState extends State<MyCustomers> {
 
           return ListView.builder(
             itemCount: customers.length,
-            itemBuilder: (context, index) => _buildCustomerCard(customers[index], snapshot.data!.docs[index].id, context),
+            itemBuilder: (context, index) => _buildCustomerCard(
+                customers[index], snapshot.data!.docs[index].id, context),
           );
         },
       ),
@@ -184,9 +184,11 @@ class _MyCustomersState extends State<MyCustomers> {
         children: [
           Icon(Icons.people_outline, size: 60, color: Colors.grey.shade400),
           const SizedBox(height: 16),
-          const Text("No customers found", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const Text("No customers found",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
-          const Text("Add your first customer to get started", style: TextStyle(fontSize: 14, color: Colors.grey)),
+          const Text("Add your first customer to get started",
+              style: TextStyle(fontSize: 14, color: Colors.grey)),
         ],
       ),
     );
@@ -206,9 +208,11 @@ class _MyCustomersState extends State<MyCustomers> {
     }).toList();
   }
 
-  Widget _buildCustomerCard(Customers customer, String customerId, BuildContext context) {
-    String formattedDate = DateFormat('MMM d, yyyy').format(customer.memberSince);
-    
+  Widget _buildCustomerCard(
+      Customers customer, String customerId, BuildContext context) {
+    String formattedDate =
+        DateFormat('MMM d, yyyy').format(customer.memberSince);
+
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       elevation: 2,
@@ -216,7 +220,8 @@ class _MyCustomersState extends State<MyCustomers> {
       child: InkWell(
         onTap: () => Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => CustomerDetails(customerId: customerId)),
+          MaterialPageRoute(
+              builder: (context) => CustomerDetails(customerId: customerId)),
         ),
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -227,8 +232,13 @@ class _MyCustomersState extends State<MyCustomers> {
                 radius: 30,
                 backgroundColor: Colors.blue.shade100,
                 child: Text(
-                  customer.name.isNotEmpty ? customer.name[0].toUpperCase() : '?',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.blue.shade800),
+                  customer.name.isNotEmpty
+                      ? customer.name[0].toUpperCase()
+                      : '?',
+                  style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue.shade800),
                 ),
               ),
               const SizedBox(width: 16),
@@ -238,26 +248,31 @@ class _MyCustomersState extends State<MyCustomers> {
                   children: [
                     Text(
                       customer.name,
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       customer.number,
-                      style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+                      style:
+                          TextStyle(fontSize: 14, color: Colors.grey.shade600),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       customer.address,
-                      style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+                      style:
+                          TextStyle(fontSize: 14, color: Colors.grey.shade600),
                     ),
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        Icon(Icons.calendar_today, size: 14, color: Colors.blue.shade300),
+                        Icon(Icons.calendar_today,
+                            size: 14, color: Colors.blue.shade300),
                         const SizedBox(width: 4),
                         Text(
                           'Member since: $formattedDate',
-                          style: TextStyle(fontSize: 12, color: Colors.blue.shade300),
+                          style: TextStyle(
+                              fontSize: 12, color: Colors.blue.shade300),
                         ),
                       ],
                     ),

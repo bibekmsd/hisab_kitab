@@ -7,9 +7,9 @@ class AddCustomers extends StatefulWidget {
   final List<Map<String, dynamic>> productDetails;
 
   const AddCustomers({
-    Key? key,
+    super.key,
     required this.productDetails,
-  }) : super(key: key);
+  });
 
   @override
   _AddCustomersState createState() => _AddCustomersState();
@@ -23,7 +23,7 @@ class _AddCustomersState extends State<AddCustomers> {
   final TextEditingController _birthDateController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  Timestamp? _memberSince;
+
   bool _isLoading = false;
   bool _isSaving = false;
 
@@ -112,17 +112,17 @@ class _AddCustomersState extends State<AddCustomers> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Customer Info', style: TextStyle(fontSize: 20)),
-        centerTitle: true,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.blueAccent, primaryColor],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-        ),
+        title: Text('Customer Info'),
+        // centerTitle: true,
+        // flexibleSpace: Container(
+        //   decoration: BoxDecoration(
+        //     gradient: LinearGradient(
+        //       colors: [Colors.blueAccent, primaryColor],
+        //       begin: Alignment.topLeft,
+        //       end: Alignment.bottomRight,
+        //     ),
+        //   ),
+        // ),
         elevation: 0,
       ),
       body: SafeArea(
@@ -146,20 +146,20 @@ class _AddCustomersState extends State<AddCustomers> {
                           LengthLimitingTextInputFormatter(10),
                         ],
                       ),
-                      SizedBox(height: 16),
+                      const SizedBox(height: 16),
                       _buildTextField(
                         controller: _nameController,
                         label: 'Name (Optional)',
                         icon: Icons.person,
                       ),
-                      SizedBox(height: 16),
+                      const SizedBox(height: 16),
                       _buildTextField(
                         controller: _notesController,
                         label: 'Notes',
                         icon: Icons.note,
                         maxLines: 3,
                       ),
-                      SizedBox(height: 16),
+                      const SizedBox(height: 16),
                       _buildTextField(
                         controller: _birthDateController,
                         label: 'Birth Date',
@@ -171,18 +171,18 @@ class _AddCustomersState extends State<AddCustomers> {
                           onPressed: () => _selectDate(context),
                         ),
                       ),
-                      SizedBox(height: 16),
+                      const SizedBox(height: 16),
                       _buildTextField(
                         controller: _addressController,
                         label: 'Address',
                         icon: Icons.home,
                         maxLines: 2,
                       ),
-                      SizedBox(height: 24),
+                      const SizedBox(height: 24),
                       ElevatedButton(
                         onPressed: _isSaving ? null : _addBill,
                         child: _isSaving
-                            ? SizedBox(
+                            ? const SizedBox(
                                 width: 20,
                                 height: 20,
                                 child: CircularProgressIndicator(
@@ -191,9 +191,10 @@ class _AddCustomersState extends State<AddCustomers> {
                                   strokeWidth: 2,
                                 ),
                               )
-                            : Text('Save Bill', style: TextStyle(fontSize: 18)),
+                            : const Text('Save Bill',
+                                style: TextStyle(fontSize: 18)),
                         style: ElevatedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(vertical: 16),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),

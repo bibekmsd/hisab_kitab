@@ -265,16 +265,25 @@ class _NabhetekoProductPageState extends State<NabhetekoProductPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           if (_isScanning)
-            Container(
-              height: 300,
-              width: 300,
-              margin: const EdgeInsets.only(bottom: 20),
-              child: MobileScanner(
-                controller: MobileScannerController(
-                  facing: CameraFacing.back,
-                  torchEnabled: false,
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Container(
+                height: 100, // Adjust the height as needed
+                width: double.infinity, // Adjust the width as needed
+                margin: const EdgeInsets.only(bottom: 20),
+                decoration: BoxDecoration(
+                  border: Border.all(
+                      color: Colors.blue, width: 2), // Optional: Adds border
+                  borderRadius:
+                      BorderRadius.circular(8), // Optional: Rounds the corners
                 ),
-                onDetect: _handleScanResult,
+                child: MobileScanner(
+                  controller: MobileScannerController(
+                    facing: CameraFacing.back,
+                    torchEnabled: false,
+                  ),
+                  onDetect: _handleScanResult,
+                ),
               ),
             ),
           ElevatedButton.icon(
