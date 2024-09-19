@@ -3,6 +3,7 @@ import 'package:hisab_kitab/main.dart';
 import 'package:hisab_kitab/newUI/settings%20folder/about_app.dart';
 import 'package:hisab_kitab/newUI/settings%20folder/forgot_pass.dart';
 import 'package:hisab_kitab/newUI/settings%20folder/shop_info_page.dart';
+import 'package:hisab_kitab/newUI/settings%20folder/help.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -73,6 +74,20 @@ class _SettingsPageState extends State<SettingsPage> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => const ShopInfoPage(),
+                ),
+              );
+            },
+          ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.menu_book),
+            title: const Text('User Manual'),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const UserManualPage(),
                 ),
               );
             },
