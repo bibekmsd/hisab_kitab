@@ -7,7 +7,7 @@ import 'package:hisab_kitab/pages/sign_up_page.dart';
 import 'package:hisab_kitab/reuseable_widgets/buttons.dart';
 import 'package:hisab_kitab/reuseable_widgets/textField.dart';
 import 'package:hisab_kitab/services/User_authentication/firebase_authentication.dart';
-import 'package:hisab_kitab/utils/constants/apptextstyles.dart';
+import 'package:hisab_kitab/utils/constants/app_text_styles.dart';
 
 class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
@@ -26,76 +26,79 @@ class _SignInPageState extends State<SignInPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Form(
-            key: logInKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                SizedBox(height: MediaQuery.of(context).size.height * 0.1),
-                const Text('Welcome Back', style: AppTextStyle.header),
-                const Text('Sign in to continue',
-                    style: AppTextStyle.subHeader),
-                const SizedBox(height: 50),
-                AppInputField(
-                  controller: _emailController,
-                  hint: 'Email',
-                  prefixIcon: const Icon(Icons.mail),
-                ),
-                const SizedBox(height: 10),
-                AppInputField(
-                  controller: _passwordController,
-                  hint: 'Password',
-                  prefixIcon: const Icon(Icons.lock_outline),
-                  isPassword: true,
-                ),
-                const SizedBox(height: 10),
-                // Role Dropdown
-                DropdownButtonFormField<String>(
-                  hint: const Text("Select Role"),
-                  value: _selectedRole,
-                  items: ['Admin', 'Staff'].map((role) {
-                    return DropdownMenuItem<String>(
-                      value: role,
-                      child: Text(role),
-                    );
-                  }).toList(),
-                  onChanged: (newValue) {
-                    setState(() {
-                      _selectedRole = newValue!;
-                    });
-                  },
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please select a role';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 20),
-                // Sign In Button
-                AppButton(
-                  onTap: _isLoading ? () {} : () => _signIn(),
-                  label: _isLoading ? 'Signing In...' : 'Sign In',
-                ),
-                const SizedBox(height: 20),
-                if (_isLoading) const CircularProgressIndicator(),
-                const SizedBox(height: 20),
-                const Text("Don't have an account?", style: AppTextStyle.body),
-                const SizedBox(height: 20),
-                AppButton(
-                  onTap: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => const SignUpPage(),
-                    ));
-                  },
-                  label: 'Sign Up',
-                  isNegativeButton: true,
-                ),
-              ],
+    return SafeArea(
+      child: Scaffold(
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: SingleChildScrollView(
+            child: Form(
+              key: logInKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+                  const Text('Welcome Back', style: AppTextStyle.header),
+                  const Text('Sign in to continue',
+                      style: AppTextStyle.subHeader),
+                  const SizedBox(height: 50),
+                  AppInputField(
+                    controller: _emailController,
+                    hint: 'Email',
+                    prefixIcon: const Icon(Icons.mail),
+                  ),
+                  const SizedBox(height: 10),
+                  AppInputField(
+                    controller: _passwordController,
+                    hint: 'Password',
+                    prefixIcon: const Icon(Icons.lock_outline),
+                    isPassword: true,
+                  ),
+                  const SizedBox(height: 10),
+                  // Role Dropdown
+                  DropdownButtonFormField<String>(
+                    hint: const Text("Select Role"),
+                    value: _selectedRole,
+                    items: ['Admin', 'Staff'].map((role) {
+                      return DropdownMenuItem<String>(
+                        value: role,
+                        child: Text(role),
+                      );
+                    }).toList(),
+                    onChanged: (newValue) {
+                      setState(() {
+                        _selectedRole = newValue!;
+                      });
+                    },
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please select a role';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  // Sign In Button
+                  AppButton(
+                    onTap: _isLoading ? () {} : () => _signIn(),
+                    label: _isLoading ? 'Signing In...' : 'Sign In',
+                  ),
+                  const SizedBox(height: 20),
+                  if (_isLoading) const CircularProgressIndicator(),
+                  const SizedBox(height: 20),
+                  const Text("Don't have an account?",
+                      style: AppTextStyle.body),
+                  const SizedBox(height: 20),
+                  AppButton(
+                    onTap: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => const SignUpPage(),
+                      ));
+                    },
+                    label: 'Sign Up',
+                    isNegativeButton: true,
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -172,15 +175,17 @@ class _SignInPageState extends State<SignInPage> {
             });
 
             // Navigate to the home page
-            Navigator.of(context)
-                .pushReplacement(MaterialPageRoute(builder: (context) {
-              return HomePage(
-                email: email,
-                panNo: panNo,
-                userRole: role,
-                username: userName,
-              );
-            }));
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(
+                builder: (context) => HomePage(
+                  email: email,
+                  panNo: panNo,
+                  userRole: role,
+                  username: userName,
+                ),
+              ),
+              (Route<dynamic> route) => false,
+            );
           } else {
             _showErrorAndResetLoading("Invalid role for this email.");
           }

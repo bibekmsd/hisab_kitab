@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hisab_kitab/utils/constants/appcolors.dart';
 
-
 class AppTextStyle {
   static const TextStyle header = TextStyle(
     fontSize: 24,

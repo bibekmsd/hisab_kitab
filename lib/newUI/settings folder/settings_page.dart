@@ -5,6 +5,8 @@ import 'package:hisab_kitab/newUI/settings%20folder/about_app.dart';
 import 'package:hisab_kitab/newUI/settings%20folder/forgot_pass.dart';
 import 'package:hisab_kitab/newUI/settings%20folder/shop_info_page.dart';
 import 'package:hisab_kitab/newUI/settings%20folder/help.dart';
+import 'package:hisab_kitab/reuseable_widgets/app_bar.dart';
+import 'package:hisab_kitab/reuseable_widgets/appbar_data.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -19,8 +21,11 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Settings"),
+      appBar: CustomAppBar(
+        // backgroundColor: AppBarData.appBarColor,
+        title: "Settings", // Localized title
+
+        titleColor: AppBarData.titleColor,
       ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),

@@ -4,7 +4,7 @@ import 'package:hisab_kitab/DAIkoUI/sgvicons.dart';
 import 'package:hisab_kitab/pages/sign_in_page.dart';
 import 'package:hisab_kitab/pages/sign_up_page.dart';
 import 'package:hisab_kitab/reuseable_widgets/buttons.dart';
-import 'package:hisab_kitab/utils/constants/apptextstyles.dart';
+import 'package:hisab_kitab/utils/constants/app_text_styles.dart';
 import 'package:hisab_kitab/utils/constants/default_padding.dart';
 import 'package:hisab_kitab/utils/constants/sgv_assets.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';

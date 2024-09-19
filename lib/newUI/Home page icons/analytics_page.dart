@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:hisab_kitab/reuseable_widgets/app_bar.dart';
+import 'package:hisab_kitab/reuseable_widgets/appbar_data.dart';
 import 'package:intl/intl.dart';
 import 'dart:math';
 
@@ -178,14 +180,16 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Analytics Dashboard'),
+      appBar: CustomAppBar(
+        // backgroundColor: AppBarData.appBarColor,
+        title: "Analytics Dashboard", // Localized title
         actions: [
           IconButton(
-            icon: Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh),
             onPressed: _fetchAnalyticsData,
           ),
         ],
+        titleColor: AppBarData.titleColor,
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())

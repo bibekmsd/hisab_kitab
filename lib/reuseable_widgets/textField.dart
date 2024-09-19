@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:hisab_kitab/utils/constants/appcolors.dart';
-import 'package:hisab_kitab/utils/constants/apptextstyles.dart';
+import 'package:hisab_kitab/utils/constants/app_text_styles.dart';
 
 class AppInputField extends StatefulWidget {
   final String hint;
   final TextEditingController? controller;
   final Widget? widget;
   final Widget? prefixIcon;
+  final Widget? suffixIcon; // Suffix icon property
   final VoidCallback? onTap;
   final bool isEmail;
   final bool isPassword;
   final FocusNode? focusNode;
-  final Function(String)? onFieldSubmitted;
+  final Function(String)? onFieldSubmitted; // On field submitted
   final TextInputAction? textInputAction;
+  final Function(String)? onSubmitted; // New onSubmitted property
 
   const AppInputField({
     super.key,
@@ -20,12 +22,14 @@ class AppInputField extends StatefulWidget {
     this.onFieldSubmitted,
     this.textInputAction,
     this.prefixIcon,
+    this.suffixIcon, // Include in the constructor
     required this.hint,
     this.isPassword = false,
     this.controller,
     this.widget,
     this.isEmail = false,
     this.onTap,
+    this.onSubmitted, // Add to constructor
   });
 
   @override
@@ -41,7 +45,14 @@ class _AppInputFieldState extends State<AppInputField> {
       width: MediaQuery.of(context).size.width * 0.9,
       child: Center(
         child: TextFormField(
-          onFieldSubmitted: widget.onFieldSubmitted,
+          onFieldSubmitted: (value) {
+            if (widget.onSubmitted != null) {
+              widget.onSubmitted!(value); // Call the onSubmitted function
+            }
+            if (widget.onFieldSubmitted != null) {
+              widget.onFieldSubmitted!(value);
+            }
+          },
           focusNode: widget.focusNode,
           autovalidateMode: AutovalidateMode.onUserInteraction,
           textInputAction: widget.textInputAction,
@@ -83,7 +94,7 @@ class _AppInputFieldState extends State<AppInputField> {
                     ),
                     tooltip: isObscure ? 'Show password' : 'Hide password',
                   )
-                : null,
+                : widget.suffixIcon, // Use the custom suffix icon if provided
             border: OutlineInputBorder(
               borderSide: BorderSide.none,
               borderRadius: BorderRadius.circular(12),

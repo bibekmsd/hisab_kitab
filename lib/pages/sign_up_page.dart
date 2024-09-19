@@ -7,7 +7,7 @@ import 'package:hisab_kitab/reuseable_widgets/loading_incidator.dart';
 import 'package:hisab_kitab/reuseable_widgets/radio_text_widget.dart';
 import 'package:hisab_kitab/reuseable_widgets/textField.dart';
 import 'package:hisab_kitab/services/User_authentication/firebase_authentication.dart';
-import 'package:hisab_kitab/utils/constants/apptextstyles.dart';
+import 'package:hisab_kitab/utils/constants/app_text_styles.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});

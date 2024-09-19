@@ -5,9 +5,10 @@ import 'package:hisab_kitab/newUI/Drawers/newStaffDrawer.dart';
 import 'package:hisab_kitab/newUI/Home%20page%20icons/New%20Bill/newBill.dart';
 import 'package:hisab_kitab/newUI/Navigation%20and%20Notification/HomePages/grid_items.dart';
 import 'package:hisab_kitab/newUI/Navigation%20and%20Notification/notification.dart';
+import 'package:hisab_kitab/reuseable_widgets/app_bar.dart';
+import 'package:hisab_kitab/reuseable_widgets/appbar_data.dart';
 import 'package:hisab_kitab/reuseable_widgets/row_card_widget.dart';
 import 'package:hisab_kitab/utils/gradiants.dart';
-
 
 class HomepageBody extends StatelessWidget {
   final String userRole;
@@ -24,9 +25,9 @@ class HomepageBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Home Page',
-            style: TextStyle(fontWeight: FontWeight.bold)),
+      appBar: CustomAppBar(
+        // backgroundColor: AppBarData.appBarColor,
+        title: "Hisab Kitab", // Localized title
         actions: [
           IconButton(
             icon: const HeroIcon(HeroIcons.bell),
@@ -40,6 +41,7 @@ class HomepageBody extends StatelessWidget {
             },
           ),
         ],
+        titleColor: AppBarData.titleColor,
       ),
       drawer: userRole == 'admin'
           ? AdminDrawer(email: email, panNo: panNo)
