@@ -173,34 +173,59 @@ class StaffDrawer extends StatelessWidget {
     required String lastLogin,
   }) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+      padding: const EdgeInsets.all(16),
+      decoration: const BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage('assets/drawer_bg.png'),
+          fit: BoxFit.cover,
+        ),
+      ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const CircleAvatar(
-            radius: 50,
-            backgroundImage: AssetImage('assets/staff_photo.png'),
+          Row(
+            children: [
+              const CircleAvatar(
+                radius: 40,
+                backgroundImage: AssetImage('assets/staff_photo.png'),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Login',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      shopName,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 20),
-          Text(
-            shopName,
-            style: const TextStyle(
-                color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 5),
-          Text(
-            'Username: $username',
-            style:
-                TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 16),
-          ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
+          _buildInfoChip(Icons.person, username),
+          const SizedBox(height: 8),
           _buildInfoChip(Icons.phone, phoneNumber),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           _buildInfoChip(Icons.home, address),
-          const SizedBox(height: 10),
-          _buildInfoChip(Icons.person, role),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
+          _buildInfoChip(Icons.work, role),
+          const SizedBox(height: 8),
           _buildInfoChip(Icons.email, email),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           _buildInfoChip(Icons.access_time, 'Last Login: $lastLogin'),
         ],
       ),
@@ -220,9 +245,11 @@ class StaffDrawer extends StatelessWidget {
           Icon(icon, color: Colors.white, size: 16),
           const SizedBox(width: 8),
           Expanded(
-            child: Text(label,
-                style: const TextStyle(color: Colors.white, fontSize: 14),
-                overflow: TextOverflow.ellipsis),
+            child: Text(
+              label,
+              style: const TextStyle(color: Colors.white, fontSize: 14),
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
         ],
       ),

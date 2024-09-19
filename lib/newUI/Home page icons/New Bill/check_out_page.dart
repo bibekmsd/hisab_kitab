@@ -2,6 +2,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hisab_kitab/newUI/Home%20page%20icons/My%20customers/add_customer.dart';
+import 'package:hisab_kitab/newUI/Navigation%20and%20Notification/HomePages/homepage.dart';
 import 'package:hisab_kitab/newUI/Navigation%20and%20Notification/homepage_body.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -345,10 +346,13 @@ class CheckOutPage extends StatelessWidget {
 
                       String userRole = userDoc['role'];
                       String username = userDoc['username'];
-
+                      String email = userDoc['email'];
+                      String panNo = userDoc['panNo'];
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
                           builder: (context) => HomePage(
+                            email: email,
+                            panNo: panNo,
                             userRole: userRole,
                             username: username,
                           ),
@@ -358,6 +362,8 @@ class CheckOutPage extends StatelessWidget {
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
                           builder: (context) => HomePage(
+                            email: "unknow",
+                            panNo: 'unkown',
                             userRole: 'unknown',
                             username: 'unknown',
                           ),
