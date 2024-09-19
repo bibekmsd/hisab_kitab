@@ -30,51 +30,25 @@ class _NewbillState extends State<Newbill> {
   }
 
   Future<void> _searchBarcodeOrName(String searchTerm) async {
-    try {
-      // Search for the product by barcode first
-      final querySnapshot = await _firestore
+  try {
+    // Search for the product by barcode first
+    final querySnapshot = await _firestore
+        .collection('ProductsNew')
+        .where('Barcode', isEqualTo: searchTerm)
+        .get();
+
+    if (querySnapshot.docs.isEmpty) {
+      // If no barcode match, search by product name
+      final nameQuerySnapshot = await _firestore
           .collection('ProductsNew')
-          .where('Barcode', isEqualTo: searchTerm)
+          .where('Name', isEqualTo: searchTerm)
           .get();
 
-      if (querySnapshot.docs.isEmpty) {
-        // If no barcode match, search by product name
-        final nameQuerySnapshot = await _firestore
-            .collection('ProductsNew')
-            .where('Name', isEqualTo: searchTerm)
-            .get();
-
-        if (nameQuerySnapshot.docs.isNotEmpty) {
-          final productData = nameQuerySnapshot.docs.first.data();
-
-          if (!_isProductAlreadyScanned(productData['Barcode'])) {
-            setState(() {
-              _scannedValues.add({
-                'name': productData['Name'],
-                'barcode': productData['Barcode'],
-                'price': productData['Price'],
-                'quantity': 1,
-                'totalPrice': productData['Price'],
-                'ImageUrl': productData['ImageUrl']
-              });
-            });
-          }
-        } else {
-          // If no product found, dispose of the camera controller and show modal
-          cameraController?.dispose();
-          cameraController = null;
-          showModalBottomSheet(
-            context: context,
-            isScrollControlled: true,
-            constraints: const BoxConstraints(maxHeight: 700, minHeight: 600),
-            builder: (context) => NabhetekoProductPage(),
-          );
-        }
-      } else {
-        // If a barcode match is found
-        final productData = querySnapshot.docs.first.data();
+      if (nameQuerySnapshot.docs.isNotEmpty) {
+        final productData = nameQuerySnapshot.docs.first.data();
 
         if (!_isProductAlreadyScanned(productData['Barcode'])) {
+          final currentStock = productData['Quantity'] ?? 0;
           setState(() {
             _scannedValues.add({
               'name': productData['Name'],
@@ -82,15 +56,52 @@ class _NewbillState extends State<Newbill> {
               'price': productData['Price'],
               'quantity': 1,
               'totalPrice': productData['Price'],
-              'ImageUrl': productData['ImageUrl']
+              'ImageUrl': productData['ImageUrl'],
+              'availableStock': currentStock,
             });
           });
         }
+      } else {
+        // If no product found, dispose of the camera controller and show modal
+        cameraController?.dispose();
+        cameraController = null;
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          constraints: const BoxConstraints(maxHeight: 700, minHeight: 600),
+          builder: (context) => NabhetekoProductPage(),
+        );
       }
-    } catch (e) {
-      print('Error searching barcode or name: $e');
+    } else {
+      // If a barcode match is found
+      final productData = querySnapshot.docs.first.data();
+
+      if (!_isProductAlreadyScanned(productData['Barcode'])) {
+        final currentStock = productData['Quantity'] ?? 0;
+        setState(() {
+          _scannedValues.add({
+            'name': productData['Name'],
+            'barcode': productData['Barcode'],
+            'price': productData['Price'],
+            'quantity': 1,
+            'totalPrice': productData['Price'],
+            'ImageUrl': productData['ImageUrl'],
+            'availableStock': currentStock,
+          });
+        });
+      }
     }
+  } catch (e) {
+    print('Error searching barcode or name: $e');
+    // Consider showing an error message to the user here
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Error searching for product: ${e.toString()}'),
+        duration: Duration(seconds: 3),
+      ),
+    );
   }
+}
 
 // Function to check if product is already scanned based on barcode
   bool _isProductAlreadyScanned(String barcode) {
@@ -114,12 +125,25 @@ class _NewbillState extends State<Newbill> {
     });
   }
 
-  void _incrementQuantity(int index) {
-    setState(() {
-      _scannedValues[index]['quantity']++;
-      _scannedValues[index]['totalPrice'] =
-          _scannedValues[index]['price'] * _scannedValues[index]['quantity'];
-    });
+  void _incrementQuantity(int index) async {
+    final currentQuantity = _scannedValues[index]['quantity'];
+    final availableStock = _scannedValues[index]['availableStock'];
+
+    if (currentQuantity < availableStock) {
+      setState(() {
+        _scannedValues[index]['quantity']++;
+        _scannedValues[index]['totalPrice'] =
+            _scannedValues[index]['price'] * _scannedValues[index]['quantity'];
+      });
+    } else {
+      // Show an alert or snackbar to inform the user
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Cannot add more. Available stock: $availableStock'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   void _decrementQuantity(int index) {

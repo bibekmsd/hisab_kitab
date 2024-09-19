@@ -189,23 +189,27 @@ class CheckOutPage extends StatelessWidget {
         onLayout: (PdfPageFormat format) async => pdf.save());
   }
 
-  void showCheckOutForm(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
-      ),
-      builder: (context) => Padding(
-        padding:
-            EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-        child: Container(
-          padding: EdgeInsets.all(16),
-          child: AddCustomers(productDetails: productDetails),
+  void _showAddCustomerBottomSheet(BuildContext context) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
+    ),
+    builder: (BuildContext context) {
+      return FractionallySizedBox(
+        heightFactor: 0.8,
+        child: Padding(
+          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          child: Container(
+            padding: EdgeInsets.all(16),
+            child: AddCustomers(productDetails: productDetails),
+          ),
         ),
-      ),
-    );
-  }
+      );
+    },
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -305,17 +309,18 @@ class CheckOutPage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 ElevatedButton.icon(
-                  onPressed: () => showCheckOutForm(context),
-                  icon: Icon(Icons.person_add),
-                  label: Text('Add Customer'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                ),
+  onPressed: () => _showAddCustomerBottomSheet(context),
+  icon: Icon(Icons.person_add),
+  label: Text('Add Customer'),
+  style: ElevatedButton.styleFrom(
+    backgroundColor: Colors.green,
+    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(8),
+    ),
+  ),
+),
+
                 ElevatedButton.icon(
                   onPressed: generatePDF,
                   icon: Icon(Icons.receipt),
@@ -383,3 +388,4 @@ class CheckOutPage extends StatelessWidget {
     );
   }
 }
+

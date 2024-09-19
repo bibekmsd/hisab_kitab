@@ -24,24 +24,17 @@ class _NabhetekoProductPageState extends State<NabhetekoProductPage> {
   bool _isScanning = false;
   bool _isSearching = false;
   bool _isUploading = false;
-  String _selectedProductType = 'Packaged Foods';
+  String _selectedProductType = 'Groceries';
   File? _imageFile;
   String? _imageUrl;
 
   final List<String> _productTypes = [
-    'Personal Care & Hygiene',
-    'Home Cleaning & Essentials',
-    'Fresh Meat, Fish & Eggs',
-    'Staples, Oils & Spices',
-    'Fruits & Vegetables',
-    'Health & Wellness',
-    'Snacks & Confectionery',
-    'Beverages & Drinks',
-    'Dairy & Bakery',
-    'Frozen Foods',
-    'Baby Care',
-    'Packaged Foods',
-    'Organic & Gourmet'
+    'Groceries', 
+    'Household Essentials',
+     'Personal Care',
+      'Stationery and Office Supplies', 
+      'Snacks and Beverages',
+       'Fruits, Vegetables, Eggs, and Dairy'
   ];
 
   @override

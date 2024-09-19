@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:hisab_kitab/newUI/Analytics/analytics_page.dart';
 import 'package:hisab_kitab/newUI/Navigation%20and%20Notification/homepage_body.dart';
 import 'package:hisab_kitab/newUI/settings%20folder/settings_page.dart';
 import 'package:hisab_kitab/pages/sign_in_page.dart';
@@ -113,7 +114,9 @@ class _MyAppState extends State<MyApp> {
           debugShowCheckedModeBanner: false,
           title: "HisabKitab",
           theme: isDark ? darkTheme : lightTheme,
-          home: const SplashScreen(),
+          //
+          //home: const SplashScreen(),
+          home: const AnalyticsPage(),
         );
       },
     );

@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 class EditProductPage extends StatefulWidget {
   final String initialProductName;
-  final int initialMRP;
-  final int initialPrice;
-  final int initialWholesalePrice;
+  final double initialMRP;
+  final double initialPrice;
+  final double initialWholesalePrice;
   final int initialQuantity;
   final double initialDiscount;
   final String initialImageUrl; // Added to handle ImageUrl

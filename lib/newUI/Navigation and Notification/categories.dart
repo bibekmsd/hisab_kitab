@@ -53,19 +53,12 @@ class CategoryList extends StatelessWidget {
 
   final List<String> categories = [
     'All',
-    'Personal Care & Hygiene',
-    'Home Cleaning & Essentials',
-    'Fresh Meat, Fish & Eggs',
-    'Staples, Oils & Spices',
-    'Fruits & Vegetables',
-    'Health & Wellness',
-    'Snacks & Confectionery',
-    'Beverages & Drinks',
-    'Dairy & Bakery',
-    'Frozen Foods',
-    'Baby Care',
-    'Packaged Foods',
-    'Organic & Gourmet'
+    'Groceries', 
+    'Household Essentials',
+    'Personal Care',
+    'Stationery and Office Supplies', 
+    'Snacks and Beverages',
+    'Fruits, Vegetables, Eggs, and Dairy'
   ];
 
   @override

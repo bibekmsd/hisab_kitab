@@ -7,7 +7,7 @@ import 'package:hisab_kitab/newUI/Home%20page%20icons/My%20Stock/my_stock.dart';
 import 'package:hisab_kitab/newUI/Home%20page%20icons/My%20customers/my_customers.dart';
 import 'package:hisab_kitab/newUI/Home%20page%20icons/New%20Bill/newBill.dart';
 import 'package:hisab_kitab/newUI/Home%20page%20icons/Transactions.dart';
-import 'package:hisab_kitab/newUI/Home%20page%20icons/analytics_page.dart';
+import 'package:hisab_kitab/newUI/Analytics/analytics_page.dart';
 import 'package:hisab_kitab/newUI/Navigation%20and%20Notification/categories.dart';
 import 'package:hisab_kitab/newUI/Navigation%20and%20Notification/notification.dart';
 import 'package:hisab_kitab/newUI/Navigation%20and%20Notification/return_item.dart';
