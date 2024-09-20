@@ -69,8 +69,18 @@ dependencies:
   flutter_svg: ^2.0.10+1
   flutter_local_notifications: ^17.2.2
   curved_navigation_bar: ^1.0.6
+  animated_text_kit: ^4.2.2
+  shimmer: ^2.0.0
+  flutter_animate: ^4.1.1+1
 
 dev_dependencies:
+  flutter_launcher_icons: "^0.13.1"
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/logo.png"
+
   flutter_test:
     sdk: flutter
 
