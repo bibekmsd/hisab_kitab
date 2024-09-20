@@ -4,6 +4,7 @@ import 'package:hisab_kitab/reuseable_widgets/app_bar.dart';
 import 'package:hisab_kitab/reuseable_widgets/appbar_data.dart';
 import 'package:hisab_kitab/reuseable_widgets/textField.dart';
 import 'package:intl/intl.dart';
+import 'package:heroicons/heroicons.dart';
 
 class ReturnItem extends StatefulWidget {
   const ReturnItem({Key? key}) : super(key: key);
@@ -312,10 +313,36 @@ class _ReturnItemState extends State<ReturnItem> {
                               ),
                               const SizedBox(height: 8),
                               Text('Barcode: ${product['barcode'] ?? 'N/A'}'),
-                              Text(
-                                  'Price: \$${(product['price'] as num?)?.toStringAsFixed(2) ?? '0.00'}'),
-                              Text(
-                                  'Total Price: \$${(product['totalPrice'] as num?)?.toStringAsFixed(2) ?? '0.00'}'),
+                             Row(
+  children: [
+    Text('Price: '), // The label 'Price:'
+    SizedBox(
+      width: 14,  // Set the width of the icon
+      height: 14, // Set the height of the icon
+      child: HeroIcon(HeroIcons.currencyRupee),
+    ),
+    SizedBox(width: 4), // Spacing between the icon and the price
+    Text(
+      '${(product['price'] as num?)?.toStringAsFixed(2) ?? '0.00'}', // The price value
+    ),
+  ],
+),
+Row(
+  children: [
+    Text('Total Price: '), // The label 'Total Price:'
+    SizedBox(
+      width: 14,  // Set the width of the icon
+      height: 14, // Set the height of the icon
+      child: HeroIcon(HeroIcons.currencyRupee),
+    ),
+    SizedBox(width: 4), // Spacing between the icon and the total price
+    Text(
+      '${(product['totalPrice'] as num?)?.toStringAsFixed(2) ?? '0.00'}', // The total price value
+    ),
+  ],
+),
+
+
                               Text('Purchased Quantity: $purchasedQuantity'),
                               const SizedBox(height: 16),
                               Row(
