@@ -53,31 +53,44 @@ class _SignInPageState extends State<SignInPage> {
                     prefixIcon: const Icon(Icons.lock_outline),
                     isPassword: true,
                   ),
-                  const SizedBox(height: 10),
-                  // Role Dropdown
-                  DropdownButtonFormField<String>(
-                    hint: const Text("Select Role"),
-                    value: _selectedRole,
-                    items: ['Admin', 'Staff'].map((role) {
-                      return DropdownMenuItem<String>(
-                        value: role,
-                        child: Text(role),
-                      );
-                    }).toList(),
-                    onChanged: (newValue) {
-                      setState(() {
-                        _selectedRole = newValue!;
-                      });
-                    },
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please select a role';
-                      }
-                      return null;
-                    },
+                  Container(
+                    decoration: BoxDecoration(
+                      color: const Color(
+                          0xEAF4FE), // Equivalent to rgba(234, 244, 254, 1)
+                      borderRadius: BorderRadius.circular(
+                          8), // Optional: adds rounded corners
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal:
+                            12), // Optional: adds padding inside the dropdown
+                    child: DropdownButtonFormField<String>(
+                      decoration: const InputDecoration(
+                        border:
+                            InputBorder.none, // Remove the default underline
+                      ),
+                      hint: const Text("Select Role"),
+                      value: _selectedRole,
+                      items: ['Admin', 'Staff'].map((role) {
+                        return DropdownMenuItem<String>(
+                          value: role,
+                          child: Text(role),
+                        );
+                      }).toList(),
+                      onChanged: (newValue) {
+                        setState(() {
+                          _selectedRole = newValue!;
+                        });
+                      },
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please select a role';
+                        }
+                        return null;
+                      },
+                    ),
                   ),
                   const SizedBox(height: 20),
-                  // Sign In Button
+                  // In Button
                   AppButton(
                     onTap: _isLoading ? () {} : () => _signIn(),
                     label: _isLoading ? 'Signing In...' : 'Sign In',
@@ -89,6 +102,7 @@ class _SignInPageState extends State<SignInPage> {
                       style: AppTextStyle.body),
                   const SizedBox(height: 20),
                   AppButton(
+                    labelColor: const Color.fromARGB(255, 17, 24, 39),
                     onTap: () {
                       Navigator.of(context).push(MaterialPageRoute(
                         builder: (context) => const SignUpPage(),

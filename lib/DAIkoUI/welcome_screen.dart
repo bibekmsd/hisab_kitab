@@ -4,6 +4,7 @@ import 'package:hisab_kitab/DAIkoUI/sgvicons.dart';
 import 'package:hisab_kitab/pages/sign_in_page.dart';
 import 'package:hisab_kitab/pages/sign_up_page.dart';
 import 'package:hisab_kitab/reuseable_widgets/buttons.dart';
+import 'package:hisab_kitab/reuseable_widgets/loading_incidator.dart';
 import 'package:hisab_kitab/utils/constants/app_text_styles.dart';
 import 'package:hisab_kitab/utils/constants/default_padding.dart';
 import 'package:hisab_kitab/utils/constants/sgv_assets.dart';
@@ -88,51 +89,54 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   }
 
   Widget _buildConnectedUI() {
-    return DefaultPadding(
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SvgIcon(
-              assetName: SvgAssets.welcome,
-              height: MediaQuery.of(context).size.height * 0.4,
-            ),
-            const Text(
-              'Hey! Welcome',
-              style: AppTextStyle.header,
-            ),
-            const SizedBox(height: 10),
-            const Text(
-              'Your one-stop destination for endless variety, and effortless shopping at your fingertips!',
-              style: AppTextStyle.body,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 30),
-            AppButton(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const SignUpPage(),
-                  ),
-                );
-              },
-              label: 'Let’s Get Started',
-            ),
-            const SizedBox(height: 10),
-            AppButton(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const SignInPage(),
-                  ),
-                );
-              },
-              label: 'I already have an account',
-              isNegativeButton: true,
-            ),
-          ],
+    return SafeArea(
+      child: DefaultPadding(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SvgIcon(
+                assetName: SvgAssets.welcome,
+                height: MediaQuery.of(context).size.height * 0.4,
+              ),
+              const Text(
+                'Hey! Welcome',
+                style: AppTextStyle.header,
+              ),
+              const SizedBox(height: 10),
+              const Text(
+                'Your one-stop destination for endless variety, and effortless shopping at your fingertips!',
+                style: AppTextStyle.body,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 30),
+              AppButton(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SignUpPage(),
+                    ),
+                  );
+                },
+                label: 'Let’s Get Started',
+              ),
+              const SizedBox(height: 10),
+              AppButton(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SignInPage(),
+                    ),
+                  );
+                },
+                label: 'I already have an account',
+                labelColor: const Color.fromARGB(255, 17, 24, 39),
+                isNegativeButton: true,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -162,7 +166,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
           ),
           const SizedBox(height: 20),
           // Show loading animation if isLoading is true
-          if (_isLoading) const CircularProgressIndicator(),
+          if (_isLoading) const LoadingIndicator(),
         ],
       ),
     );

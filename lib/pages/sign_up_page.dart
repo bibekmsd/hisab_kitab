@@ -43,129 +43,135 @@ class _SignUpPageState extends State<SignUpPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Form(
-            key: signUpKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                SizedBox(height: MediaQuery.of(context).size.height * 0.1),
-                const Text('Create Account', style: AppTextStyle.header),
-                const Text(
-                  'Please fill in the details to sign up',
-                  style: AppTextStyle.subHeader,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 50),
-                AppInputField(
-                  controller: _usernameController,
-                  hint: 'Username',
-                  prefixIcon: const Icon(Icons.person_outline),
-                ),
-                const SizedBox(height: 10),
-                AppInputField(
-                  controller: _emailController,
-                  hint: 'Email',
-                  prefixIcon: const Icon(Icons.mail),
-                ),
-                const SizedBox(height: 10),
-                AppInputField(
-                  controller: _passwordController,
-                  hint: 'Password',
-                  prefixIcon: const Icon(Icons.lock_outline),
-                  isPassword: true,
-                ),
-                const SizedBox(height: 10),
-                AppInputField(
-                  controller: _phoneController,
-                  hint: 'Phone Number',
-                  prefixIcon: const Icon(Icons.phone_outlined),
-                ),
-                const SizedBox(height: 10),
-                AppInputField(
-                  controller: _panController,
-                  hint: 'PAN Number',
-                  prefixIcon: const Icon(Icons.credit_card_outlined),
-                ),
-                const SizedBox(height: 10),
-                AppInputField(
-                  controller: _shopNameController,
-                  hint: 'Shop Name',
-                  prefixIcon: const Icon(Icons.store_outlined),
-                ),
-                const SizedBox(height: 10),
-                AppInputField(
-                  controller: _addressController,
-                  hint: 'Address',
-                  prefixIcon: const Icon(Icons.location_on_outlined),
-                ),
-                const SizedBox(height: 20),
-                const Text('Select Role', style: AppTextStyle.body),
-                const SizedBox(height: 10),
-                RadioTextWidget(
-                  text: 'Admin',
-                  isSelected: _selectedRole == 'Admin',
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedRole =
-                          value == true ? 'admin' : null; // Store as lowercase
-                    });
-                  },
-                ),
-                RadioTextWidget(
-                  text: 'Staff',
-                  isSelected: _selectedRole == 'Staff',
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedRole =
-                          value == true ? 'staff' : null; // Store as lowercase
-                    });
-                  },
-                ),
-                const SizedBox(height: 20),
-                AppButton(
-                  onTap: () {
-                    if (signUpKey.currentState!.validate() &&
-                        _selectedRole != null) {
-                      _signUp(role: _selectedRole!);
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content: Text(
-                                'Please fill all fields and select a role')),
-                      );
-                    }
-                  },
-                  label: 'Sign Up',
-                ),
-                const SizedBox(height: 10),
-                if (_isLoading)
-                  const LoadingIndicator(
-                    size: 30,
+    return SafeArea(
+      child: Scaffold(
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: SingleChildScrollView(
+            child: Form(
+              key: signUpKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+                  const Text('Create Account', style: AppTextStyle.header),
+                  const Text(
+                    'Please fill in the details to sign up',
+                    style: AppTextStyle.subHeader,
+                    textAlign: TextAlign.center,
                   ),
-                const SizedBox(height: 20),
-                const Text(
-                  "Already have an account?",
-                  style: AppTextStyle.body,
-                ),
-                const SizedBox(height: 20),
-                AppButton(
-                  onTap: () {
-                    Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const SignInPage(),
-                        ));
-                  },
-                  label: 'Log In',
-                  isNegativeButton: true,
-                ),
-                const SizedBox(height: 20),
-                // Show loading animation if the signup process is in progress
-              ],
+                  const SizedBox(height: 50),
+                  AppInputField(
+                    controller: _usernameController,
+                    hint: 'Username',
+                    prefixIcon: const Icon(Icons.person_outline),
+                  ),
+                  const SizedBox(height: 10),
+                  AppInputField(
+                    controller: _emailController,
+                    hint: 'Email',
+                    prefixIcon: const Icon(Icons.mail),
+                  ),
+                  const SizedBox(height: 10),
+                  AppInputField(
+                    controller: _passwordController,
+                    hint: 'Password',
+                    prefixIcon: const Icon(Icons.lock_outline),
+                    isPassword: true,
+                  ),
+                  const SizedBox(height: 10),
+                  AppInputField(
+                    controller: _phoneController,
+                    hint: 'Phone Number',
+                    prefixIcon: const Icon(Icons.phone_outlined),
+                  ),
+                  const SizedBox(height: 10),
+                  AppInputField(
+                    controller: _panController,
+                    hint: 'PAN Number',
+                    prefixIcon: const Icon(Icons.credit_card_outlined),
+                  ),
+                  const SizedBox(height: 10),
+                  AppInputField(
+                    controller: _shopNameController,
+                    hint: 'Shop Name',
+                    prefixIcon: const Icon(Icons.store_outlined),
+                  ),
+                  const SizedBox(height: 10),
+                  AppInputField(
+                    controller: _addressController,
+                    hint: 'Address',
+                    prefixIcon: const Icon(Icons.location_on_outlined),
+                  ),
+                  const SizedBox(height: 20),
+                  const Text('Select Role', style: AppTextStyle.body),
+                  const SizedBox(height: 10),
+                  RadioTextWidget(
+                    text: 'Admin',
+                    isSelected: _selectedRole == 'Admin',
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedRole = value == true
+                            ? 'admin'
+                            : null; // Store as lowercase
+                      });
+                    },
+                  ),
+                  RadioTextWidget(
+                    text: 'Staff',
+                    isSelected: _selectedRole == 'Staff',
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedRole = value == true
+                            ? 'staff'
+                            : null; // Store as lowercase
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  AppButton(
+                    // labelColor: const Color.fromARGB(255, 17, 24, 39),
+                    onTap: () {
+                      if (signUpKey.currentState!.validate() &&
+                          _selectedRole != null) {
+                        _signUp(role: _selectedRole!);
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text(
+                                  'Please fill all fields and select a role')),
+                        );
+                      }
+                    },
+                    label: 'Sign Up',
+                  ),
+                  const SizedBox(height: 10),
+                  if (_isLoading)
+                    const LoadingIndicator(
+                      size: 30,
+                    ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    "Already have an account?",
+                    style: AppTextStyle.body,
+                  ),
+                  const SizedBox(height: 20),
+                  AppButton(
+                    labelColor: const Color.fromARGB(255, 17, 24, 39),
+                    onTap: () {
+                      Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SignInPage(),
+                          ));
+                    },
+                    label: 'Log In',
+                    isNegativeButton: true,
+                  ),
+                  const SizedBox(height: 20),
+                  // Show loading animation if the signup process is in progress
+                ],
+              ),
             ),
           ),
         ),

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:heroicons/heroicons.dart';
+import 'package:hisab_kitab/reuseable_widgets/app_bar.dart';
+import 'package:hisab_kitab/reuseable_widgets/appbar_data.dart';
 import 'package:intl/intl.dart';
 
 class TransactionsPage extends StatefulWidget {
@@ -15,15 +18,18 @@ class _TransactionsPageState extends State<TransactionsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title:
-            const Text('Transactions', style: TextStyle(color: Colors.white)),
+    
+      appBar: CustomAppBar(
+        title: "Transactions",
         actions: [
           IconButton(
-            icon: const Icon(Icons.calendar_today),
+            icon: HeroIcon(HeroIcons.calendarDays),
+
+            // icon: const Icon(Icons.calendar_today),
             onPressed: () => _selectDate(context),
           ),
         ],
+        titleColor: AppBarData.titleColor,
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: _getFilteredStream(),

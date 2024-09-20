@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:heroicons/heroicons.dart';
 import 'package:hisab_kitab/newUI/Home%20page%20icons/New%20Bill/edit_page.dart';
+import 'package:hisab_kitab/reuseable_widgets/app_bar.dart';
+import 'package:hisab_kitab/reuseable_widgets/appbar_data.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'check_out_page.dart';
@@ -16,11 +18,17 @@ class Newbill extends StatefulWidget {
 class _NewbillState extends State<Newbill> {
   bool _isLoading = false;
   final List<Map<String, dynamic>> _scannedValues = [];
-
   final TextEditingController barcodeController = TextEditingController();
-  bool isScanning = false;
+  bool isScanning = true; // Set to true initially
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   MobileScannerController? cameraController;
+
+  @override
+  void initState() {
+    super.initState();
+    // Start the scanner automatically when the page opens
+    initializeCameraController();
+  }
 
   @override
   void dispose() {
@@ -29,23 +37,92 @@ class _NewbillState extends State<Newbill> {
     super.dispose();
   }
 
-  Future<void> _searchBarcodeOrName(String searchTerm) async {
-  try {
-    // Search for the product by barcode first
-    final querySnapshot = await _firestore
-        .collection('ProductsNew')
-        .where('Barcode', isEqualTo: searchTerm)
-        .get();
+  Future<void> initializeCameraController() async {
+    try {
+      cameraController = MobileScannerController();
+      await cameraController?.start(); // Start scanning immediately
+      setState(() {
+        isScanning = true;
+      });
+    } catch (e) {
+      print('Error initializing and starting camera controller: $e');
+      setState(() {
+        isScanning = false;
+      });
+    }
+  }
 
-    if (querySnapshot.docs.isEmpty) {
-      // If no barcode match, search by product name
-      final nameQuerySnapshot = await _firestore
+  Future<void> toggleScanner() async {
+    try {
+      if (isScanning && cameraController != null) {
+        // If currently scanning, stop the camera
+        await cameraController!.stop();
+      } else if (cameraController != null) {
+        // If not scanning, start the camera
+        await cameraController!.start();
+      } else {
+        // Reinitialize if the camera controller is null
+        initializeCameraController();
+      }
+
+      // Update the scanning state
+      setState(() {
+        isScanning = !isScanning;
+      });
+    } catch (e) {
+      print('Error toggling camera: $e');
+      setState(() {
+        isScanning = false;
+      });
+    }
+  }
+
+  Future<void> _searchBarcodeOrName(String searchTerm) async {
+    try {
+      // Search for the product by barcode first
+      final querySnapshot = await _firestore
           .collection('ProductsNew')
-          .where('Name', isEqualTo: searchTerm)
+          .where('Barcode', isEqualTo: searchTerm)
           .get();
 
-      if (nameQuerySnapshot.docs.isNotEmpty) {
-        final productData = nameQuerySnapshot.docs.first.data();
+      if (querySnapshot.docs.isEmpty) {
+        // If no barcode match, search by product name
+        final nameQuerySnapshot = await _firestore
+            .collection('ProductsNew')
+            .where('Name', isEqualTo: searchTerm)
+            .get();
+
+        if (nameQuerySnapshot.docs.isNotEmpty) {
+          final productData = nameQuerySnapshot.docs.first.data();
+
+          if (!_isProductAlreadyScanned(productData['Barcode'])) {
+            final currentStock = productData['Quantity'] ?? 0;
+            setState(() {
+              _scannedValues.add({
+                'name': productData['Name'],
+                'barcode': productData['Barcode'],
+                'price': productData['Price'],
+                'quantity': 1,
+                'totalPrice': productData['Price'],
+                'ImageUrl': productData['ImageUrl'],
+                'availableStock': currentStock,
+              });
+            });
+          }
+        } else {
+          // If no product found, dispose of the camera controller and show modal
+          cameraController?.dispose();
+          cameraController = null;
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            constraints: const BoxConstraints(maxHeight: 700, minHeight: 600),
+            builder: (context) => const NabhetekoProductPage(),
+          );
+        }
+      } else {
+        // If a barcode match is found
+        final productData = querySnapshot.docs.first.data();
 
         if (!_isProductAlreadyScanned(productData['Barcode'])) {
           final currentStock = productData['Quantity'] ?? 0;
@@ -61,47 +138,18 @@ class _NewbillState extends State<Newbill> {
             });
           });
         }
-      } else {
-        // If no product found, dispose of the camera controller and show modal
-        cameraController?.dispose();
-        cameraController = null;
-        showModalBottomSheet(
-          context: context,
-          isScrollControlled: true,
-          constraints: const BoxConstraints(maxHeight: 700, minHeight: 600),
-          builder: (context) => NabhetekoProductPage(),
-        );
       }
-    } else {
-      // If a barcode match is found
-      final productData = querySnapshot.docs.first.data();
-
-      if (!_isProductAlreadyScanned(productData['Barcode'])) {
-        final currentStock = productData['Quantity'] ?? 0;
-        setState(() {
-          _scannedValues.add({
-            'name': productData['Name'],
-            'barcode': productData['Barcode'],
-            'price': productData['Price'],
-            'quantity': 1,
-            'totalPrice': productData['Price'],
-            'ImageUrl': productData['ImageUrl'],
-            'availableStock': currentStock,
-          });
-        });
-      }
+    } catch (e) {
+      print('Error searching barcode or name: $e');
+      // Consider showing an error message to the user here
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error searching for product: ${e.toString()}'),
+          duration: const Duration(seconds: 3),
+        ),
+      );
     }
-  } catch (e) {
-    print('Error searching barcode or name: $e');
-    // Consider showing an error message to the user here
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Error searching for product: ${e.toString()}'),
-        duration: Duration(seconds: 3),
-      ),
-    );
   }
-}
 
 // Function to check if product is already scanned based on barcode
   bool _isProductAlreadyScanned(String barcode) {
@@ -140,7 +188,7 @@ class _NewbillState extends State<Newbill> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Cannot add more. Available stock: $availableStock'),
-          duration: Duration(seconds: 2),
+          duration: const Duration(seconds: 2),
         ),
       );
     }
@@ -204,36 +252,28 @@ class _NewbillState extends State<Newbill> {
         _scannedValues.fold<double>(0, (sum, item) => sum + item['totalPrice']);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Naya Bill"),
+      appBar: CustomAppBar(
+        titleColor: AppBarData.titleColor,
+        title: "Naya Bill",
         actions: [
           IconButton(
-            icon: const HeroIcon(HeroIcons.qrCode),
-            onPressed: () {
-              setState(() {
-                isScanning = !isScanning;
-                if (isScanning) {
-                  cameraController = MobileScannerController();
-                } else {
-                  cameraController?.dispose();
-                  cameraController = null;
-                }
-              });
-            },
+            icon: HeroIcon(isScanning ? HeroIcons.pause : HeroIcons.play),
+            onPressed: toggleScanner,
           ),
         ],
       ),
       body: Column(
         children: [
           if (isScanning)
-            Container(
-              height: MediaQuery.of(context).size.height * 0.12,
-              width: MediaQuery.of(context).size.width,
-              child: MobileScanner(
-                controller: cameraController!,
-                onDetect: handleScanResult,
+            if (isScanning && cameraController != null)
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.12,
+                width: MediaQuery.of(context).size.width,
+                child: MobileScanner(
+                  controller: cameraController!,
+                  onDetect: handleScanResult,
+                ),
               ),
-            ),
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: TextField(

@@ -6,10 +6,11 @@ class AppButton extends StatelessWidget {
     required this.label,
     this.width,
     this.isLoading = false,
-    super.key,
     this.isNegativeButton = false,
     this.foregroundColor,
     this.backgroundColor,
+    this.labelColor, // Added labelColor field
+    super.key,
   });
 
   final VoidCallback onTap;
@@ -19,6 +20,7 @@ class AppButton extends StatelessWidget {
   final bool isNegativeButton;
   final Color? foregroundColor;
   final Color? backgroundColor;
+  final Color? labelColor; // New label color field
 
   @override
   Widget build(BuildContext context) {
@@ -59,10 +61,11 @@ class AppButton extends StatelessWidget {
                 fit: BoxFit.scaleDown,
                 child: Text(
                   label,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
-                    color: Colors.white,
+                    color: labelColor ??
+                        Colors.white, // Use labelColor if provided
                   ), // Custom text style for the button
                 ),
               ),
