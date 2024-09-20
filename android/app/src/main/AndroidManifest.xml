@@ -49,8 +49,9 @@
         
         <!-- Default Notification Icon -->
         <meta-data
-            android:name="com.google.firebase.messaging.default_notification_icon"
-            android:resource="@drawable/ic_launcher" /> <!-- Default icon for notifications -->
+    android:name="com.google.firebase.messaging.default_notification_icon"
+    android:resource="@mipmap/ic_launcher" />
+ <!-- Default icon for notifications -->
 
         <!-- Default Notification Color (Optional) -->
         <meta-data
