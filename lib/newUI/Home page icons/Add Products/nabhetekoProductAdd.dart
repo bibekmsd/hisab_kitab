@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:heroicons/heroicons.dart';
+import 'package:hisab_kitab/reuseable_widgets/app_bar.dart';
+import 'package:hisab_kitab/reuseable_widgets/appbar_data.dart';
+import 'package:hisab_kitab/reuseable_widgets/loading_incidator.dart';
+import 'package:hisab_kitab/reuseable_widgets/textField.dart';
+import 'package:hisab_kitab/utils/constants/appcolors.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'dart:io';
@@ -241,11 +247,13 @@ class _NabhetekoProductPageState extends State<NabhetekoProductPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Product Management"),
+      appBar: CustomAppBar(
+        title: "Product Management", // Localized title
+
+        titleColor: AppBarData.titleColor,
       ),
       body: _isSearching
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: LoadingIndicator())
           : _barcodeController.text.isEmpty
               ? _buildInitialScreen()
               : _buildProductForm(),
@@ -259,36 +267,73 @@ class _NabhetekoProductPageState extends State<NabhetekoProductPage> {
         children: [
           if (_isScanning)
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding:
+                  const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
               child: Container(
-                height: 100, // Adjust the height as needed
-                width: double.infinity, // Adjust the width as needed
+                height: 120, // Slightly increased height for better visibility
+                width: double.infinity,
                 margin: const EdgeInsets.only(bottom: 20),
                 decoration: BoxDecoration(
+                  color: Colors.white, // Background color for a clean look
                   border: Border.all(
-                      color: Colors.blue, width: 2), // Optional: Adds border
-                  borderRadius:
-                      BorderRadius.circular(8), // Optional: Rounds the corners
-                ),
-                child: MobileScanner(
-                  controller: MobileScannerController(
-                    facing: CameraFacing.back,
-                    torchEnabled: false,
+                    color: Colors.blue.withOpacity(0.5), // Subtle border
+                    width: 1.5,
                   ),
-                  onDetect: _handleScanResult,
+                  borderRadius: BorderRadius.circular(
+                      12), // Slightly larger border radius
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black
+                          .withOpacity(0.1), // Subtle shadow for depth
+                      blurRadius: 8,
+                      offset: const Offset(0, 4), // Shadow offset
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(
+                      12), // Ensures child content respects border radius
+                  child: MobileScanner(
+                    controller: MobileScannerController(
+                      facing: CameraFacing.back,
+                      torchEnabled: false,
+                    ),
+                    onDetect: _handleScanResult,
+                  ),
                 ),
               ),
             ),
           ElevatedButton.icon(
-            icon: Icon(_isScanning ? Icons.stop : Icons.qr_code_scanner),
-            label: Text(_isScanning ? 'Stop Scanning' : 'Scan Barcode'),
+            icon: HeroIcon(
+              _isScanning ? HeroIcons.stop : HeroIcons.qrCode,
+              size: 24, // Adjust size for better alignment with text
+              color: Colors.white, // Icon color for contrast
+            ),
+            label: Text(
+              _isScanning ? 'Stop Scanning' : 'Scan Barcode',
+              style: const TextStyle(
+                fontSize: 16, // Adjust font size for better readability
+                fontWeight: FontWeight.w500, // Medium weight for emphasis
+              ),
+            ),
             onPressed: () {
               setState(() {
                 _isScanning = !_isScanning;
               });
             },
             style: ElevatedButton.styleFrom(
+              foregroundColor: const Color.fromARGB(255, 227, 225, 221),
+              backgroundColor: AppColors.primaryColor, // Text and icon color
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8), // Rounded corners
+                side: BorderSide(
+                    color: Colors.blue.shade700,
+                    width: 1.5), // Optional border for depth
+              ),
+              shadowColor:
+                  Colors.black.withOpacity(0.1), // Subtle shadow for depth
+              elevation: 4, // Slight elevation
             ),
           ),
           const SizedBox(height: 20),
@@ -296,14 +341,15 @@ class _NabhetekoProductPageState extends State<NabhetekoProductPage> {
           const SizedBox(height: 20),
           SizedBox(
             width: 250,
-            child: TextField(
+            child: AppInputField(
               controller: _barcodeController,
-              decoration: const InputDecoration(
-                labelText: 'Enter Barcode',
-                border: OutlineInputBorder(),
-                suffixIcon: Icon(Icons.search),
+              hint: 'Enter Barcode',
+              prefixIcon: const HeroIcon(HeroIcons.qrCode),
+              suffixIcon: const Icon(
+                Icons.search,
+                color: AppColors.primaryColor,
               ),
-              onSubmitted: (value) => _fetchProductDetails(value),
+              onFieldSubmitted: (value) => _fetchProductDetails(value),
             ),
           ),
         ],

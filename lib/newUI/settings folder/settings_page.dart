@@ -1,9 +1,12 @@
+// settings_page.dart
 import 'package:flutter/material.dart';
-import 'package:hisab_kitab/main.dart';
+import 'package:hisab_kitab/app.dart'; // Import the file where isDarkMode is defined
 import 'package:hisab_kitab/newUI/settings%20folder/about_app.dart';
 import 'package:hisab_kitab/newUI/settings%20folder/forgot_pass.dart';
 import 'package:hisab_kitab/newUI/settings%20folder/shop_info_page.dart';
 import 'package:hisab_kitab/newUI/settings%20folder/help.dart';
+import 'package:hisab_kitab/reuseable_widgets/app_bar.dart';
+import 'package:hisab_kitab/reuseable_widgets/appbar_data.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -18,8 +21,11 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Settings"),
+      appBar: CustomAppBar(
+        // backgroundColor: AppBarData.appBarColor,
+        title: "Settings", // Localized title
+
+        titleColor: AppBarData.titleColor,
       ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
@@ -27,12 +33,15 @@ class _SettingsPageState extends State<SettingsPage> {
           ListTile(
             leading: const Icon(Icons.brightness_6),
             title: const Text('Dark Mode'),
-            trailing: Switch(
-              value: isDarkMode.value,
-              onChanged: (bool value) {
-                setState(() {
-                  isDarkMode.value = value; // Update the theme mode
-                });
+            trailing: ValueListenableBuilder(
+              valueListenable: isDarkMode,
+              builder: (context, bool isDark, _) {
+                return Switch(
+                  value: isDark,
+                  onChanged: (bool value) {
+                    isDarkMode.value = value; // Toggle the theme mode
+                  },
+                );
               },
             ),
           ),

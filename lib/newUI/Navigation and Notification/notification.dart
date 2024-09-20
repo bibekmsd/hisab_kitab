@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:hisab_kitab/reuseable_widgets/app_bar.dart';
+import 'package:hisab_kitab/reuseable_widgets/appbar_data.dart';
 
 class NotificationPage extends StatefulWidget {
   const NotificationPage({super.key});
@@ -10,29 +13,66 @@ class NotificationPage extends StatefulWidget {
 
 class _NotificationPageState extends State<NotificationPage> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  List<Map<String, dynamic>> lowStockProducts =
-      []; // List to store low stock products
+  List<Map<String, dynamic>> lowStockProducts = [];
+
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
 
   @override
   void initState() {
     super.initState();
+    initializeNotifications();
     checkLowStockProducts();
+  }
+
+  // Initialize local notifications
+  void initializeNotifications() {
+    const AndroidInitializationSettings initializationSettingsAndroid =
+        AndroidInitializationSettings(
+            'app_icon'); // App icon in drawable folder
+
+    const InitializationSettings initializationSettings =
+        InitializationSettings(
+      android: initializationSettingsAndroid,
+    );
+
+    flutterLocalNotificationsPlugin.initialize(initializationSettings);
+  }
+
+  // Function to show low stock notification
+  Future<void> showLowStockNotification(String productName) async {
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+        AndroidNotificationDetails(
+      'low_stock_channel', // Channel ID
+      'Low Stock Notifications', // Channel Name
+      importance: Importance.high,
+      priority: Priority.high,
+    );
+    const NotificationDetails platformChannelSpecifics =
+        NotificationDetails(android: androidPlatformChannelSpecifics);
+
+    await flutterLocalNotificationsPlugin.show(
+      0, // Notification ID
+      'Low Stock Alert', // Title
+      'Product "$productName" is running low on stock!', // Body
+      platformChannelSpecifics,
+    );
   }
 
   // Function to check low stock products
   Future<void> checkLowStockProducts() async {
-    QuerySnapshot querySnapshot = await _firestore
-        .collection('ProductsNew') // Collection name from your screenshot
-        .get();
+    QuerySnapshot querySnapshot =
+        await _firestore.collection('ProductsNew').get();
 
     List<Map<String, dynamic>> tempLowStockProducts = [];
 
     for (var doc in querySnapshot.docs) {
-      // Each document is identified by the barcode, with the product details inside
-      var productData = doc.data() as Map<String, dynamic>; // Cast data to Map
+      var productData = doc.data() as Map<String, dynamic>;
       if (productData['Quantity'] != null && productData['Quantity'] < 10) {
-        tempLowStockProducts
-            .add(productData); // Add the product to the low-stock list
+        tempLowStockProducts.add(productData);
+
+        // Trigger notification for each low-stock product
+        showLowStockNotification(productData['Name'] ?? 'Unknown Product');
       }
     }
 
@@ -40,17 +80,20 @@ class _NotificationPageState extends State<NotificationPage> {
       setState(() {
         lowStockProducts = tempLowStockProducts;
       });
-
     }
   }
-
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Low Stock Notification'),
+      // appBar: AppBar(
+      //   title: const Text('Low Stock Notification'),
+      // ),
+      appBar: CustomAppBar(
+        // backgroundColor: AppBarData.appBarColor,
+        title: "Notifications", // Localized title
+
+        titleColor: AppBarData.titleColor,
       ),
       body: lowStockProducts.isEmpty
           ? const Center(child: Text('No low stock products at the moment.'))

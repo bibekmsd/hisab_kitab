@@ -2,7 +2,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hisab_kitab/newUI/Home%20page%20icons/My%20customers/add_customer.dart';
-import 'package:hisab_kitab/newUI/Navigation%20and%20Notification/homepage_body.dart';
+import 'package:hisab_kitab/newUI/Navigation%20and%20Notification/HomePages/homepage.dart';
+// import 'package:hisab_kitab/newUI/Navigation%20and%20Notification/homepage_body.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
@@ -190,26 +191,27 @@ class CheckOutPage extends StatelessWidget {
   }
 
   void _showAddCustomerBottomSheet(BuildContext context) {
-  showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
-    ),
-    builder: (BuildContext context) {
-      return FractionallySizedBox(
-        heightFactor: 0.8,
-        child: Padding(
-          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-          child: Container(
-            padding: EdgeInsets.all(16),
-            child: AddCustomers(productDetails: productDetails),
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
+      ),
+      builder: (BuildContext context) {
+        return FractionallySizedBox(
+          heightFactor: 0.8,
+          child: Padding(
+            padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom),
+            child: Container(
+              padding: EdgeInsets.all(16),
+              child: AddCustomers(productDetails: productDetails),
+            ),
           ),
-        ),
-      );
-    },
-  );
-}
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -309,18 +311,17 @@ class CheckOutPage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 ElevatedButton.icon(
-  onPressed: () => _showAddCustomerBottomSheet(context),
-  icon: Icon(Icons.person_add),
-  label: Text('Add Customer'),
-  style: ElevatedButton.styleFrom(
-    backgroundColor: Colors.green,
-    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(8),
-    ),
-  ),
-),
-
+                  onPressed: () => _showAddCustomerBottomSheet(context),
+                  icon: Icon(Icons.person_add),
+                  label: Text('Add Customer'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
                 ElevatedButton.icon(
                   onPressed: generatePDF,
                   icon: Icon(Icons.receipt),
@@ -350,10 +351,13 @@ class CheckOutPage extends StatelessWidget {
 
                       String userRole = userDoc['role'];
                       String username = userDoc['username'];
-
+                      String email = userDoc['email'];
+                      String panNo = userDoc['panNo'];
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
                           builder: (context) => HomePage(
+                            email: email,
+                            panNo: panNo,
                             userRole: userRole,
                             username: username,
                           ),
@@ -363,6 +367,8 @@ class CheckOutPage extends StatelessWidget {
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
                           builder: (context) => HomePage(
+                            email: "unknow",
+                            panNo: 'unkown',
                             userRole: 'unknown',
                             username: 'unknown',
                           ),
@@ -388,4 +394,3 @@ class CheckOutPage extends StatelessWidget {
     );
   }
 }
-

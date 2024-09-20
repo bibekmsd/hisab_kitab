@@ -6,6 +6,7 @@ import 'package:hisab_kitab/newUI/Drawers/progress_indicator.dart';
 import 'package:hisab_kitab/newUI/settings%20folder/manage_staff.dart';
 import 'package:hisab_kitab/pages/sign_in_page.dart';
 import 'package:hisab_kitab/pages/sign_up_page.dart';
+import 'package:hisab_kitab/reuseable_widgets/loading_incidator.dart';
 
 // Singleton class to cache admin data
 class AdminDataCache {
@@ -28,6 +29,11 @@ class AdminDataCache {
 }
 
 class AdminDrawer extends StatelessWidget {
+  final String email;
+  final String panNo; // Use this as the document ID
+
+  const AdminDrawer({super.key, required this.email, required this.panNo});
+
   // Fetch Admin Data (either from cache or Firestore)
   Future<Map<String, dynamic>?> _fetchAdminData() async {
     // Check if data is already cached
@@ -41,19 +47,25 @@ class AdminDrawer extends StatelessWidget {
       return null; // User not logged in
     }
 
-    final doc = await FirebaseFirestore.instance
-        .collection('admin')
-        .doc("09099090") // Change to dynamic if needed
-        .get();
+    try {
+      // Use panNo as the document ID
+      final doc = await FirebaseFirestore.instance
+          .collection('admin')
+          .doc(panNo) // Use panNo as the document ID
+          .get();
 
-    if (!doc.exists) {
-      throw Exception('Admin data not found');
+      if (!doc.exists) {
+        throw Exception('Admin data not found');
+      }
+
+      // Cache the fetched data
+      AdminDataCache.instance.setAdminData(doc.data()!);
+
+      return doc.data();
+    } catch (e) {
+      print("Error fetching admin data: $e");
+      throw Exception("Failed to fetch admin data.");
     }
-
-    // Cache the fetched data
-    AdminDataCache.instance.setAdminData(doc.data()!);
-
-    return doc.data();
   }
 
   @override
@@ -62,69 +74,60 @@ class AdminDrawer extends StatelessWidget {
       future: _fetchAdminData(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Drawer(child: Center(child: BanakoLoadingPage()));
+          return const Drawer(child: Center(child: LoadingIndicator()));
         } else if (snapshot.hasError) {
-          return Drawer(child: Center(child: Text('Error: ${snapshot.error}')));
+          // Log the error to see the actual cause
+          print('Error fetching admin data: ${snapshot.error}');
+          return Drawer(
+            child: Center(
+              child: Text(
+                'Failed to load admin data.\nError: ${snapshot.error}',
+                style: const TextStyle(color: Colors.red),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          );
         }
 
         final data = snapshot.data ?? {};
 
         return Drawer(
-          child: Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [Color(0xFF7EB6FF), Color(0xFF9599E2)],
-              ),
-            ),
-            child: SafeArea(
-              child: Column(
-                children: [
-                  _buildHeader(data),
-                  Expanded(
-                    child: Container(
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(30),
-                          topRight: Radius.circular(30),
+          child: SafeArea(
+            child: Column(
+              children: [
+                _buildHeader(data),
+                Expanded(
+                  child: ListView(
+                    padding: EdgeInsets.zero,
+                    children: [
+                      _buildMenuItem(
+                        icon: HeroIcons.userGroup,
+                        title: 'Manage Staff',
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const ManageStaffPage()),
                         ),
                       ),
-                      child: ListView(
-                        padding: EdgeInsets.zero,
-                        children: [
-                          _buildMenuItem(
-                            icon: HeroIcons.userGroup,
-                            title: 'Manage Staff',
-                            onTap: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      const ManageStaffPage()),
-                            ),
-                          ),
-                          _buildMenuItem(
-                            icon: HeroIcons.userPlus,
-                            title: 'Add User',
-                            onTap: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const SignUpPage()),
-                            ),
-                          ),
-                          _buildMenuItem(
-                            icon: HeroIcons.arrowRightOnRectangle,
-                            title: 'Logout',
-                            onTap: () => _handleLogout(context),
-                          ),
-                        ],
+                      _buildMenuItem(
+                        icon: HeroIcons.userPlus,
+                        title: 'Add User',
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const SignUpPage()),
+                        ),
                       ),
-                    ),
+                      _buildMenuItem(
+                        icon: HeroIcons.arrowRightOnRectangle,
+                        title: 'Logout',
+                        onTap: () => _handleLogout(context),
+                      ),
+                    ],
                   ),
-                  _buildFooter(),
-                ],
-              ),
+                ),
+                _buildFooter(),
+              ],
             ),
           ),
         );
@@ -133,72 +136,61 @@ class AdminDrawer extends StatelessWidget {
   }
 
   Widget _buildHeader(Map<String, dynamic> data) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-      child: Column(
-        children: [
-          const CircleAvatar(
-            radius: 45,
-            backgroundImage: AssetImage('assets/admin_photo.png'),
+    return SafeArea(
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/drawer_bg.png'),
+            fit: BoxFit.cover,
           ),
-          const SizedBox(height: 15),
-          Text(
-            data['shopName']?.toString() ?? 'Shop Name N/A',
-            style: const TextStyle(
-                color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 3),
-          Text(
-            data['username']?.toString() ?? 'Username N/A',
-            style:
-                TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 14),
-          ),
-          const SizedBox(height: 15),
-          _buildInfoRow(
-            data['phoneNo']?.toString() ?? 'Phone N/A',
-            data['Address']?.toString() ?? 'Address N/A',
-            data['panNo']?.toString() ?? 'PAN N/A',
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInfoRow(String phone, String address, String pan) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildCompactInfoChip(HeroIcons.phone, phone),
-            const SizedBox(width: 10),
-            _buildCompactInfoChip(HeroIcons.buildingOffice, address),
+            Row(
+              children: [
+                const CircleAvatar(
+                  radius: 40,
+                  backgroundImage: AssetImage('assets/admin_photo.png'),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        data['shopName']?.toString() ?? 'Shop Name N/A',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        data['username']?.toString() ?? 'Username N/A',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            _buildInfoChip(
+                HeroIcons.phone, data['phoneNo']?.toString() ?? 'Phone N/A'),
+            const SizedBox(height: 8),
+            _buildInfoChip(HeroIcons.buildingOffice,
+                data['Address']?.toString() ?? 'Address N/A'),
+            const SizedBox(height: 8),
+            _buildInfoChip(HeroIcons.identification,
+                'PAN: ${data['panNo']?.toString() ?? 'N/A'}'),
           ],
         ),
-        const SizedBox(height: 10),
-        _buildCompactInfoChip(HeroIcons.identification, 'PAN: $pan'),
-      ],
-    );
-  }
-
-  Widget _buildCompactInfoChip(HeroIcons icon, String label) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          HeroIcon(icon, color: Colors.white, size: 14),
-          const SizedBox(width: 5),
-          Text(
-            label,
-            style: const TextStyle(color: Colors.white, fontSize: 12),
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
       ),
     );
   }
@@ -215,16 +207,23 @@ class AdminDrawer extends StatelessWidget {
         children: [
           HeroIcon(icon, color: Colors.white, size: 16),
           const SizedBox(width: 8),
-          Text(label, style: TextStyle(color: Colors.white, fontSize: 14)),
+          Expanded(
+            child: Text(
+              label,
+              style: const TextStyle(color: Colors.white, fontSize: 14),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildMenuItem(
-      {required HeroIcons icon,
-      required String title,
-      required VoidCallback onTap}) {
+  Widget _buildMenuItem({
+    required HeroIcons icon,
+    required String title,
+    required VoidCallback onTap,
+  }) {
     return ListTile(
       leading: HeroIcon(
         icon,
@@ -247,11 +246,11 @@ class AdminDrawer extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 20),
       child: const Column(
         children: [
-          Text('App Version 1.0.0', style: TextStyle(color: Colors.white70)),
+          Text('App Version 1.0.0', style: TextStyle(color: Colors.black54)),
           SizedBox(height: 5),
           Text('© The Last Minute Guys',
-              style: TextStyle(color: Colors.white70)),
-          Text('2024', style: TextStyle(color: Colors.white70)),
+              style: TextStyle(color: Colors.black54)),
+          Text('2024', style: TextStyle(color: Colors.black54)),
         ],
       ),
     );

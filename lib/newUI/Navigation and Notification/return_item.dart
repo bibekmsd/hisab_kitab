@@ -1,5 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:hisab_kitab/reuseable_widgets/app_bar.dart';
+import 'package:hisab_kitab/reuseable_widgets/appbar_data.dart';
+import 'package:hisab_kitab/reuseable_widgets/textField.dart';
 import 'package:intl/intl.dart';
 
 class ReturnItem extends StatefulWidget {
@@ -197,10 +200,11 @@ class _ReturnItemState extends State<ReturnItem> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Return Item'),
-        leading: const BackButton(),
-        elevation: 0,
+      appBar: CustomAppBar(
+        // backgroundColor: AppBarData.appBarColor,
+        title: "Return Items", // Localized title
+
+        titleColor: AppBarData.titleColor,
       ),
       body: Container(
         decoration: BoxDecoration(
@@ -220,18 +224,14 @@ class _ReturnItemState extends State<ReturnItem> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: TextField(
-                    controller: _billNumberController,
-                    decoration: InputDecoration(
-                      labelText: 'Enter Bill Number',
-                      border: InputBorder.none,
-                      suffixIcon: IconButton(
-                        icon: Icon(Icons.search, color: Colors.blue),
-                        onPressed: _searchBill,
-                      ),
-                    ),
+                child: AppInputField(
+                  controller: _billNumberController,
+                  hint: 'Enter Bill Number',
+                  // focusNode: FocusNode(),
+                  // prefixIcon: const Icon(Icons.mail),
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.search, color: Colors.blue),
+                    onPressed: _searchBill,
                   ),
                 ),
               ),
@@ -367,6 +367,7 @@ class _ReturnItemState extends State<ReturnItem> {
                                 ],
                               ),
                               const SizedBox(height: 16),
+                              
                               Center(
                                 child: ElevatedButton(
                                   onPressed: _canReturn(_purchaseDate) &&
